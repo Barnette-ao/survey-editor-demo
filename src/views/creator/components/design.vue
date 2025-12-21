@@ -186,8 +186,6 @@ import instruction from "@/views/creator/components/instruction.vue";
 import { questionTypeList } from "@/views/creator/utils/questionTypeList";
 import page from "@/views/creator/components/page.vue";
 
-const LogicSettingDialog = defineAsyncComponent(()=> import("@/views/creator/components/LogicSettingDialog.vue")) ;
-
 import { updateDefaultSettings, loadSettingsFromDatabase } from "@/views/creator/config";
 import {
   componentMap,
@@ -222,6 +220,13 @@ import { debounce, isEqual } from "lodash-es";
 import customEditor from "@/views/creator/components/customEditor.vue";
 import { useIncrementalLoading } from "@/views/creator/composibles/useIncreamentalLoading.js"
 
+const LogicSettingDialog = defineAsyncComponent({
+  loader: () => import("@/views/creator/components/LogicSettingDialog.vue"),
+  loadingComponent: () => h('div', { class: 'loading-dialog' }, '加载中...'),
+  errorComponent: () => h('div', { class: 'error-dialog' }, '加载失败'),
+  delay: 200,
+  timeout: 3000
+})
 
 //定义是否拖拽，拖拽则赋空值时不更新数据
 const istarg = ref(false);
