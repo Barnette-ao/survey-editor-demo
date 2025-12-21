@@ -79,7 +79,6 @@
 <script setup>
 import { computed, ref } from 'vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
-import { Remove, CirclePlus, Rank, Connection, CopyDocument, Delete } from '@element-plus/icons-vue'
 
 const props = defineProps({
 	element: {

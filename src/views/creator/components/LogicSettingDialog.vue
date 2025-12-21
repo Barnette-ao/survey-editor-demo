@@ -134,8 +134,6 @@
 
 <script setup>
 import { ref, computed, reactive, watch } from 'vue';
-import { CirclePlus, Remove } from '@element-plus/icons-vue'
-import { ElMessage, ElMessageBox } from "element-plus";
 import {
 	isDefaultRule, isEqual, isCompleteRule,isRating
 } from "@/views/creator/config/helpers";

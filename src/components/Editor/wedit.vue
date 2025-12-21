@@ -23,6 +23,7 @@ import "@wangeditor/editor/dist/css/style.css"; // 引入 css
 import { onBeforeUnmount, ref, watch, nextTick } from "vue";
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
 import { useEditorStore } from "@/stores/editorStore";
+
 export default {
   components: { Editor, Toolbar },
   props: {

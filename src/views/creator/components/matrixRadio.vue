@@ -120,15 +120,6 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
-import {
-	Plus,
-	Document,
-	More,
-	Connection,
-	CopyDocument,
-	Delete,
-	QuestionFilled,
-} from '@element-plus/icons-vue'
 import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 
 const emit = defineEmits(['click', 'copy', 'delete', 'update'])

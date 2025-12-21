@@ -17,7 +17,6 @@
 
 <script setup>
 import { computed } from 'vue'
-import { Plus } from '@element-plus/icons-vue'
 import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 
 const emit = defineEmits(['click', 'copy', 'delete', 'update'])

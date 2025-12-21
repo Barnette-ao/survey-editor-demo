@@ -214,11 +214,15 @@ import {
   getLogicRulesOfElement,
 } from "@/views/creator/config/updateLogic";
 
-import { ElMessage, ElMessageBox } from "element-plus";
 import { watch, nextTick } from "vue";
 import { debounce, isEqual } from "lodash-es";
 import customEditor from "@/views/creator/components/customEditor.vue";
 import { useIncrementalLoading } from "@/views/creator/composibles/useIncreamentalLoading.js"
+import {
+	afterGetInitialSettings,
+	beforeSaveToDatabase
+} from "@/views/creator/config/helpers";
+
 
 const LogicSettingDialog = defineAsyncComponent({
   loader: () => import("@/views/creator/components/LogicSettingDialog.vue"),
@@ -260,8 +264,20 @@ const isLoading = ref(false)
 let incrementalLoadingInstance = null
 
 onMounted(async () => {
-  let defaultQuestionSettings = await loadSettingsFromDatabase();
+  // let defaultQuestionSettings = await loadSettingsFromDatabase();
+  // 获取问卷 ID（从 URL 或使用默认值）
+  let settings;
+  const urlParams = new URLSearchParams(window.location.search);
+  const qid = urlParams.get("id") || '1'; // 默认使用 ID 为 1 的问卷
+  const localData = localStorage.getItem(`questionnaire_${qid}`);
+  if (localData) {
+    console.log("从 localStorage 加载配置");
+    settings = JSON.parse(localData);
+  }
+  let defaultQuestionSettings = afterGetInitialSettings(settings)
+  
   Object.assign(questionSettings, defaultQuestionSettings);
+  console.log("questionSettings",questionSettings)
   instructionElement.value = questionSettings.pages[0].elements[0];
   instructionElementId.value = questionSettings.pages[0].elements[0].id;
   

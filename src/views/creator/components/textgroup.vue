@@ -57,8 +57,8 @@
 
 <script setup>
 import { ref, nextTick, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
-import { Delete, Plus } from '@element-plus/icons-vue'
+// 移除 ElMessage 导入，使用全局配置
+// 移除图标导入，使用全局注册
 import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
 import DragHandler from "@/views/creator/components/Icons/dragIcon.vue";
@@ -122,7 +122,7 @@ const confirmBatchAdd = () => {
 		.map(item => ({ name: item }))
 
 	if (newItems.length === 0) {
-		ElMessage.warning('请输入有效的填空项')
+		this.$message.warning('请输入有效的填空项')
 		return
 	}
 
@@ -130,7 +130,7 @@ const confirmBatchAdd = () => {
 	updateItems(updatedItems)
 
 	batchDialogVisible.value = false
-	ElMessage.success('批量添加成功')
+	this.$message.success('批量添加成功')
 }
 </script>
 

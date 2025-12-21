@@ -66,7 +66,6 @@
 
 <script setup>
 import { ref, nextTick, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
 import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
 import DragHandler from "@/views/creator/components/Icons/dragIcon.vue";

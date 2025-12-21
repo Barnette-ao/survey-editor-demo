@@ -27,9 +27,15 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from "vue";
-import Editor from "@/components/Editor/wedit.vue"; // 导入你封装的 wangEditor 组件
+// import Editor from "@/components/Editor/wedit.vue"; // 导入你封装的 wangEditor 组件
 import { useEditorStore } from "@/stores/editorStore";
 import { isOnlyBr } from "@/views/creator/config/helpers";
+
+const Editor = defineAsyncComponent({
+  loader: () => import('@/components/Editor/wedit.vue'),
+  delay: 200,
+  timeout: 3000
+})
 
 const toolbarConfig = ref({
   toolbarKeys: ["headerSelect", "bold", "color", "uploadImage", "fontSize", "fullScreen"],

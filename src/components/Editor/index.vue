@@ -9,8 +9,10 @@
 import "@wangeditor/editor/dist/css/style.css"; // 引入 css
 import { onBeforeUnmount, ref, shallowRef } from "vue";
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
-import { getToken } from "@/utils/auth";
-import useUserStore from "@/store/modules/user";
+
+// import { getToken } from "@/utils/auth";
+// import useUserStore from "@/store/modules/user";
+
 export default {
   components: { Editor, Toolbar },
   props: {
@@ -47,8 +49,8 @@ export default {
       metaWithUrl: false,
       // 自定义增加 http  header
       headers: {
-        Authorization: "Bearer " + getToken(),
-        userid: useUserStore().userId,
+        Authorization: "Bearer " ,
+        userid: ""
       },
       // 跨域是否传递 cookie ，默认为 false
       withCredentials: true,
@@ -82,8 +84,8 @@ export default {
 
       // 自定义增加 http  header
       headers: {
-        Authorization: "Bearer " + getToken(),
-        userid: useUserStore().userId,
+        Authorization: "Bearer ",
+        userid: ""
       },
 
       // 跨域是否传递 cookie ，默认为 false
