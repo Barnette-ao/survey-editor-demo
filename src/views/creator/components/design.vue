@@ -56,39 +56,49 @@
                   :isEditable="true"
                 />
               </div>
-              <template v-for="(page, index) in questionSettings.pages" :key="index">
-                <div class="page-container" :data-page-index="index">
+              <template v-for="item in renderedItems" :key="item.id">
+                <!-- 页面组件 -->
+                <div 
+                  v-if="item.type === 'page'"
+                  class="page-container" 
+                  :data-page-index="item.pageIndex"
+                >
                   <page
                     v-if="questionSettings.pages.length > 1"
                     :totalPages="questionSettings.pages.length"
-                    :currentPage="index + 1"
-                    :selected="currentQuestionId === '' && pageIndex === index"
-                    :questionList="getQuestionNameOf(page)"
-                    @delete="handleDeletePage(questionSettings, page, index)"
-                    @click="handlePageClick(index)"
-                  >
-                  </page>
-                  <template v-for="(element) in page.elements" :key="element.id">
-                    <component
-                      v-if="element.id !== instructionElementId"
-                      :id="element.id"
-                      :is="componentIs(element)"
-                      :logicRuleNum="getLogicRuleNum(element.id)"
-                      :selected="currentQuestionId === element.id"
-                      :show-number="isShowNumber(element)"
-                      :element="element"
-                      @click="handleQuestionClick(element.id)"
-                      @copy="(id) => handleCopy(id, element.type)"
-                      @delete="handleDelete(element.id)"
-                      @setLogic="handleSetLogic"
-                      @optionSetting="handleOptionSettingUpdate"
-                      @update="(key, value) => handleElementUpdate(key, value)"
-                    />
-                  </template>
+                    :currentPage="item.pageIndex + 1"
+                    :selected="currentQuestionId === '' && pageIndex === item.pageIndex"
+                    :questionList="getQuestionNameOf(item.page)"
+                    @delete="handleDeletePage(questionSettings, item.page, item.pageIndex)"
+                    @click="handlePageClick(item.pageIndex)"
+                  />
                 </div>
+                <!-- 元素组件 -->
+                <component
+                  v-else-if="item.type === 'element' && item.element.id !== instructionElementId"
+                  :id="item.element.id"
+                  :is="componentIs(item.element)"
+                  :logicRuleNum="getLogicRuleNum(item.element.id)"
+                  :selected="currentQuestionId === item.element.id"
+                  :show-number="isShowNumber(item.element)"
+                  :element="item.element"
+                  @click="handleQuestionClick(item.element.id)"
+                  @copy="(id) => handleCopy(id, item.element.type)"
+                  @delete="handleDelete(item.element.id)"
+                  @setLogic="handleSetLogic"
+                  @optionSetting="handleOptionSettingUpdate"
+                  @update="(key, value) => handleElementUpdate(key, value)"
+                />
               </template>
-              
-              
+            
+              <!-- 哨兵元素 -->
+              <div v-if="hasMore" ref="sentinelRef" class="loading-sentinel">
+                <div v-if="isLoading" class="loading-indicator"> 加载中...</div>
+              </div>
+              <!-- 加载完成提示 -->
+              <div v-else class="load-complete">
+                已加载全部内容 (共 {{ renderedItems.length }} 项)
+              </div>
             </div>
             <div class="completeHtmlBox">
               <div class="title">结束语</div>
@@ -210,7 +220,7 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { watch, nextTick } from "vue";
 import { debounce, isEqual } from "lodash-es";
 import customEditor from "@/views/creator/components/customEditor.vue";
-
+import { useIncrementalLoading } from "@/views/creator/composibles/useIncreamentalLoading.js"
 
 
 //定义是否拖拽，拖拽则赋空值时不更新数据
@@ -236,14 +246,44 @@ watch(
   { deep: true }
 );
 
+const sentinelRef = ref(null)  // 直接在组件中创建
+
+// 增量加载相关状态 - 先定义默认值避免暂时性死区
+const renderedItems = ref([])
+const hasMore = ref(false)
+const isLoading = ref(false)
+let incrementalLoadingInstance = null
+
 onMounted(async () => {
   let defaultQuestionSettings = await loadSettingsFromDatabase();
   Object.assign(questionSettings, defaultQuestionSettings);
   instructionElement.value = questionSettings.pages[0].elements[0];
   instructionElementId.value = questionSettings.pages[0].elements[0].id;
+  
+  // 数据加载完成后，初始化增量加载
+  incrementalLoadingInstance = useIncrementalLoading(questionSettings, sentinelRef, {
+    initialCount: 10,
+    batchSize: 5,
+    threshold: 200
+  });
+
+  // 初始化数据
+  incrementalLoadingInstance.init();
+
+  // 更新响应式变量
+  renderedItems.value = incrementalLoadingInstance.renderedItems.value;
+  hasMore.value = incrementalLoadingInstance.hasMore.value;
+  isLoading.value = incrementalLoadingInstance.isLoading.value;
+
+  // 等待 DOM 渲染完成后初始化 Observer
+  await nextTick();
+  if (sentinelRef.value) {
+    incrementalLoadingInstance.initObserverManually();
+  }
+  
+
   // 初始化拖拽功能
   initSortable(questionSettings, instructionElementId.value, istarg);
-  console.log("questionSettings.title", questionSettings.title);
 });
 
 // 在组件卸载前清理所有实例

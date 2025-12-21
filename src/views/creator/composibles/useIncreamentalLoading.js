@@ -1,0 +1,135 @@
+// composables/useIncrementalLoading.js
+import { ref, computed, onMounted, nextTick } from 'vue'
+
+export function useIncrementalLoading(questionSettings, sentinelRef, options = {}) {
+  const {
+    initialCount = 10,    // 初始渲染数量
+    batchSize = 5,        // 每次加载数量
+    threshold = 200       // 触发加载的距离阈值
+  } = options
+
+  // 状态管理
+  const renderedCount = ref(0)
+  const isLoading = ref(false)
+  const observer = ref(null)
+
+  // 已渲染的项目（只增加，不重新计算）
+  const renderedItems = ref([])
+
+  // 扁平化所有项目（页面 + 元素）
+  const allItems = computed(() => {
+    const items = []
+    questionSettings.pages?.forEach((page, pageIndex) => {
+      // 添加页面项
+      if (questionSettings.pages.length > 1) {
+        items.push({
+          type: 'page',
+          pageIndex,
+          page,
+          id: `page-${pageIndex}`
+        })
+      }
+      
+      // 添加元素项
+      page.elements?.forEach((element, elementIndex) => {
+        items.push({
+          type: 'element',
+          pageIndex,
+          elementIndex,
+          element,
+          id: element.id
+        })
+      })
+    })
+    return items
+  })
+
+  // 是否还有更多内容
+  const hasMore = computed(() => {
+    return renderedItems.value.length < allItems.value.length
+  })
+
+  // 加载更多
+  const loadMore = () => {
+    if (isLoading.value || !hasMore.value) return
+    
+    isLoading.value = true
+    
+    // 模拟异步加载（可以根据需要调整）
+    setTimeout(() => {
+      const currentLength = renderedItems.value.length
+      const nextBatch = allItems.value.slice(
+        currentLength, 
+        currentLength + batchSize
+      )
+      
+      // 只添加新项目，不重新渲染已有项目
+      renderedItems.value.push(...nextBatch)
+      isLoading.value = false
+      
+      // 清空观察器
+      cleanupObserver()
+    }, 50)
+  }
+
+  // 更新哨兵元素位置
+  const cleanupObserver  = () => {
+    if (!hasMore.value && observer.value && sentinelRef.value) {
+      observer.value.unobserve(sentinelRef.value)
+    }
+  }
+
+  // 初始化 IntersectionObserver
+  const initObserver = () => {
+    const element = sentinelRef.value || sentinelRef;
+    if (!element) {
+      console.warn('sentinelRef is null, observer not initialized')
+      return
+    }
+
+    observer.value = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0]
+        if (entry.isIntersecting && hasMore.value) {
+          loadMore()
+        }
+      },
+      {
+        rootMargin: `${threshold}px`,
+        threshold: 0.1
+      }
+    )
+
+    observer.value.observe(element)
+  }
+
+  // 初始化
+  const init = () => {
+    const initialItems = allItems.value.slice(0, initialCount)
+    renderedItems.value = [...initialItems]
+  }
+
+  // 手动初始化 Observer（在组件中调用）
+  const initObserverManually = () => {
+    nextTick(() => {
+      initObserver()
+    })
+  }
+
+  // 清理
+  const cleanup = () => {
+    if (observer.value) {
+      observer.value.disconnect()
+    }
+  }
+
+  return {
+    renderedItems,
+    isLoading,
+    hasMore,
+    loadMore,
+    init,
+    initObserverManually,
+    cleanup
+  }
+}

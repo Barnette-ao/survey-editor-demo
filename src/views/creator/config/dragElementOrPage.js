@@ -1,7 +1,6 @@
 import Sortable from "sortablejs";
 import { spliteOffOnePageIntoPages, handleDeletePage, addEmptyPageBeforePage } from "@/views/creator/config/handleElementAndPage";
 import { formattedNumber } from "@/views/creator/config/helpers";
-import { t } from "vxe-table";
 
 // 存储所有创建的 Sortable 实例
 const sortableInstances = [];
