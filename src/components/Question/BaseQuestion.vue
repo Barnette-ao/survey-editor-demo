@@ -25,9 +25,7 @@
 					</el-tooltip>
 					<el-tooltip content="长按拖拽题目" placement="top">
 						<el-button class="icon-button drag-handle">
-							<el-icon>
-								<Rank />
-							</el-icon>
+							⋮⋮
 						</el-button>
 					</el-tooltip>
 					<el-tooltip content="逻辑设置" placement="top">
