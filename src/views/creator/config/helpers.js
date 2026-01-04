@@ -301,3 +301,40 @@ export const afterGetInitialSettings = (settings) => {
 	console.log("刚从数据库中取出来做格式化处理的questionSettings", copy)
 	return copy
 }
+
+// 备用的动态生成函数（仅用于超大数据测试）
+export const generateLargeQuestionnaire = (count) => {
+  const baseQuestion = {
+    title: '性能测试问卷',
+    description: '用于测试长列表渲染性能',
+    pages: [{
+      name: 'page1',
+      elements: [{
+        html: "<h3>欢迎参与问卷调查</h3><p>请认真填写以下问题。</p>",
+        id: "intro-2",
+        type: "html"
+      }]
+    }],
+    logicRules: []
+  }
+  
+  for (let i = 1; i <= count; i++) {
+    baseQuestion.pages[0].elements.push({
+      id: `test-question-${i}`,
+      name: `Q${i}`,
+      type: 'radiogroup',
+      title: `测试题目 ${i}：这是第 ${i} 个测试题目，用于性能测试`,
+      description: `这是题目 ${i} 的描述信息`,
+      isRequired: true,
+      hideNumber: false,
+      choices: [
+        { value: `选项A-${i}`, showText: false, textType: 'text', required: true },
+        { value: `选项B-${i}`, showText: false, textType: 'text', required: true },
+        { value: `选项C-${i}`, showText: false, textType: 'text', required: true },
+        { value: `选项D-${i}`, showText: false, textType: 'text', required: true }
+      ]
+    })
+  }
+  
+  return baseQuestion
+}

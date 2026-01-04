@@ -99,7 +99,7 @@
 					<div class="thenContent">
 						<div class="condition-row">
 							<span class="condition-label">则</span>
-							<span>{{ thenAction }}</span>
+							<span class="thenaction-label">{{ thenAction }}</span>
 							<span v-if="logicClass !== 'skipLogic'">本题</span>
 							<el-select v-else 
 								v-model="rule.thenCondition.targetElementId" 
@@ -185,9 +185,12 @@ const allElements = computed(() => {
 	return (props.questionSettings.pages ?? [])
 		.flatMap(page => page.elements)
 });
+
 const allIfElement = computed(() => {
 	return allElements.value
-		.map((element, index) => { return {element, index} })
+		.map((element, index) => { 
+			return {element, index} 
+		})
 		.filter(item => !filterType.includes(item.element.type))
 });
 
@@ -718,6 +721,9 @@ const closeDialog = () => {
 </script>
 
 <style scoped lang="scss">
+
+
+
 .logic-header {
 	display: flex;
 	justify-content: space-between;
@@ -754,14 +760,17 @@ const closeDialog = () => {
 		gap: 10px;
 
 		.condition-label {
-			width: 40px;
-			text-align: right;
-			margin-left: 26px;
+			/* display: block; */
+			width: 30px;
+			text-align: left;
+			margin-left: 10px;
 
 			&.if {
-				margin-left: 32px;
+				margin-left: 0px;
 			}
 		}
+
+		
 
 		&.additional-condition {
 			margin-left: 6px;
@@ -795,5 +804,9 @@ const closeDialog = () => {
 
 :deep(.el-divider--horizontal) {
 	margin: 0px 0 10px 0;
+}
+
+:deep(.el-select) {
+	--el-select-width: 50%
 }
 </style>
