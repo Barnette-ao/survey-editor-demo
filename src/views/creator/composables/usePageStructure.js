@@ -3,9 +3,7 @@ import { computed } from 'vue'
 export function usePageStructure(questionSettings) {
   // 一页一题模式计算
   const oneQuestionPerPage = computed(() => {
-    return questionSettings.questionsOnPageMode === undefined
-      ? false
-      : questionSettings.questionsOnPageMode === "questionPerPage"
+    return questionSettings.value.questionsOnPageMode === "questionPerPage"
   })
 
   // 获取页面题目名称

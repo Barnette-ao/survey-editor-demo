@@ -1,5 +1,6 @@
 // composables/useIncrementalLoading.js
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, nextTick} from 'vue'
+import { useDebounceFn } from '@vueuse/core'
 
 export function useIncrementalLoading(questionSettings, sentinelRef, options = {}) {
   const {
@@ -9,7 +10,6 @@ export function useIncrementalLoading(questionSettings, sentinelRef, options = {
   } = options
 
   // 状态管理
-  const renderedCount = ref(0)
   const isLoading = ref(false)
   const observer = ref(null)
 
@@ -18,10 +18,13 @@ export function useIncrementalLoading(questionSettings, sentinelRef, options = {
 
   // 扁平化所有项目（页面 + 元素）
   const allItems = computed(() => {
+    const settings = questionSettings.value; // ← 通过 .value 访问
+    if (!settings?.pages) return [];
+
     const items = []
-    questionSettings.pages?.forEach((page, pageIndex) => {
+    settings.pages?.forEach((page, pageIndex) => {
       // 添加页面项
-      if (questionSettings.pages.length > 1) {
+      if (questionSettings.value.pages.length > 1) {
         items.push({
           type: 'page',
           pageIndex,
@@ -41,6 +44,7 @@ export function useIncrementalLoading(questionSettings, sentinelRef, options = {
         })
       })
     })
+
     return items
   })
 
@@ -122,6 +126,26 @@ export function useIncrementalLoading(questionSettings, sentinelRef, options = {
       observer.value.disconnect()
     }
   }
+
+  const debounceUpdate = useDebounceFn((newAllItems) => {
+    // 获取当前已渲染的数量
+    const currentRenderedCount = renderedItems.value.length
+    // 重新计算 renderedItems，保持相同的渲染数量
+    const newRenderedCount = newAllItems.length <= initialCount 
+      ? newAllItems.length
+      : Math.min(currentRenderedCount, newAllItems.length)
+    renderedItems.value = newAllItems.slice(0, newRenderedCount)
+  }, 50)
+
+
+  // 监听 allItems 变化，同步更新 renderedItems
+  watch(
+    allItems,
+    debounceUpdate,
+    { 
+      deep: true,  // 深度监听
+    }
+  )
 
   return {
     renderedItems,

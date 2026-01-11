@@ -4,7 +4,12 @@ import { v4 as uuidv4 } from 'uuid'
 import { removeLogicRule, getLogicRulesOfElement } from "@/views/creator/config/updateLogic";
 
 export const addEmptyPageBeforePage = (questionSettings, pageIndex) => {
-	questionSettings.pages.splice(pageIndex, 0, {
+	const pageSettings = questionSettings.value 
+	if(!pageSettings?.pages){
+		return 
+	}
+
+	pageSettings.pages.splice(pageIndex, 0, {
 		name: `page${pageIndex.value}`,
 		elements: [],
 	});
@@ -15,21 +20,21 @@ export const addEmptyPageBeforePage = (questionSettings, pageIndex) => {
 export const handleDeletePage = (questionSettings, page, index) => {
 	// 该页不为空页
 	if (page.elements.length > 0) {
-		questionSettings.pages[index - 1].elements.push(...page.elements);
+		questionSettings.value.pages[index - 1].elements.push(...page.elements);
 	}
 	// 空页或者非空页都删除掉
-	questionSettings.pages.splice(index, 1);
+	questionSettings.value.pages.splice(index, 1);
 };
 
 // 将一页分成两页，选中题目，然后插入页码，原来页面中被选中题目之后的元素成为新页的题目元素
 // elementIndex表示选中元素的索引，或者说插入新页码的位置之前的题目元素的索引
 // pageIndex表示选中元素所属的页面索引
 export const spliteOffOnePageIntoPages = (questionSettings, elementIndex, pageIndex) => {
-	const newPgaeElements = questionSettings.pages[pageIndex].elements.splice(
+	const newPgaeElements = questionSettings.value.pages[pageIndex].elements.splice(
 		elementIndex + 1
 	);
 
-	questionSettings.pages.splice(pageIndex + 1, 0, {
+	questionSettings.value.pages.splice(pageIndex + 1, 0, {
 		name: `page${pageIndex + 1}`,
 		elements: newPgaeElements,
 	});
@@ -43,14 +48,14 @@ export const addQuestionElement = (questionSettings, elemntType, selectedQuestio
 		getPageAndElementIndexOfSelectElement(questionSettings, selectedQuestionId);
 
 	if (elementIndex === undefined) {
-		questionSettings.pages[questionSettings.pages.length - 1].elements.push(newElement);
+		questionSettings.value.pages[questionSettings.value.pages.length - 1].elements.push(newElement);
 	} else {
-		questionSettings.pages[pageIndex].elements.splice(elementIndex + 1, 0, newElement);
+		questionSettings.value.pages[pageIndex].elements.splice(elementIndex + 1, 0, newElement);
 	}
 
 	// 修改添加新题目之后，题目的序号序列不对的问题
 	// 更新题目的序号序列
-	formattedNumber(questionSettings)
+	formattedNumber(questionSettings.value)
 
 	// 滚动到新添加的题目
 	// 注意，这里的滚动是在页面中滚动，而不是在整个页面中滚动
@@ -67,12 +72,12 @@ export const addQuestionElement = (questionSettings, elemntType, selectedQuestio
 
 export const getPageAndElementIndexOfSelectElement = (questionSettings, selectedQuestionId) => {
 	let elementIndex, pageIndex;
-	const page = questionSettings.pages.find((page) =>
+	const page = questionSettings.value.pages.find((page) =>
 		page.elements.some((el) => el && el.id === selectedQuestionId)
 	);
 
 	if (page) {
-		pageIndex = questionSettings.pages.indexOf(page);
+		pageIndex = questionSettings.value.pages.indexOf(page);
 		elementIndex = page.elements.findIndex(
 			(el) => el && el.id === selectedQuestionId
 		);
@@ -106,8 +111,8 @@ const isNotSelectAnyQuestion = (selectedQuestionId, isPageSelected) => {
 };
 
 const addEmptyPageAtLast = (questionSettings) => {
-	questionSettings.pages.push({
-		name: `page${questionSettings.pages.length + 1}`,
+	questionSettings.value.pages.push({
+		name: `page${questionSettings.value.pages.length + 1}`,
 		elements: [],
 	});
 };
@@ -120,7 +125,7 @@ const isLastElementOfAnyPageSelected = (questionSettings, selectedQuestionId) =>
 		return null;
 	};
 
-	const index = questionSettings.pages
+	const index = questionSettings.value.pages
 		.map(getLastElementOfPage)
 		.findIndex((el) => el && el.id == selectedQuestionId);
 
@@ -128,8 +133,8 @@ const isLastElementOfAnyPageSelected = (questionSettings, selectedQuestionId) =>
 };
 
 const addEmptyPageAfterPage = (questionSettings, selectedQuestionId) => {
-	const { elementIndex, pageIndex } = getPageAndElementIndexOfSelectElement(questionSettings, selectedQuestionId);
-	questionSettings.pages.splice(pageIndex + 1, 0, {
+	const { pageIndex } = getPageAndElementIndexOfSelectElement(questionSettings, selectedQuestionId);
+	questionSettings.value.pages.splice(pageIndex + 1, 0, {
 		name: `page${pageIndex + 1}`,
 		elements: [],
 	});
@@ -152,7 +157,7 @@ export const handleCopyElement = (elementId, questionSettings, elementType) => {
 // 一定要提前删除该元素所涉及的逻辑规则
 export const deleteQuestion = (questionSettings, elementId) => {
 	let index;
-	for (let page of questionSettings.pages) {
+	for (let page of questionSettings.value.pages) {
 		index = page.elements.findIndex((el) => el.id === elementId);
 
 		if (index !== -1) {
@@ -169,7 +174,7 @@ export const deleteQuestion = (questionSettings, elementId) => {
 
 export const removeLogicRulesOfDeletedRule = (questionSettings, elementId) => {
 	// 查找删除该题目关联的逻辑规则
-	const deletedRules = getLogicRulesOfElement(questionSettings.logicRules, elementId)
+	const deletedRules = getLogicRulesOfElement(questionSettings.value.logicRules, elementId)
 
 	// 从questionSettings中删除这些规则
 	// 然后再从questionSettings.logicRules中删除这些规则
@@ -186,7 +191,7 @@ export const getMaxNumOfName = (questionSettings, element) => {
 	// 不为html和panel计数，这两种题型都没有name属性
 	if (element.type === "html" || element.type === "panel") return;
 
-	const numOfNames = (questionSettings.pages ?? [])
+	const numOfNames = (questionSettings.value.pages ?? [])
 		.flatMap(page => page.elements)
 		.filter(element => element.type !== "html" && element.type !== "panel")
 		.map(element => parseInt(element.name.substring(1)));

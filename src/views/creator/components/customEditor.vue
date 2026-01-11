@@ -8,15 +8,12 @@
       <div class="choiceBtn">
         <slot name="choiceIcon"></slot>
       </div>
-      <Editor
+      <TiipTapEditor
         v-if="isEditing"
-        :modelValue="wangEditorValue"
-        :wangEditorId="editorId"
+        v-model="wangEditorValue"
         class="editable active"
         @focus="handleFocus"
-        :blur="handleBlur"
-        v-bind="editorProps"
-        :toolbarConfig="toolbarConfig"
+        @blur="handleBlur"  
       />
       <div v-else class="editable">
         <div v-html="displayText"></div>
@@ -27,19 +24,9 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from "vue";
-// import Editor from "@/components/Editor/wedit.vue"; // 导入你封装的 wangEditor 组件
+import TiipTapEditor from "@/components/Editor/TiipTapEditor.vue"; // 导入你封装的 wangEditor 组件
 import { useEditorStore } from "@/stores/editorStore";
-import { isOnlyBr } from "@/views/creator/config/helpers";
-
-const Editor = defineAsyncComponent({
-  loader: () => import('@/components/Editor/wedit.vue'),
-  delay: 200,
-  timeout: 3000
-})
-
-const toolbarConfig = ref({
-  toolbarKeys: ["headerSelect", "bold", "color", "uploadImage", "fontSize", "fullScreen"],
-});
+import { formatContent } from "@/views/creator/config/helpers";
 
 const props = defineProps({
   modelValue: {
@@ -76,6 +63,10 @@ const isEditing = computed(() => {
   return !props.isEditable && editorStore.activeEditorId === props.editorId;
 });
 
+const wangEditorValue = computed(() => {
+  return editorStore.getContent(props.editorId) || props.modelValue || "";
+});
+
 // 显示在 div 中的文本
 const displayText = computed(() => {
   if(props.editorId === "surveyName"){
@@ -85,12 +76,6 @@ const displayText = computed(() => {
   return props.modelValue || "请输入内容";
 });
 
-// 编辑器的配置
-const editorProps = {
-  modelValue: props.modelValue,
-  placeholder: "",
-  toolbarConfig: toolbarConfig.value,
-};
 
 // 当 div 获取焦点时，切换到编辑器
 const handleFocus = () => {
@@ -102,20 +87,6 @@ const handleBlur = (value) => {
   const content = formatContent(props.targetKey, value);
   editorStore.setContent(props.editorId, content);
   props.targetObject[props.targetKey] = content;
-};
-
-const wangEditorValue = computed(() => {
-  return editorStore.getContent(props.editorId) || props.modelValue || "";
-});
-
-// 获取内容
-const formatContent = (key, value) => {
-  if (isOnlyBr(value)) {
-    return "";
-  } else if (key == "zh-cn") {
-    return value;
-  }
-  return value.match(/<\/?p>/g) ? value.replace(/<\/?p>/g, "") : value;
 };
 
 // 点击 wrapper 时激活编辑器
@@ -156,23 +127,21 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   padding-left: 5px;
-  // align-items: center;
   position: relative;
-  /* 关键：恢复相对定位 */
 
   .editable {
-    //	padding: 0px 0px 0px 10px;
+    
     line-height: 1.5em;
     min-height: 30px;
-    //min-width: v-bind(width);
     border-radius: 0.3em;
     transition: all 0.2s ease-in-out;
     word-wrap: break-word;
     word-break: break-all;
     white-space: pre-wrap;
     overflow-wrap: break-word;
-    display: flex;
-    align-items: center;
+    padding-top: 2px;
+    
+    
   }
 
   cursor: pointer;

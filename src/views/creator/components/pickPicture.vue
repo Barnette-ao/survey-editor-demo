@@ -58,8 +58,6 @@
 
 <script setup>
 import { ref } from 'vue'
-import { ElMessage } from 'element-plus'
-import { Connection, CopyDocument, Delete, Plus, RefreshRight } from '@element-plus/icons-vue'
 import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 // import { UploadImages } from "@/api/common.js";
 

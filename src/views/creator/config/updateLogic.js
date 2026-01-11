@@ -27,15 +27,15 @@ import {
 
 export function handleLogicRulesUpdate(saveLogicObj, questionSettings) {
 	console.log("执行handleLogicRulesUpdate")
-	if (!questionSettings.logicRules) {
-		questionSettings.logicRules = [];
+	if (!questionSettings.value.logicRules) {
+		questionSettings.value.logicRules = [];
 	}
 
 	// 定义一个通用的筛选函数
 	const filterFun = (rules, property) =>
 		rules.filter((rule) => saveLogicObj[property].includes(rule.id));
 
-	if (questionSettings.logicRules.length === 0) {
+	if (questionSettings.value.logicRules.length === 0) {
 		for (const logicRule of saveLogicObj.logicRules) {
 			// 在questionSettings对每一个逻辑规则，完成设置
 			setLogicRule(logicRule, questionSettings);
@@ -52,14 +52,12 @@ export function handleLogicRulesUpdate(saveLogicObj, questionSettings) {
 
 		// 2.从已设置的逻辑规则questionSettings.logicRules中筛选出删除的逻辑规则
 		if (saveLogicObj.deletedLogicRulesId.length > 0) {
-			const deletedRules = filterFun(questionSettings.logicRules, "deletedLogicRulesId");
+			const deletedRules = filterFun(questionSettings.value.logicRules, "deletedLogicRulesId");
 			// console.log("deletedRules", deletedRules)
 			// debugger
 			deletedRules.forEach((deletedRule) => {
 				removeLogicRule(deletedRule, questionSettings);
 			});
-			// console.log("questionSettings.logicRules", questionSettings)
-			// debugger
 		}
 
 
@@ -67,7 +65,7 @@ export function handleLogicRulesUpdate(saveLogicObj, questionSettings) {
 		if (saveLogicObj.updatedLogicRulesId.length > 0) {
 			// 3.1 从已设置的逻辑规则中筛选出修改前的规则（旧规则）
 			const oldLogicRulesByUpdated = filterFun(
-				questionSettings.logicRules,
+				questionSettings.value.logicRules,
 				"updatedLogicRulesId"
 			);
 
@@ -94,8 +92,8 @@ export function handleLogicRulesUpdate(saveLogicObj, questionSettings) {
 // 将单条逻辑规则，转换成相应的规则，写入questionSettings
 export const setLogicRule = (logicRule, questionSettings) => {
 	// 1.将logicRule添加到questionSettings.logicRules中
-	if (questionSettings.logicRules && Array.isArray(questionSettings.logicRules)) {
-		questionSettings.logicRules.push(logicRule)
+	if (questionSettings.value.logicRules && Array.isArray(questionSettings.value.logicRules)) {
+		questionSettings.value.logicRules.push(logicRule)
 	}
 	// 2.根据logicRule设置questionSettings中的设置项
 
@@ -174,8 +172,8 @@ export const setExpression = (ifElement, ifCondition, expressionList) => {
 
 // 处理跳转逻辑则条件
 const handleJumpCondition = (targetElementId, expression, questionSettings, thenElement) => {
-	if (!questionSettings.triggers) {
-		questionSettings.triggers = [];
+	if (!questionSettings.value.triggers) {
+		questionSettings.value.triggers = [];
 	}
 
 	const triggerItem = targetElementId === 'complete'
@@ -189,7 +187,7 @@ const handleJumpCondition = (targetElementId, expression, questionSettings, then
 			gotoName: thenElement.name
 		};
 
-	questionSettings.triggers.push(triggerItem);
+	questionSettings.value.triggers.push(triggerItem);
 };
 
 // 处理显示逻辑则条件
@@ -226,7 +224,7 @@ export const setThenCondition = (thenCondition, expression, questionSettings) =>
 
 const getElement = (elementId, questionSettings) => {
 	let element;
-	for (const page of questionSettings.pages) {
+	for (const page of questionSettings.value.pages) {
 		const index = page.elements.findIndex(el => el.id === elementId);
 		if (index !== -1) {
 			element = page.elements[index];
@@ -262,13 +260,13 @@ export const removeLogicRule = (removedRule, questionSettings) => {
 	if (!removedRule) return;
 
 	// 将删除的逻辑规则从questionSettings.logicRules中删除
-	if (questionSettings.logicRules.length !== 0) {
-		const removedRuleIndex = questionSettings.logicRules.findIndex(rule =>
+	if (questionSettings.value.logicRules.length !== 0) {
+		const removedRuleIndex = questionSettings.value.logicRules.findIndex(rule =>
 			isEqual(rule, removedRule)
 		);
 
 		if (removedRuleIndex !== -1) {
-			questionSettings.logicRules.splice(removedRuleIndex, 1)
+			questionSettings.value.logicRules.splice(removedRuleIndex, 1)
 		}
 	}
 
@@ -294,18 +292,18 @@ export const removeLogicRule = (removedRule, questionSettings) => {
 					"gotoName": `${thenElement.name}`
 				}
 			}
-			const deletedTriggerIndex = questionSettings.triggers.findIndex(trigger =>
+			const deletedTriggerIndex = questionSettings.value.triggers.findIndex(trigger =>
 				isEqual(trigger, deletedTrigger)
 			);
 
 			if (deletedTriggerIndex !== -1) {
-				questionSettings.triggers.splice(deletedTriggerIndex, 1)
+				questionSettings.value.triggers.splice(deletedTriggerIndex, 1)
 			}
 
 			break;
 		// 显示
 		case 'show':
-			for (const page of questionSettings.pages) {
+			for (const page of questionSettings.value.pages) {
 				const element = page.elements.find(
 					el => el.id === removedRule.thenCondition.targetElementId);
 				if (element) {

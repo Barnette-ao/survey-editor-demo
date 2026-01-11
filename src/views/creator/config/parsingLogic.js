@@ -15,9 +15,9 @@ const getLogicRules = () => {
 
 // 问卷是否设置了触发器
 export const parsingSkipLogic = (logicRules, skipExpressions, questionSettings, allElements) => {
-	if (questionSettings.hasOwnProperty('triggers')) {
+	if (questionSettings.value.hasOwnProperty('triggers')) {
 		// 遍历每一个触发器
-		for (const trigger of questionSettings.triggers) {
+		for (const trigger of questionSettings.value.triggers) {
 			// 找出跳转触发器 
 			if (trigger.type === 'skip') {
 				// 根据gotoName查找跳转目标题目元素

@@ -28,7 +28,6 @@
 </template>
 
 <script setup>
-import { Delete, Rank } from '@element-plus/icons-vue'
 
 const props = defineProps({
 	currentPage: {

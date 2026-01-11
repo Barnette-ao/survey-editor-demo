@@ -41,17 +41,17 @@
 		<!-- 底部操作按钮 -->
 		<template #bottom-actions>
 			<div class="action-buttons">
-				<el-button type="primary" text @click="addOption">
+				<el-button type="primary" text @click.stop="addOption">
 					<el-icon>
 						<Plus />
 					</el-icon>添加选项
 				</el-button>
-				<el-button type="primary" text @click="addOtherOption">
+				<el-button type="primary" text @click.stop="addOtherOption">
 					<el-icon>
 						<Plus />
 					</el-icon>添加其他项
 				</el-button>
-				<el-button type="primary" text @click="showBatchDialog">
+				<el-button type="primary" text @click.stop="showBatchDialog">
 					<el-icon>
 						<Plus />
 					</el-icon>批量添加选项

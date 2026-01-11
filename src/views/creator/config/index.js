@@ -54,19 +54,10 @@ export const loadSettingsFromDatabase = async () => {
 export const updateDefaultSettings = (newSettings) => {
 	const rawObject = toRaw(newSettings);
 	const dataToSave = beforeSaveToDatabase(rawObject)
-	console.log("保存配置", dataToSave)
 	
 	// 保存到 localStorage
-	localStorage.setItem(`questionnaire_${qid}`, JSON.stringify(dataToSave));
-	
-	// 同时保存到 Mock API（可选）
-	updateQuestionnaire(qid, dataToSave).then((res) => {
-		if (res.code === 200) {
-			console.log("保存到 Mock API 成功");
-		}
-	}).catch(err => {
-		console.warn("保存到 Mock API 失败", err);
-	});
+	localStorage.setItem(`baseQuestion`, JSON.stringify(dataToSave));
+	console.log("updateDefaultSettings baseQuestion",JSON.parse(localStorage.getItem(`baseQuestion`)))
 }
 
 

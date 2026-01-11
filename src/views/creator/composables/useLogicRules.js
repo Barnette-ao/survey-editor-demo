@@ -6,7 +6,7 @@ export function useLogicRules(questionSettings) {
   const getLogicRuleNum = computed(() => {
     return (elementId) => {
       const rules = getLogicRulesOfElement(
-        questionSettings.logicRules ?? [], 
+        questionSettings.value?.logicRules ?? [], 
         elementId
       )
       return rules.length

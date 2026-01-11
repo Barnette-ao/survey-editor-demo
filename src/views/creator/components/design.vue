@@ -1,7 +1,11 @@
 <template>
+  <!-- 1 -->
   <div class="design">
+    <!-- 2 -->
     <div class="typeAndStyleBox">
+      <!-- 3 -->
       <div class="mainPart">
+        <!-- 4 -->
         <div class="questionTypeList">
           <div class="list" v-for="(categoryItem,index) in questionTypeList" :key="index">
             <div class="groupTitle">
@@ -27,6 +31,7 @@
           </div>
         </div>
         <div class="middlePart">
+          <!-- 5 -->
           <div class="creatorContent">
             <div class="surveyNameBox">
               <div class="surveyName">
@@ -48,7 +53,9 @@
                 />
               </div>
             </div>
+            <!-- 6 -->
             <div class="questionListContainer">
+              <!-- 7 -->
               <div class="firstElement">
                 <instruction
                   :element="instructionElement"
@@ -56,7 +63,8 @@
                   :isEditable="true"
                 />
               </div>
-              <template v-for="item in renderedItems" :key="item.id">
+              <!-- 7 -->
+              <template v-for="item in incrementalLoadingInstance?.renderedItems" :key="item.id">
                 <!-- 页面组件 -->
                 <div 
                   v-if="item.type === 'page'"
@@ -92,12 +100,13 @@
               </template>
             
               <!-- 哨兵元素 -->
-              <div v-if="hasMore" ref="sentinelRef" class="loading-sentinel">
-                <div v-if="isLoading" class="loading-indicator"> 加载中...</div>
+              <div v-if="incrementalLoadingInstance.hasMore" ref="sentinelRef" class="loading-sentinel">
+                <!-- 8 -->
+                <div v-if="incrementalLoadingInstance.isLoading" class="loading-indicator"> 加载中...</div>
               </div>
               <!-- 加载完成提示 -->
               <div v-else class="load-complete">
-                已加载全部内容 (共 {{ renderedItems.length }} 项)
+                已加载全部内容 (共 {{ incrementalLoadingInstance?.renderedItems?.length }} 项)
               </div>
             </div>
             <div class="completeHtmlBox">
@@ -116,8 +125,10 @@
         </div>
       </div>
     </div>
+    <!-- 2 -->
     <div class="propertyGridBox">
       <div class="titleBox"></div>
+      <!-- 3 -->
       <div class="propertyGrid">
         <div class="segment-container">
           <el-segmented
@@ -126,6 +137,7 @@
             style="margin-bottom: 1rem"
           />
         </div>
+        <!-- 4 -->
         <div class="segment-content">
           <div v-if="settingType === 'quickSetting'" class="quick-settings">
             <!-- 答题页 -->
@@ -146,10 +158,12 @@
               </div>
             </div>
           </div>
+          <!-- 5 -->
           <div v-else class="question-settings">
             <div class="questionType" v-if="currentQuestionId">
               {{ getCurrentElementTypeText }}
             </div>
+            <!-- 6 -->
             <component
               v-if="currentQuestionId"
               :is="settingComponentMap[getCurrentElementType]"
@@ -186,7 +200,10 @@ import instruction from "@/views/creator/components/instruction.vue";
 import { questionTypeList } from "@/views/creator/utils/questionTypeList";
 import page from "@/views/creator/components/page.vue";
 
-import { updateDefaultSettings, loadSettingsFromDatabase } from "@/views/creator/config";
+import { 
+  updateDefaultSettings, 
+  loadSettingsFromDatabase 
+} from "@/views/creator/config";
 import {
   componentMap,
   settingComponentMap,
@@ -245,7 +262,7 @@ const LogicSettingDialog = defineAsyncComponent({
 //定义是否拖拽，拖拽则赋空值时不更新数据
 const istarg = ref(false);
 // 先初始化 questionSettings
-const questionSettings = reactive({});
+const questionSettings = ref({});
 const instructionElementId = ref("");
 const instructionElement = ref({});
 
@@ -256,7 +273,7 @@ const saveToDefault = debounce((newValue) => {
 
 // 监听 questionSettings 的变化
 watch(
-  () => questionSettings,
+  questionSettings,
   (newValue) => {
     if (!istarg.value) {
       saveToDefault(newValue);
@@ -268,46 +285,41 @@ watch(
 const sentinelRef = ref(null)  // 直接在组件中创建
 
 // 增量加载相关状态 - 先定义默认值避免暂时性死区
-const renderedItems = ref([])
-const hasMore = ref(false)
-const isLoading = ref(false)
-let incrementalLoadingInstance = null
+const incrementalLoadingInstance = ref({})
 
 onMounted(async () => {
   // let defaultQuestionSettings = await loadSettingsFromDatabase();
   // 获取问卷 ID（从 URL 或使用默认值）
-  let settings = generateLargeQuestionnaire(100)
-  let defaultQuestionSettings = afterGetInitialSettings(settings)
+  let settings = generateLargeQuestionnaire(1)
+  questionSettings.value = afterGetInitialSettings(settings)
   
-  Object.assign(questionSettings, defaultQuestionSettings);
-  console.log("questionSettings",questionSettings)
-  instructionElement.value = questionSettings.pages[0].elements[0];
-  instructionElementId.value = questionSettings.pages[0].elements[0].id;
+  instructionElement.value = questionSettings.value.pages[0].elements[0];
+  instructionElementId.value = questionSettings.value.pages[0].elements[0].id;
   
   // 数据加载完成后，初始化增量加载
-  incrementalLoadingInstance = useIncrementalLoading(questionSettings, sentinelRef, {
-    initialCount: 10,
-    batchSize: 5,
-    threshold: 200
-  });
-
+  incrementalLoadingInstance.value = useIncrementalLoading(
+    questionSettings, 
+    sentinelRef, {
+      initialCount: 10,
+      batchSize: 5,
+      threshold: 200
+    }
+  );
   // 初始化数据
-  incrementalLoadingInstance.init();
-
-  // 更新响应式变量
-  renderedItems.value = incrementalLoadingInstance.renderedItems.value;
-  hasMore.value = incrementalLoadingInstance.hasMore.value;
-  isLoading.value = incrementalLoadingInstance.isLoading.value;
-
+  incrementalLoadingInstance.value.init();
+  
   // 等待 DOM 渲染完成后初始化 Observer
   await nextTick();
   if (sentinelRef.value) {
-    incrementalLoadingInstance.initObserverManually();
+    incrementalLoadingInstance.value.initObserverManually();
   }
   
   // 初始化拖拽功能
   initSortable(questionSettings, instructionElementId.value, istarg);
 });
+// questionSettings是reactive，它不能支持动态添加的属性保持器响应式，
+// 但ref可以保持其响应式
+
 
 // 在组件卸载前清理所有实例
 onBeforeUnmount(() => {
@@ -333,7 +345,6 @@ const {
 } = useDesignState(currentQuestionId)
 
 const { componentIs } = useComponentMapping()
-
 const { 
   showQuestionNumbers, 
   isShowNumber, 
@@ -353,6 +364,14 @@ const {
   getCurrentElementTypeText
 } = useCurrentElement(questionSettings,currentQuestionId)
 
+watchEffect(()=>{
+  console.log("incrementalLoadingInstance.value?.renderedItems",
+  incrementalLoadingInstance.value?.renderedItems)
+  // console.log("watchEffect currentElement",currentElement.value)
+  // console.log("currentQuestionId",currentQuestionId)
+  // console.log("questionSettings.value",questionSettings.value)
+})
+
 const {
     handleElementUpdate,
     handleSettingUpdate,
@@ -368,7 +387,7 @@ const {
 
 // 当页面结构变化时重新初始化 Sortable
 watch(
-  () => questionSettings?.pages?.length || 0,
+  () => questionSettings.value?.pages?.length || 0,
   () => {
     nextTick(() => {
       initSortable(questionSettings, instructionElementId.value, istarg);

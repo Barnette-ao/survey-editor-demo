@@ -23,7 +23,7 @@ export function useElementOperations(questionSettings, currentQuestionId, curren
         if (pageIndex !== undefined && elementIndex !== undefined) {
             // 直接修改源数据，确保响应式更新
             // 创建新对象保证引用变化
-            const dragElement = questionSettings.pages[pageIndex].elements[elementIndex];
+            const dragElement = questionSettings.value.pages[pageIndex].elements[elementIndex];
             // 如果value是数组，要通过创建新元素，替换旧元素来触发响应式更新视图
             if (Array.isArray(value)) {
                 // 必须要删除旧元素的id,给它一个新的id，因为template中key绑定了id
@@ -35,9 +35,9 @@ export function useElementOperations(questionSettings, currentQuestionId, curren
                 const newId = generateUUID();
                 newElement.id = newId;
 
-                if (questionSettings.logicRules?.length) { 
+                if (questionSettings.value.logicRules?.length) { 
                     // 更新选中题目的逻辑规则中的元素ID
-                    questionSettings.logicRules = questionSettings.logicRules.map(rule => {
+                    questionSettings.value.logicRules = questionSettings.value.logicRules.map(rule => {
                         // 更新其显示逻辑中的id
                         if (rule.thenCondition.targetElementId === oldId && rule.thenCondition.action === "show") {
                             rule.thenCondition.targetElementId = newId;
@@ -54,7 +54,6 @@ export function useElementOperations(questionSettings, currentQuestionId, curren
                     });
                 }
       
-
                 // currentQuestionId.value更新之后，计算属性currentElement的值也会更新，
                 // 渲染视图需要currentElement，currentElement改变，就会触发视图更新,如果不更新
                 // currentQuestionId.value，下一步执行之后，旧元素被删掉，原来的currentQuestionId没有了相应元素，
@@ -63,7 +62,7 @@ export function useElementOperations(questionSettings, currentQuestionId, curren
                 currentQuestionId.value = newId;
 
                 // 替换元素并触发响应式更新
-                questionSettings.pages[pageIndex].elements.splice(elementIndex, 1, newElement);
+                questionSettings.value.pages[pageIndex].elements.splice(elementIndex, 1, newElement);
             }
             // 如果value是原始数据类型，那么直接修改源数据就可以触发响应式更新视图
             else {
@@ -114,7 +113,7 @@ export function useElementOperations(questionSettings, currentQuestionId, curren
         // 删除与被切换的题目元素关联的所有逻辑规则
         removeLogicRulesOfDeletedRule(questionSettings, currentQuestionId.value)
         // 替换元素并触发响应式更新
-        questionSettings.pages[pageIndex].elements.splice(elementIndex, 1, newElement);
+        questionSettings.value.pages[pageIndex].elements.splice(elementIndex, 1, newElement);
         // 更新当前选中的题目ID
         currentQuestionId.value = newElement.id;
     }
@@ -123,7 +122,7 @@ export function useElementOperations(questionSettings, currentQuestionId, curren
   const handleCopy = (elementId, elementType) => {
     handleCopyElement(elementId, questionSettings, elementType);
     // 更新所有题目的序号
-    formattedNumber(questionSettings);
+    formattedNumber(questionSettings.value);
     ElMessage.success("复制成功");
   };
   
@@ -136,7 +135,7 @@ export function useElementOperations(questionSettings, currentQuestionId, curren
     }).then(() => {
         deleteQuestionElement(elementId, questionSettings);
         // 更新所有题目的序号
-        formattedNumber(questionSettings);
+        formattedNumber(questionSettings.value);
         ElMessage({
             type: "success",
             message: "删除成功",

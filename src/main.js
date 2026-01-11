@@ -27,6 +27,7 @@ import {
   Delete,
   Plus,
   StarFilled,
+  Setting,
   Sort,
   RefreshRight,
   Rank,
@@ -73,6 +74,7 @@ app.component('Sort', Sort)
 app.component('RefreshRight', RefreshRight)
 app.component('Rank', Rank)
 app.component('QuestionFilled', QuestionFilled)
+app.component('Setting', Setting)
 
 // 全局配置 ElMessage 和 ElMessageBox
 app.config.globalProperties.$message = ElMessage

@@ -5,12 +5,22 @@ import { ratingTypeMap } from "@/views/creator/config/componentAndSettingMap"
 export function useCurrentElement(questionSettings, currentQuestionId) {
   // 当前选中的元素
   const currentElement = computed(() => {
-    const allElements = questionSettings.pages
+    const pageSettings = questionSettings.value?.pages
+    if(!pageSettings){
+      return null
+    }
+
+    const allElements = pageSettings
       .map((page) => page.elements)
       .flat()
-    
-    return allElements.find((element) => element.id === currentQuestionId.value)
+      
+    let current = allElements.find((element) => 
+      element.id === currentQuestionId.value
+    )
+
+    return current
   })
+  
 
   // 获取当前元素类型
   const getCurrentElementType = computed(() => {

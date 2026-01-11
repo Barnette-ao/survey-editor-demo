@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid'
-import { cloneDeep } from 'lodash'
-import _ from "lodash";
+import { cloneDeep } from 'lodash-es'
+import _ from "lodash-es";
 
 export const generateUUID = () => {
 	return uuidv4()
@@ -110,6 +110,15 @@ export const isOnlyBr = (str) => {
 	return removeBrStr.trim() === ''
 }
 
+export const formatContent = (key, value) => {
+  if (isOnlyBr(value)) {
+    return "";
+  } else if (key == "zh-cn") {
+    return value;
+  }
+  return value.match(/<\/?p>/g) ? value.replace(/<\/?p>/g, "") : value;
+};
+
 export const wrapTextWithPTag = (text) => {
 	// 如果文本已经有 p 标签则直接返回
 	if (!text) {
@@ -174,21 +183,6 @@ const mapPipe = (...fns) => (elements) => elements.map(element => pipe(...fns)(e
 
 export const beforeSaveToDatabase = (settings) => {
 	let copy = cloneDeep(settings)
-	console.log("copy", copy)
-
-	const resetRatingType = (element) => {
-		if (isRating(element.type)) {
-			element.type = "rating"
-		}
-		return element
-	}
-
-	const checkTypeProp = (element) => {
-		if (element.type) {
-			return element
-		}
-	}
-
 
 	const setPage = (copy) => {
 		const { elements, ...rest } = copy
@@ -207,6 +201,19 @@ export const beforeSaveToDatabase = (settings) => {
 		return page
 	}
 
+	const resetRatingType = (element) => {
+		if (isRating(element.type)) {
+			element.type = "rating"
+		}
+		return element
+	}
+
+	const checkTypeProp = (element) => {
+		if (element.type) {
+			return element
+		}
+	}
+	
 	const mapProcessElements = mapPipe(
 		resetRatingType,
 		checkTypeProp
@@ -221,7 +228,6 @@ export const beforeSaveToDatabase = (settings) => {
 		.map(resetPageElements)
 		.map(resetPageName)
 
-	console.log("beforeSaveToDatabase", copy)
 	return copy
 }
 
@@ -275,7 +281,6 @@ export const formattedNumber = (settings) => {
 
 
 export const afterGetInitialSettings = (settings) => {
-	console.log("从数据库中刚取出来", settings)
 	const copy = cloneDeep(settings)
 	let addNumber = createNumberGenerator()
 
@@ -298,43 +303,61 @@ export const afterGetInitialSettings = (settings) => {
 		return page
 	})
 	addNumber = null;
-	console.log("刚从数据库中取出来做格式化处理的questionSettings", copy)
+
 	return copy
 }
 
 // 备用的动态生成函数（仅用于超大数据测试）
 export const generateLargeQuestionnaire = (count) => {
-  const baseQuestion = {
-    title: '性能测试问卷',
-    description: '用于测试长列表渲染性能',
-    pages: [{
-      name: 'page1',
-      elements: [{
-        html: "<h3>欢迎参与问卷调查</h3><p>请认真填写以下问题。</p>",
-        id: "intro-2",
-        type: "html"
-      }]
-    }],
-    logicRules: []
-  }
+  const lastCount = localStorage.getItem('questionNumber');
+  const lastCountNum = lastCount ? parseInt(lastCount, 10) : null;
   
-  for (let i = 1; i <= count; i++) {
-    baseQuestion.pages[0].elements.push({
-      id: `test-question-${i}`,
-      name: `Q${i}`,
-      type: 'radiogroup',
-      title: `测试题目 ${i}：这是第 ${i} 个测试题目，用于性能测试`,
-      description: `这是题目 ${i} 的描述信息`,
-      isRequired: true,
-      hideNumber: false,
-      choices: [
-        { value: `选项A-${i}`, showText: false, textType: 'text', required: true },
-        { value: `选项B-${i}`, showText: false, textType: 'text', required: true },
-        { value: `选项C-${i}`, showText: false, textType: 'text', required: true },
-        { value: `选项D-${i}`, showText: false, textType: 'text', required: true }
-      ]
-    })
+	
+  console.log("执行时的questionNumber",lastCountNum)	
+  if(count === lastCountNum){
+	console.log("从loacalStorage中读取")
+	console.log('generateLargeQuestionnaire baseQuestion',
+		JSON.parse(localStorage.getItem("baseQuestion")))
+	return JSON.parse(localStorage.getItem("baseQuestion"))
   }
+  else {
+	console.log("执行创建")
+	const baseQuestion = {
+		title: '性能测试问卷',
+		description: '用于测试长列表渲染性能',
+		pages: [{
+			name: 'page1',
+			elements: [{
+				html: "<h3>欢迎参与问卷调查</h3><p>请认真填写以下问题。</p>",
+				id: "intro-2",
+				type: "html"
+			}]
+		}],
+		logicRules: []
+	}
+	
+	for (let i = 1; i <= count; i++) {
+		baseQuestion.pages[0].elements.push({
+			id: `test-question-${i}`,
+			name: `Q${i}`,
+			type: 'radiogroup',
+			title: `测试题目 ${i}：这是第 ${i} 个测试题目，用于性能测试`,
+			description: `这是题目 ${i} 的描述信息`,
+			isRequired: true,
+			hideNumber: false,
+			choices: [
+				{ value: `选项A-${i}`, showText: false, textType: 'text', required: true },
+				{ value: `选项B-${i}`, showText: false, textType: 'text', required: true },
+				{ value: `选项C-${i}`, showText: false, textType: 'text', required: true },
+				{ value: `选项D-${i}`, showText: false, textType: 'text', required: true }
+			]
+		})
+	}
+	
+	localStorage.setItem("questionNumber", count.toString());
+	console.log("创建时questionNumber",count)
+	localStorage.setItem("baseQuestion", JSON.stringify(baseQuestion))
+	return baseQuestion
+  }	 
   
-  return baseQuestion
 }

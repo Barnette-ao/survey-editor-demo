@@ -4,13 +4,13 @@ import { computed } from 'vue'
 export function useQuestionDisplay(questionSettings) {
   // 全局显示序号设置
   const showQuestionNumbers = computed({
-    get: () => questionSettings.showQuestionNumbers,
+    get: () => questionSettings.value.showQuestionNumbers,
     set: (value) => {
-      questionSettings.showQuestionNumbers = value
+      questionSettings.value.showQuestionNumbers = value
       
       if (!value) {
         // 当全局设置关闭时，移除所有题目的 hideNumber 属性
-        questionSettings.pages = questionSettings.pages.map((page) => {
+        questionSettings.value.pages = questionSettings.value.pages.map((page) => {
           page.elements = page.elements.map((element) => {
             const { hideNumber, ...rest } = element
             return rest
@@ -19,7 +19,7 @@ export function useQuestionDisplay(questionSettings) {
         })
       } else {
         // 当全局设置开启时，为所有题目添加 hideNumber 属性
-        questionSettings.pages = questionSettings.pages.map((page) => {
+        questionSettings.value.pages = questionSettings.value.pages.map((page) => {
           page.elements = page.elements.map((element) => {
             element.hideNumber = false
             return element

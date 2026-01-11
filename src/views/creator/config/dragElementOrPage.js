@@ -11,7 +11,7 @@ export const initSortable = (questionSettings, instructionElementId, istarg) => 
 	destroySortableInstances();
 
 	const pageContainers = document.querySelectorAll(".page-container");
-	console.log("pageContainers", pageContainers)
+	// console.log("pageContainers", pageContainers)
 	pageContainers.forEach((container) => {
 		const instance = Sortable.create(container, {
 			animation: 150,
@@ -40,26 +40,23 @@ export const initSortable = (questionSettings, instructionElementId, istarg) => 
 				const toPageIndex = parseInt(to.dataset.pageIndex);
 				console.log("fromPageIndex", fromPageIndex)
 				console.log("toPageIndex", toPageIndex)
-				debugger
 
 				// 只有一页的情况下，不会插入页码元素，所以视图上索引为0的元素是第一页的
 				// 第一个题目元素，不是页码元素。
 				// 而且在多页的情况下，第一个页码组件是没有拖拽按钮的。能拖拽的页码组件，是第
 				// 2，3，4，5...页。
-				console.log("questionSettings.pages.length > 1 && oldIndex === 0",
-					questionSettings.pages.length > 1 && oldIndex === 0)
-				if (questionSettings.pages.length > 1 && oldIndex === 0) {
+				if (questionSettings.value.pages.length > 1 && oldIndex === 0) {
 					dragPage(questionSettings, newIndex, fromPageIndex, toPageIndex)
 				} else {
 					// 拖拽的是题目元素组件
 					// 问卷只有一页时，在div pageContainer视图上，索引为0的元素是第一个页面的
 					// 第一个题目元素。在数据层面，该题目的索引为1，而不是0。简介元素的索引才是0。
 					// 所以在只有一个页面的情况下，题目元素在数据层面的索引 = 页面上的索引 + 1。
-					if (questionSettings.pages.length === 1 && fromPageIndex === 0) {
+					if (questionSettings.value.pages.length === 1 && fromPageIndex === 0) {
 						oldIndex += 1
 					}
 
-					if (questionSettings.pages.length === 1 && toPageIndex === 0) {
+					if (questionSettings.value.pages.length === 1 && toPageIndex === 0) {
 						newIndex += 1
 					}
 					// 当toPageIndex !== 0,说明问卷中有页码组件，页码组件的位置在题目组件之前
@@ -79,13 +76,13 @@ export const initSortable = (questionSettings, instructionElementId, istarg) => 
 				}
 
 				//重新为整个问卷的所有题目排序
-				formattedNumber(questionSettings)
+				formattedNumber(questionSettings.value)
 
-				const newPages = JSON.parse(JSON.stringify(questionSettings.pages));
-				questionSettings.pages = [];
+				const newPages = JSON.parse(JSON.stringify(questionSettings.value.pages));
+				questionSettings.value.pages = [];
 				nextTick(() => {
 					istarg.value = false
-					questionSettings.pages = newPages
+					questionSettings.value.pages = newPages
 				});
 			}
 		});
@@ -121,18 +118,18 @@ const dragPageToElement = (questionSettings, newIndex, fromPageIndex, toPageInde
 	// 计算改变拖拽页码块前一页的大小，因为之后的删除页码操作和插入新页码操作会改变数据结构，所以
 	// 一定要在handleDeletePage执行之前计算
 	const prePageIndex = fromPageIndex - 1;
-	const prePageSize = questionSettings.pages[prePageIndex].elements.length
+	const prePageSize = questionSettings.value.pages[prePageIndex].elements.length
 	console.log("prePageSize", prePageSize)
 	debugger
 	// 将拖拽前的页码从整个问卷中删除
 	// 将被拖拽页的所有元素全部插入上一页中。该数据操作对应删除页码组件的操作。
 	handleDeletePage(
 		questionSettings,
-		questionSettings.pages[fromPageIndex],
+		questionSettings.value.pages[fromPageIndex],
 		fromPageIndex
 	)
 
-	console.log("questionSettings.pages", questionSettings.pages)
+	console.log("questionSettings.value.pages", questionSettings.value.pages)
 
 
 
@@ -184,7 +181,7 @@ const findIndexToAddNewPage = (questionSettings, fromPageIndex, toPageIndex, new
 const dragPageToPage = (questionSettings, fromPageIndex, toPageIndex) => {
 	handleDeletePage(
 		questionSettings,
-		questionSettings.pages[fromPageIndex],
+		questionSettings.value.pages[fromPageIndex],
 		fromPageIndex
 	);
 	// 在落点页面之前插入一个空页面
@@ -194,11 +191,11 @@ const dragPageToPage = (questionSettings, fromPageIndex, toPageIndex) => {
 
 const dragQuestionElement = (questionSettings, fromPageIndex, toPageIndex, oldIndex, newIndex) => {
 	// 直接操作原数组（避免浅拷贝问题）
-	const element = questionSettings.pages[fromPageIndex].elements.splice(oldIndex, 1)[0];
+	const element = questionSettings.value.pages[fromPageIndex].elements.splice(oldIndex, 1)[0];
 
 	if (fromPageIndex === toPageIndex) {
-		questionSettings.pages[fromPageIndex].elements.splice(newIndex, 0, element);
+		questionSettings.value.pages[fromPageIndex].elements.splice(newIndex, 0, element);
 	} else {
-		questionSettings.pages[toPageIndex].elements.splice(newIndex, 0, element);
+		questionSettings.value.pages[toPageIndex].elements.splice(newIndex, 0, element);
 	}
 };

@@ -138,6 +138,9 @@ import {
 	isDefaultRule, isEqual, isCompleteRule,isRating
 } from "@/views/creator/config/helpers";
 
+import { useLogicRuleState } from "@/views/creator/composables/useLogicRule/useLogicRuleState.js"
+
+
 import { v4 as uuidv4 } from 'uuid'
 
 
@@ -157,6 +160,14 @@ const props = defineProps({
 });
 
 const emits = defineEmits(['closeLogicDialog', 'saveLogicRules']);
+
+const state = useLogicRuleState(props)
+const elementData = useElementData(props.questionSettings, props.element)
+const ruleOperations = useRuleOperations(state, elementData)
+const conditionManager = useConditionManager(state, elementData)
+const ruleValidation = useRuleValidation(state, props)
+const uiInteraction = useUIInteraction(state, elementData, props)
+
 
 const logicRules = ref([]);
 

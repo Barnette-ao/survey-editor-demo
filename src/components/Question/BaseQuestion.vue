@@ -218,8 +218,6 @@ const handleSetLogic = () => {
 
 	:deep(.editor-wrapper) {
 		width: 100%;
-		display: flex;
-		flex-direction: row;
 
 		.wang-editor-wrapper {
 			flex: 1;
@@ -264,6 +262,19 @@ const handleSetLogic = () => {
 .icon-button {
 	padding: 8px;
 	border: none;
+	cursor: pointer;
+}
+
+/* 鼠标点击：无轮廓 */
+.icon-button:focus {
+  outline: none;
+}
+
+/* 键盘导航：优雅轮廓 */
+.icon-button:focus-visible {
+  outline: 2px solid #1a73e8;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .options-container {
