@@ -100,7 +100,6 @@ export const questionTemplates = [
 			"textType": "text",
 			"required": true,
 		}],
-		"itemComponent": "survey-checkbox-newitem"
 	},
 	{
 		"type": 'checkbox',

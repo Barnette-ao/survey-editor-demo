@@ -367,9 +367,6 @@ const {
 watchEffect(()=>{
   console.log("incrementalLoadingInstance.value?.renderedItems",
   incrementalLoadingInstance.value?.renderedItems)
-  // console.log("watchEffect currentElement",currentElement.value)
-  // console.log("currentQuestionId",currentQuestionId)
-  // console.log("questionSettings.value",questionSettings.value)
 })
 
 const {

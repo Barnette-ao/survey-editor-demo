@@ -1,7 +1,11 @@
 import { questionTemplates } from "@/views/creator/config/componentAndSettingMap";
 import { cloneElement, isEqual, formattedNumber } from "@/views/creator/config/helpers";
 import { v4 as uuidv4 } from 'uuid'
-import { removeLogicRule, getLogicRulesOfElement } from "@/views/creator/config/updateLogic";
+import { 
+	removeLogicRule, 
+	getLogicRulesOfDeletedElement,
+	getLogicRulesOfElement 
+} from "@/views/creator/config/updateLogic";
 
 export const addEmptyPageBeforePage = (questionSettings, pageIndex) => {
 	const pageSettings = questionSettings.value 
@@ -174,7 +178,7 @@ export const deleteQuestion = (questionSettings, elementId) => {
 
 export const removeLogicRulesOfDeletedRule = (questionSettings, elementId) => {
 	// 查找删除该题目关联的逻辑规则
-	const deletedRules = getLogicRulesOfElement(questionSettings.value.logicRules, elementId)
+	const deletedRules = getLogicRulesOfDeletedElement(questionSettings.value.logicRules, elementId)
 
 	// 从questionSettings中删除这些规则
 	// 然后再从questionSettings.logicRules中删除这些规则

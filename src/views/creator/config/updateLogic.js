@@ -323,11 +323,30 @@ export const removeLogicRule = (removedRule, questionSettings) => {
 // 如果是跳转规则，且如果条件分支中有当前元素即是
 // 如果是显示规则，且显示的逻辑规则的目标元素是当前元素，即是
 // 提前结束的逻辑规则，也要统计
-export const getLogicRulesOfElement = (rules = [], elementId) => {
+export const getLogicRulesOfElement = (rules, elementId) => {
 	return rules.filter(rule =>
 		(rule.thenCondition.targetElementId === elementId
 			&& rule.thenCondition.action === "show")
 		|| (rule.thenCondition.action === "jump"
-			&& rule.ifConditions.some(ifCondition => ifCondition.elementId === elementId))
+			&& rule.ifConditions.some(ifCondition => 
+				ifCondition.elementId === elementId))
 	)
+}
+
+export const getLogicRulesOfDeletedElement = (rules, elementId) => {
+  return rules.filter(rule => {
+    // 跳转逻辑规则
+    if (rule.thenCondition.action === "jump") {
+      // 触发条件包含被删除题目 OR 目标题目是被删除题目
+      return rule.ifConditions.some(ifCondition => ifCondition.elementId === elementId) ||
+             rule.thenCondition.targetElementId === elementId;
+    }
+    // 显示逻辑规则  
+    else if (['show', 'hide'].includes(rule.thenCondition.action)) {
+      // 触发条件包含被删除题目 OR 目标题目是被删除题目
+      return rule.ifConditions.some(ifCondition => ifCondition.elementId === elementId) ||
+             rule.thenCondition.targetElementId === elementId;
+    }
+    return false;
+  });
 }

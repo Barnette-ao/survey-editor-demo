@@ -12,9 +12,9 @@
       <div class="designer" v-if="checkedMenuIndex === 0">
         <design></design>
       </div>
-      <!-- <div class="previewBox" v-if="checkedMenuIndex === 1">
+      <div class="previewBox" v-if="checkedMenuIndex === 1">
         <preview></preview>
-      </div> -->
+      </div>
     </div>
   </div>
 </template>
@@ -22,8 +22,8 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import design from "@/views/creator/components/design.vue"
-// import preview from "@/views/creator/components/preview.vue"
-
+import preview from "@/views/creator/components/preview.vue"
+import { Serializer } from "survey-core";
 
 const memu = reactive(["项目设计", "预览"]);
 const checkedMenuIndex = ref(0);
@@ -31,6 +31,18 @@ const checkMenu = (index) => {
   checkedMenuIndex.value = index;
 };
 
+//// 给所有选择类型题目添加选项逻辑设置 属性
+Serializer.addProperty("selectbase", {
+  name: "choicesShowHide:text", // 属性名及类型
+  title: "choicesShowHide", // 属性的标题
+  category: "logic",
+  displayName: "选项逻辑设置", // 属性在 UI 中的显示名称
+  visible: true, // 是否在属性面板中显示
+  type: "text", // 属性类型，设置为 text 类型
+  isRequired: false, // 该属性非必填
+  default: "",
+  inputType: "textarea",
+});
 
 </script>
 

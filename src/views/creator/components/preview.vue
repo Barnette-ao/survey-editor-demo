@@ -11,11 +11,10 @@
 import "survey-core/survey-core.css";
 import "survey-creator-core/survey-creator-core.css";
 
-import { constructQrContainer } from "@/views/quesiton/utils/constructQrContainer.js";
 import { loadSettingsFromDatabase } from "@/views/creator/config";
-import { UploadImages } from "@/api/common.js";
-import { showOrhideChoice, hcChoice } from "@/views/creator/config/setChoiceVisibleIf";
 
+import { showOrhideChoice, hcChoice } from "@/views/creator/config/setChoiceVisibleIf";
+import { SurveyCreatorComponent } from "survey-creator-vue";
 import {
   SurveyCreatorModel,
   editorLocalization,
@@ -25,12 +24,15 @@ import {
 
 import "survey-core/survey.i18n";
 import Cookies from "js-cookie";
-import { CreateQrCodeYl } from "@/api/common";
-import markdownit from "markdown-it";
 import { setLicenseKey, Serializer } from "survey-core";
+import markdownit from "markdown-it";
+
+import {
+	afterGetInitialSettings,
+	generateLargeQuestionnaire
+} from "@/views/creator/config/helpers";
 
 const zhcn = editorLocalization.getLocale("zh-cn");
-
 zhcn.ed.testSurvey = " ";
 
 setLicenseKey("MzRkNWU3YjMtMDE3Yi00OTFmLWJjZjEtYjAzZjE5OGI4MGQxOzE9MjAyNS0xMC0zMA==");
@@ -94,23 +96,23 @@ function upfileSurvey(_, options) {
   });
 
   // 模拟文件上传到服务器
-  UploadImages(formData).then((resd) => {
-    const { code, data, msg } = resd;
-    if (code == 200) {
-      options.callback(
-        "success",
-        options.files.map((file) => {
-          return {
-            file: file,
-            content: data[0],
-          };
-        })
-      );
-    } else {
-      // 处理上传失败的情况
-      console.error(`上传失败，原因:${msg}!`);
-    }
-  });
+  // UploadImages(formData).then((resd) => {
+  //   const { code, data, msg } = resd;
+  //   if (code == 200) {
+  //     options.callback(
+  //       "success",
+  //       options.files.map((file) => {
+  //         return {
+  //           file: file,
+  //           content: data[0],
+  //         };
+  //       })
+  //     );
+  //   } else {
+  //     // 处理上传失败的情况
+  //     console.error(`上传失败，原因:${msg}!`);
+  //   }
+  // });
 }
 
 creator.onSurveyInstanceCreated.add((_, options) => {
@@ -167,30 +169,6 @@ function redistributeElementsToSingleQuestionPages(data) {
   return surveyData;
 }
 
-creator.survey.onTextMarkdown.add(applyHtml);
-creator.survey.autoAdvanceAllowComplete = false;
-loadSettingsFromDatabase().then((settings) => {
-  const questionSettings = reactive(settings);
-  questionSettings.locale = "zh-cn";
-  // 使用 for...of 而不是 forEach，因为在回调函数中 
-  // continue 只能跳出当前回调，不能跳到下一次循环
-  for(const page of questionSettings.pages) {
-    setChoiceVisibleIf(page.elements)
-  }  
-  console.log("questionSettings.pages", questionSettings.pages)  
-
-  creator.JSON = questionSettings.questionsOnPageMode == "questionPerPage"
-    ? redistributeElementsToSingleQuestionPages(questionSettings)
-    : questionSettings;
-
-  console.log("creator.JSON", creator.JSON); 
-
-  creator.locale = "zh-cn";
-  creator.survey.locale = "zh-cn";
-  const testTab = creator.getPlugin("test");
-  testTab.setDevice("androidPhone");  
-});
-
 // 根据题目元素的choicesShowHide属性的值，来设置题目元素的choices的visible属性的值。
 // elements表示某一个页面中所有的题目元素，是个数组。
 const setChoiceVisibleIf = (elements) => {
@@ -245,45 +223,69 @@ const setChoiceVisibleIf = (elements) => {
 
 Cookies.set("islogic", "0");
 
-// 创建 MutationObserver 来监控 DOM 的变化
-const observer = new MutationObserver((mutationsList, observer) => {
-  console.log("执行到来这里开始观察预览界面的 DOM 变化");
-  const previewContainer = document.querySelector(".svc-plugin-tab__content");
-  if (previewContainer) {
-    CreateQrCodeYl(qid).then((res) => {
-      if (res.code == 200) {
-        //创建二维码容器
-        const qrContainer = constructQrContainer(res);
-        // 将二维码容器插入到预览界面的 DOM 中
-        previewContainer.appendChild(qrContainer);
-        observer.disconnect();
-      }
-    });
-  }
-});
-// 开始观察 body 的子节点变化
-observer.observe(document.body, { childList: true, subtree: true });
+creator.survey.onTextMarkdown.add(applyHtml);
+creator.survey.autoAdvanceAllowComplete = false;
+const questionSettings = ref({})
+let generatedSettings = generateLargeQuestionnaire(1)
+questionSettings.value = afterGetInitialSettings(generatedSettings)
+questionSettings.value.locale = "zh-cn";
+// 使用 for...of 而不是 forEach，因为在回调函数中 
+// continue 只能跳出当前回调，不能跳到下一次循环
+for(const page of questionSettings.value.pages) {
+  setChoiceVisibleIf(page.elements)
+}  
+console.log("questionSettings.pages", questionSettings.value.pages)  
 
-const deviceListChinese = ["电脑", "苹果手机", "安卓手机", "平板"]
-const deviceList = ["Desktop", "iPhone 15", "Android Phone", "Android Tablet"]
+creator.JSON = questionSettings.value.questionsOnPageMode == "questionPerPage"
+    ? redistributeElementsToSingleQuestionPages(questionSettings.value)
+    : questionSettings.value;
+
+console.log("creator.JSON", creator.JSON); 
+
+creator.locale = "zh-cn";
+creator.survey.locale = "zh-cn";
+const testTab = creator.getPlugin("test");
+testTab.setDevice("androidPhone");
+
+
 // 创建 MutationObserver 来监控 DOM 的变化
-const deviceObeserver = new MutationObserver((mutationsList, observer) => {
-  const deviceListContainer = document.querySelector(".svc-list");
-  if (deviceListContainer) {
-    // htmlCollection转成数组使用forEach循环遍历 , 然后删除不需要的dom元素，然后修改需要的dom元素的文本内容
-    Array.from(deviceListContainer.children).forEach((item) => {
-      if (!deviceList.includes(item.children[0].textContent)) {
-        deviceListContainer.removeChild(item)
-      } else {
-        const index = deviceList.indexOf(item.children[0].textContent) 
-        item.children[0].textContent = deviceListChinese[index]
-      } 
-    })
-    observer.disconnect();
-  }
-});
-// 开始观察 body 的子节点变化
-deviceObeserver.observe(document.body, { childList: true, subtree: true });
+// const observer = new MutationObserver((mutationsList, observer) => {
+//   console.log("执行到来这里开始观察预览界面的 DOM 变化");
+//   const previewContainer = document.querySelector(".svc-plugin-tab__content");
+//   if (previewContainer) {
+//     CreateQrCodeYl(qid).then((res) => {
+//       if (res.code == 200) {
+//         //创建二维码容器
+        
+//         observer.disconnect();
+//       }
+//     });
+//   }
+// });
+
+// // 开始观察 body 的子节点变化
+// observer.observe(document.body, { childList: true, subtree: true });
+
+// const deviceListChinese = ["电脑", "苹果手机", "安卓手机", "平板"]
+// const deviceList = ["Desktop", "iPhone 15", "Android Phone", "Android Tablet"]
+// // 创建 MutationObserver 来监控 DOM 的变化
+// const deviceObeserver = new MutationObserver((mutationsList, observer) => {
+//   const deviceListContainer = document.querySelector(".svc-list");
+//   if (deviceListContainer) {
+//     // htmlCollection转成数组使用forEach循环遍历 , 然后删除不需要的dom元素，然后修改需要的dom元素的文本内容
+//     Array.from(deviceListContainer.children).forEach((item) => {
+//       if (!deviceList.includes(item.children[0].textContent)) {
+//         deviceListContainer.removeChild(item)
+//       } else {
+//         const index = deviceList.indexOf(item.children[0].textContent) 
+//         item.children[0].textContent = deviceListChinese[index]
+//       } 
+//     })
+//     observer.disconnect();
+//   }
+// });
+// // 开始观察 body 的子节点变化
+// deviceObeserver.observe(document.body, { childList: true, subtree: true });
 
 </script>
 
