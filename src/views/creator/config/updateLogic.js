@@ -53,8 +53,7 @@ export function handleLogicRulesUpdate(saveLogicObj, questionSettings) {
 		// 2.从已设置的逻辑规则questionSettings.logicRules中筛选出删除的逻辑规则
 		if (saveLogicObj.deletedLogicRulesId.length > 0) {
 			const deletedRules = filterFun(questionSettings.value.logicRules, "deletedLogicRulesId");
-			// console.log("deletedRules", deletedRules)
-			// debugger
+		
 			deletedRules.forEach((deletedRule) => {
 				removeLogicRule(deletedRule, questionSettings);
 			});

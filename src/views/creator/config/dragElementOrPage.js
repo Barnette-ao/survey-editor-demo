@@ -119,8 +119,6 @@ const dragPageToElement = (questionSettings, newIndex, fromPageIndex, toPageInde
 	// 一定要在handleDeletePage执行之前计算
 	const prePageIndex = fromPageIndex - 1;
 	const prePageSize = questionSettings.value.pages[prePageIndex].elements.length
-	console.log("prePageSize", prePageSize)
-	debugger
 	// 将拖拽前的页码从整个问卷中删除
 	// 将被拖拽页的所有元素全部插入上一页中。该数据操作对应删除页码组件的操作。
 	handleDeletePage(

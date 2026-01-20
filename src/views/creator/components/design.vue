@@ -91,11 +91,11 @@
                   :show-number="isShowNumber(item.element)"
                   :element="item.element"
                   @click="handleQuestionClick(item.element.id)"
-                  @copy="(id) => handleCopy(id, item.element.type)"
-                  @delete="handleDelete(item.element.id)"
-                  @setLogic="handleSetLogic"
+                  @copy="(id) => copyElement(id, item.element.type)"
+                  @delete="deleteElement(item.element.id)"
+                  @setLogic="openLogicDialog"
                   @optionSetting="handleOptionSettingUpdate"
-                  @update="(key, value) => handleElementUpdate(key, value)"
+                  @update="(key, value) => updateElementField(key, value)"
                 />
               </template>
             
@@ -174,8 +174,8 @@
               :isOptionSetting="isOptionSetting"
               :selectedOptionIndex="selectedOptionIndex"
               @setting-update="(key, value) => handleSettingUpdate(key, value)"
-              @update:questionType="handleQuestionTypeUpdate"
-              @setLogic="handleSetLogic"
+              @update:questionType="switchQuestionType"
+              @setLogic="openLogicDialog"
               v-bind="getSettingProps(currentElement)"
             />
             <div v-else>未选中任何题目</div>
@@ -193,7 +193,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { defineAsyncComponent } from "vue"
 
 import instruction from "@/views/creator/components/instruction.vue";
@@ -202,52 +202,43 @@ import page from "@/views/creator/components/page.vue";
 
 import { 
   updateDefaultSettings, 
-  loadSettingsFromDatabase 
 } from "@/views/creator/config";
 import {
-  componentMap,
   settingComponentMap,
-  ratingTypeMap,
 } from "@/views/creator/config/componentAndSettingMap";
 import {
   getSettingProps,
-  generateUUID,
-  formattedNumber,
   generateLargeQuestionnaire
 } from "@/views/creator/config/helpers";
 import {
-  addQuestionElement,
-  addPage,
-  getPageAndElementIndexOfSelectElement,
-  handleCopyElement,
-  deleteQuestion,
-  switchElementByType,
   handleDeletePage,
-  removeLogicRulesOfDeletedRule,
 } from "@/views/creator/config/handleElementAndPage";
 import { initSortable } from "@/views/creator/config/dragElementOrPage";
 import { destroyAllOptionSortables } from "@/views/creator/config/dragOption.js";
 import {
   handleLogicRulesUpdate,
-  getLogicRulesOfElement,
 } from "@/views/creator/config/updateLogic";
 
 import { watch, nextTick } from "vue";
 import { debounce, isEqual } from "lodash-es";
 import customEditor from "@/views/creator/components/customEditor.vue";
-import { useIncrementalLoading } from "@/views/creator/composables/useIncreamentalLoading.js"
-import { useQuestionDisplay } from "@/views/creator/composables/useQuestionNumberDisplay.js"
-import { useCurrentElement } from "@/views/creator/composables/useCurrentElement.js"
-import { useComponentMapping } from '@/views/creator/composables/useComponentMapping.js'
-import { usePageStructure } from '@/views/creator/composables/usePageStructure.js'
-import { useLogicRules } from '@/views/creator/composables/useLogicRules.js'
-import { useDesignState } from '@/views/creator/composables/useDesignState.js'
-import { useElementOperations } from '@/views/creator/composables/useElementOperations.js'
-import { useQuestionCreation } from '@/views/creator/composables/useQuestionCreation.js'
+import { useIncrementalLoading } from "@/views/creator/composables/useIncreamentalLoading"
+import { useQuestionDisplay } from "@/views/creator/composables/useQuestionNumberDisplay"
+import { useCurrentElement } from "@/views/creator/composables/useCurrentElement"
+import { useComponentMapping } from '@/views/creator/composables/useComponentMapping'
+import { usePageStructure } from '@/views/creator/composables/usePageStructure'
+import { useLogicRules } from '@/views/creator/composables/useLogicRules'
+import { useElementOperations } from '@/views/creator/composables/useElementOperations'
+import { useQuestionCreation } from '@/views/creator/composables/useQuestionCreation'
+import { useHoverState } from '@/views/creator/composables/useHoverState'
+import { useSettingPanelState } from '@/views/creator/composables/useSettingPanelState'
+import { useLogicDialogState } from '@/views/creator/composables/useLogicDialogState'
+import { useOptionEditingState } from '@/views/creator/composables/useOptionEditingState'
+import { useSelectionState } from '@/views/creator/composables/useSelectionState'
+
 
 import {
 	afterGetInitialSettings,
-	beforeSaveToDatabase
 } from "@/views/creator/config/helpers";
 
 
@@ -327,22 +318,53 @@ onBeforeUnmount(() => {
 });
 
 const currentQuestionId = ref("");
+const { hoveredQuestionType } = useHoverState()
+const { settingType, settingTypeOptions } = useSettingPanelState()
 const {
-  hoveredQuestionType,
-  isCurrentQuestionAPage,
-  pageIndex,
-  settingType,
-  settingTypeOptions,
   logicDialogVisible,
   settedLogicElement,
+  openLogicDialog,
+  closeLogicDialog
+} = useLogicDialogState()
+
+
+const {
   isOptionSetting,
   selectedOptionIndex,
-  handlePageClick,
-  handleQuestionClick,
-  handleOptionSettingUpdate,
-  handleSetLogic,
-  closeLogicDialog
-} = useDesignState(currentQuestionId)
+  handleOptionSettingUpdate
+} = useOptionEditingState({
+  onQuestionChange: (id) => {
+    currentQuestionId.value = id
+  },
+  onOpenSettingPanel: () => {
+    settingType.value = 'questionSetting'
+  }
+})
+
+const {
+  isCurrentQuestionAPage,
+  pageIndex,
+  selectPage,
+  selectQuestion
+} = useSelectionState({
+  onSelectPage: () => {
+    settingType.value = 'quickSetting'
+    currentQuestionId.value = ''
+  },
+  onSelectQuestion: () => {
+    settingType.value = 'questionSetting'
+  }
+})
+
+// 页面点击
+const handlePageClick = (index: number) => {
+  selectPage(index)
+}
+
+// 题目点击
+const handleQuestionClick = (id: string) => {
+  currentQuestionId.value = selectQuestion(id)
+}
 
 const { componentIs } = useComponentMapping()
 const { 
@@ -364,18 +386,19 @@ const {
   getCurrentElementTypeText
 } = useCurrentElement(questionSettings,currentQuestionId)
 
-watchEffect(()=>{
-  console.log("incrementalLoadingInstance.value?.renderedItems",
-  incrementalLoadingInstance.value?.renderedItems)
-})
-
 const {
-    handleElementUpdate,
+    updateElementField,
     handleSettingUpdate,
-    handleQuestionTypeUpdate,
-    handleCopy,
-    handleDelete
-} = useElementOperations(questionSettings, currentQuestionId, currentElement)
+    switchQuestionType,
+    copyElement,
+    deleteElement,
+} = useElementOperations(
+  questionSettings, 
+  currentQuestionId, 
+  currentElement,
+  settingType,
+  selectedOptionIndex
+)
 
 const {
     handleQuestionTypeClick,

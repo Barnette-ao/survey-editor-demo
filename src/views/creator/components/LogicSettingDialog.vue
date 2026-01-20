@@ -65,8 +65,8 @@
 							<template v-if="shouldShowChoiceSelect(ruleIndex, index, condition.state)">
 								<el-select v-model="condition.choiceIndex" :multiple="isCheckbox(ruleIndex, index)" collapse-tags placeholder="请选择选项"
 									style="width: 240px">
-									<el-option v-for="(choice, index) in getLogicRuleElement(ruleIndex, index).choices"
-										:key="index" :label="getLabelOfChoiceSelected(choice)" :value="index" />
+									<el-option v-for="(choice, choiceIndex) in (getLogicRuleElement(ruleIndex, index) as any)?.choices"
+										:key="choiceIndex" :label="getLabelOfChoiceSelected(choice)" :value="choiceIndex" />
 								</el-select>
 							</template>
 
@@ -108,7 +108,7 @@
 							>
 								<el-option v-for="(element, targetElementIndex) in allTargetElements" 
 								    :key="element.id"
-									:label="element.title" 
+									:label="'title' in element ? element.title : element.id" 
 									:value="element.id"
 									:disabled="targetElementIndex <= disabledIndex" 
 								/>
@@ -132,43 +132,46 @@
 	</el-dialog>
 </template>
 
-<script setup>
-import { ref, computed, reactive, watch } from 'vue';
+<script setup lang = "ts">
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { ref, computed, watch, watchEffect } from 'vue';
+
 import { 
 	isDefaultRule, 
 	isEqual, 
-	isCompleteRule,
-	isRating
+	isCompleteRule
 } from "@/views/creator/config/helpers";
-import { useHistory} from "@/views/creator/composables/useLogicRule/useHistory.js"
-import { useElementData} from "@/views/creator/composables/useLogicRule/useElementData.js"
-import { useLogicClass } from "@/views/creator/composables/useLogicRule/useLogicClass.js"
-import { useDisplayLogicRules } from "@/views/creator/composables/useLogicRule/useDisplayLogicRules.js"
-import { useLogicRuleElements } from "@/views/creator/composables/useLogicRule/useLogicRuleElements.js"
-
+import { useHistory} from "@/views/creator/composables/useLogicRule/useHistory"
+import { useElementData} from "@/views/creator/composables/useLogicRule/useElementData"
+import { useLogicClass } from "@/views/creator/composables/useLogicRule/useLogicClass"
+import { useDisplayLogicRules } from "@/views/creator/composables/useLogicRule/useDisplayLogicRules"
+import { useLogicRuleElements } from "@/views/creator/composables/useLogicRule/useLogicRuleElements"
 
 import { 
-	CHOICE_TYPES,
 	getConditionStatesByType 
 } from "@/views/creator/utils/logicRuleUI.js"
 
+import type { 
+  QuestionSettings, 
+  QuestionElement, 
+  LogicRule 
+} from '@/views/creator/types/questionnaire'
 
-const props = defineProps({
-	visible: {
-		type: Boolean,
-		default: false
-	},
-	questionSettings: {
-		type: Object,
-		default: () => { }
-	},
-	element: {
-		type: Object,
-		default: () => { }
-	}
-});
+const props = defineProps<{
+  visible: boolean,
+  questionSettings: QuestionSettings,
+  element: QuestionElement | null
+}>()
 
-const emits = defineEmits(['closeLogicDialog', 'saveLogicRules']);
+const emits = defineEmits<{
+  (e: 'closeLogicDialog'): void
+  (e: 'saveLogicRules', payload: {
+    logicRules: LogicRule[]
+    newLogicRulesId: string[]
+    updatedLogicRulesId: string[]
+    deletedLogicRulesId: string[]
+  }): void
+}>()
 
 const { 
 	addUniqueHistoryItems, 
@@ -179,16 +182,20 @@ const {
 
 const TEXT_TYPES = ['html', 'panel', 'signaturepad', 'multipletext', 'file', 'ranking', 'matrix', 'text', 'comment'];
 
+// 使用 composables
 const {
 	allElements,
 	allIfElement,
 	allTargetElements,
 	isFistElement,
 	getCurrentElementIndex,
-} = useElementData(props, TEXT_TYPES)
+} = useElementData({ 
+    questionSettings: props.questionSettings, 
+    element: props.element 
+  }, TEXT_TYPES)
 
-//  const logicClass = ref('skipLogic');
-const canSetLogic = (type) => !TEXT_TYPES.includes(type)
+const canSetLogic = (type: string): boolean => !TEXT_TYPES.includes(type)
+
 const {
 	logicClass,
     thenActionText,
@@ -196,20 +203,22 @@ const {
 	getDefaultRule,
 	initLogicClass,
 	resetLogicClass,
-} = useLogicClass(props, TEXT_TYPES);
+} = useLogicClass({ element: props.element }, TEXT_TYPES)
 
 const {
 	displayedLogicRules,
     initializeDisplayedLogicRules,
 	getDisplayRuleProp,
 	getDeletedDisplayRule,
-	setDisplayRuleIfElementProp,
 	getDisplayRuleIfElementProp,
 	isDisplayRuleEmpty,
 	changeIfCoditionElement,
 	changeIfCoditionState,
 	getMaxConditionIndex
-} = useDisplayLogicRules(props, allElements, getDefaultRule)
+} = useDisplayLogicRules(
+	allElements, 
+	getDefaultRule
+)
 
 const {
 	getLogicRuleElement,
@@ -221,29 +230,31 @@ const {
 } = useLogicRuleElements(allIfElement, getDisplayRuleIfElementProp, isDisplayRuleEmpty)
 
 // 控制对话框显示
-const dialogVisible = computed(() => props.visible);
+const dialogVisible = computed<boolean>(() => props.visible);
 
 // ✅ 监听 props.questionSettings 的变化，自动处理题目删除
-watch([() => props.questionSettings.logicRules, logicClass], 
-  ([newRules,newLogicClass]) => {
+watch([
+	() => props.element, 
+	() => props.questionSettings.logicRules, 
+	() => logicClass.value,
+  ], 
+  ([newElement, newRules,newLogicClass]) => {
+	if(!newElement || !newRules || !newLogicClass){
+		return
+	}
 	initializeDisplayedLogicRules(
+		newElement,
 		newRules, 
-		newLogicClass
+		newLogicClass,
 	)
   }, 
-{ immediate: true, deep: true });
+{ immediate: true});
 
-watchEffect(() => {
-	// let ruleIndex= 0;
-	// let index = 0; 
-	// let logicElement = getLogicRuleElement.value(ruleIndex, index)
-	// console.log("logicElement",logicElement)
-	// console.log("getConditionStatesByType",getConditionStatesByType(logicElement))
-})
 
-const openDialog = () => {
+const openDialog = () : void => {
 	initLogicClass()
 	initializeDisplayedLogicRules(
+		props.element,
 		props.questionSettings.logicRules, 
 		logicClass.value
 	)
@@ -252,14 +263,17 @@ const openDialog = () => {
 }
 
 // 用户点击过的逻辑规则数组 
-const clickLogicRule = (ruleIndex) => {
+const clickLogicRule = (ruleIndex: number) : void => {
   const ruleId = getDisplayRuleProp(ruleIndex, "id");
   addUniqueHistoryItems(ruleId)
 };
 // 对用户点击过的数组进行分类，新插入的逻辑规则和修改过的逻辑规则
 // 这个方法一定要在保存按钮的事件处理方法中执行
 // 输出新插入的，修改过的，非默认的完整的逻辑规则的ID数组
-const classifyHistory = (currentTypeRules) => {
+const classifyHistory = (currentTypeRules : LogicRule[]) : { 
+  newLogicRulesId: string[] 
+  updatedLogicRulesId: string[] 
+} => {
 	// 1. 获取当前逻辑类型的历史记录
 	const currentTypeHistory = filterHistoryBy(
 		id => currentTypeRules.some(rule => rule.id === id)
@@ -294,8 +308,8 @@ const classifyHistory = (currentTypeRules) => {
 }
 
 // 删除整个逻辑规则
-const deletedLogicRulesId = ref([])
-const removeLogicRule = (index) => {
+const deletedLogicRulesId = ref<string[]>([])
+const removeLogicRule = (index : number) => {
 	ElMessageBox.confirm("确定要删除该题目吗？", "提示", {
 		confirmButtonText: "确定",
 		cancelButtonText: "取消",
@@ -325,7 +339,7 @@ const removeLogicRule = (index) => {
 };
 
 // 添加新的逻辑规则
-const addLogicRule = () => {
+const addLogicRule = () : void => {
 	const defaultRule = getDefaultRule()
 	// 添加新的逻辑规则后，默认逻辑规则可以显示，无论原来选择了任何题型
 	displayedLogicRules.value.push(defaultRule)
@@ -334,9 +348,9 @@ const addLogicRule = () => {
 
 
 // 控制是否需要计算禁用索引
-const shouldCalculateDisabled = ref(false);
-const currentRuleIndex = ref(-1);
-const currentType = ref('');
+const shouldCalculateDisabled = ref<boolean>(false)
+const currentRuleIndex = ref<number>(-1)
+const currentType = ref<string>('')
 
 // 将 disabledIndex 改为计算属性
 // 获取禁用索引
@@ -347,7 +361,7 @@ const currentType = ref('');
 // 现在可以设置跳转逻辑的题目也可以设置显示逻辑，而不能设置跳转逻辑的题目只能设置显示逻辑
 // 设置显示逻辑关键在于确定设置显示逻辑的题目本身的序列号
 // 这个序列号也被称为禁用索引
-const disabledIndex = computed(() => {
+const disabledIndex = computed<number>(() => {
 	// 重置禁用索引
 	// 共享变量，还原状态，如果不重新设置为-1，共享变量会影响下一次点击的值，只有重新设置为-1，
 	// 才会让每一次点击下拉框的操作是独立的
@@ -364,14 +378,14 @@ const disabledIndex = computed(() => {
     }
 });
 
-const getDiabledIndex = (visible, ruleIndex, type) => {
+const getDiabledIndex = (visible : boolean, ruleIndex : number, type : string) :void => {
 	shouldCalculateDisabled.value = visible;
     currentRuleIndex.value = ruleIndex;
     currentType.value = type;
 };
 
 // 获取可设置逻辑题目的禁用索引
-const getDisabledIndexForSkipLogicType = (ruleIndex) => {
+const getDisabledIndexForSkipLogicType = (ruleIndex: number): number => {
 	// 跳转逻辑：所有如果条件分支中条件题目元素最大的索引即禁用索引
 	if (logicClass.value === 'skipLogic') {
 		// 获取所有条件题目中最大的索引
@@ -384,8 +398,9 @@ const getDisabledIndexForSkipLogicType = (ruleIndex) => {
 };
 
 // 添加"如果"条件
-const addIfCondition = (rule) => {
+const addIfCondition = (rule: LogicRule): void => {
 	rule.ifConditions.push({
+		elementId: '',
 		connector: (rule.ifConditions[1] && rule.ifConditions[1].connector) || 'or',
 		state: '',
 		choiceIndex: "",
@@ -394,9 +409,9 @@ const addIfCondition = (rule) => {
 };
 
 // 删除"如果"条件
-const removeIfCondition = (rule, index) => { rule.ifConditions.splice(index, 1);};
+const removeIfCondition = (rule: LogicRule, index: number): void => { rule.ifConditions.splice(index, 1);};
 
-const filterRulesByType = (rules, logicClassType) => {
+const filterRulesByType =  (rules: LogicRule[], logicClassType: string): LogicRule[] => {
   return rules.filter(rule => {
     if (logicClassType === 'skipLogic') {
       return rule.thenCondition.action === 'jump';
@@ -407,19 +422,19 @@ const filterRulesByType = (rules, logicClassType) => {
 };
 
 // 获取当前所有的显示类型的逻辑规则
-const filteredRulesByType = computed(() => 
+const filteredRulesByType = computed<LogicRule[]>(() => 
   filterRulesByType(displayedLogicRules.value, logicClass.value)
 );
 
 // 1. 获取当前逻辑类型的完整规则
-const currentTypeRules = computed(() => 
+const currentTypeRules = computed<LogicRule[]>(() => 
 	filteredRulesByType.value
 		.filter(rule => isCompleteRule(rule))
 		.filter(rule => !isDefaultRule(rule))
 );
 
 // 不完整规则
-const incompleteRules = computed(() => 
+const incompleteRules = computed<LogicRule[]>(() => 
 	filteredRulesByType.value
 		.filter(rule => !isCompleteRule(rule))
 );
@@ -427,7 +442,7 @@ const incompleteRules = computed(() =>
 // displayedLogicRules.value,logicClass.value
 //只有点击保存按钮，才能保存设置的逻辑规则，此外，无论点击
 //取消还是右上角的关闭符号，都不会
-const saveLogicSettings = () => {
+const saveLogicSettings = () : void => {
   if (incompleteRules.value.length > 0) {
     ElMessage({ type: 'warning', message: '有规则不完整，请完善后再保存' });
     return;
@@ -452,11 +467,11 @@ const saveLogicSettings = () => {
   emits('closeLogicDialog')
 }
 
-const cancelSave = () => {
+const cancelSave = () : void => {
 	resetLogicClass()
 	emits('closeLogicDialog')
 }
-const closeDialog = () => {
+const closeDialog = () : void => {
 	resetLogicClass()
 	// 重置状态
 	resetHistory()
@@ -465,6 +480,9 @@ const closeDialog = () => {
 	emits('closeLogicDialog')
 }
 
+// watchEffect(() => {
+// 	console.log("props.element", props.element)
+// })
 
 </script>
 
@@ -482,7 +500,6 @@ const closeDialog = () => {
 }
 
 .logic-content {
-
 	.logic-rule {
 		background-color: rgb(247, 248, 250);
 		margin-bottom: 20px;

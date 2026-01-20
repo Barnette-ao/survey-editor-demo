@@ -1,30 +1,51 @@
-// composables/useIncrementalLoading.js
-import { ref, computed, watch, nextTick} from 'vue'
+import { ref, computed, watch, nextTick, type Ref } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
+import type { QuestionPage } from '@/views/creator/types/questionnaire'
+import type { RenderedItem } from '@/views/creator/types/design'
 
-export function useIncrementalLoading(questionSettings, sentinelRef, options = {}) {
+interface UseIncrementalLoadingOptions {
+  initialCount?: number
+  batchSize?: number  
+  threshold?: number
+}
+
+interface IncrementalLoadingReturn {
+  renderedItems: Ref<RenderedItem[]>
+  isLoading: Ref<boolean>
+  hasMore: Ref<boolean>
+  loadMore: () => void
+  init: () => void
+  initObserverManually: () => void
+  cleanup: () => void
+}
+
+export function useIncrementalLoading(
+  questionSettings: Ref<{ pages?: QuestionPage[] }>,
+  sentinelRef: Ref<HTMLElement | null>,
+  options: UseIncrementalLoadingOptions = {}
+): IncrementalLoadingReturn {
   const {
-    initialCount = 10,    // 初始渲染数量
-    batchSize = 5,        // 每次加载数量
-    threshold = 200       // 触发加载的距离阈值
+    initialCount = 10,
+    batchSize = 5,
+    threshold = 200
   } = options
 
   // 状态管理
   const isLoading = ref(false)
-  const observer = ref(null)
+  const observer = ref<IntersectionObserver | null>(null)
 
   // 已渲染的项目（只增加，不重新计算）
-  const renderedItems = ref([])
+  const renderedItems = ref<RenderedItem[]>([])
 
   // 扁平化所有项目（页面 + 元素）
-  const allItems = computed(() => {
-    const settings = questionSettings.value; // ← 通过 .value 访问
-    if (!settings?.pages) return [];
+  const allItems = computed<RenderedItem[]>(() => {
+    const settings = questionSettings.value
+    if (!settings?.pages) return []
 
-    const items = []
-    settings.pages?.forEach((page, pageIndex) => {
+    const items: RenderedItem[] = []
+    settings.pages.forEach((page, pageIndex) => {
       // 添加页面项
-      if (questionSettings.value.pages.length > 1) {
+      if (settings.pages && settings.pages.length > 1) {
         items.push({
           type: 'page',
           pageIndex,
@@ -49,12 +70,12 @@ export function useIncrementalLoading(questionSettings, sentinelRef, options = {
   })
 
   // 是否还有更多内容
-  const hasMore = computed(() => {
+  const hasMore = computed<boolean>(() => {
     return renderedItems.value.length < allItems.value.length
   })
 
   // 加载更多
-  const loadMore = () => {
+  const loadMore = (): void => {
     if (isLoading.value || !hasMore.value) return
     
     isLoading.value = true
@@ -77,15 +98,15 @@ export function useIncrementalLoading(questionSettings, sentinelRef, options = {
   }
 
   // 更新哨兵元素位置
-  const cleanupObserver  = () => {
+  const cleanupObserver = (): void => {
     if (!hasMore.value && observer.value && sentinelRef.value) {
       observer.value.unobserve(sentinelRef.value)
     }
   }
 
   // 初始化 IntersectionObserver
-  const initObserver = () => {
-    const element = sentinelRef.value || sentinelRef;
+  const initObserver = (): void => {
+    const element = sentinelRef.value
     if (!element) {
       console.warn('sentinelRef is null, observer not initialized')
       return
@@ -108,26 +129,26 @@ export function useIncrementalLoading(questionSettings, sentinelRef, options = {
   }
 
   // 初始化
-  const init = () => {
+  const init = (): void => {
     const initialItems = allItems.value.slice(0, initialCount)
     renderedItems.value = [...initialItems]
   }
 
   // 手动初始化 Observer（在组件中调用）
-  const initObserverManually = () => {
+  const initObserverManually = (): void => {
     nextTick(() => {
       initObserver()
     })
   }
 
   // 清理
-  const cleanup = () => {
+  const cleanup = (): void => {
     if (observer.value) {
       observer.value.disconnect()
     }
   }
 
-  const debounceUpdate = useDebounceFn((newAllItems) => {
+  const debounceUpdate = useDebounceFn((newAllItems: RenderedItem[]) => {
     // 获取当前已渲染的数量
     const currentRenderedCount = renderedItems.value.length
     // 重新计算 renderedItems，保持相同的渲染数量
@@ -137,13 +158,12 @@ export function useIncrementalLoading(questionSettings, sentinelRef, options = {
     renderedItems.value = newAllItems.slice(0, newRenderedCount)
   }, 50)
 
-
   // 监听 allItems 变化，同步更新 renderedItems
   watch(
     allItems,
     debounceUpdate,
     { 
-      deep: true,  // 深度监听
+      deep: true
     }
   )
 

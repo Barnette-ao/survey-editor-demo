@@ -15,7 +15,12 @@ export default defineConfig(({ command }) => {
 
   return {
     plugins: [
-      vue(),
+      vue({
+        script: {
+          defineModel: true,
+          propsDestructure: true
+        }
+      }),
       AutoImport({
         imports: ['vue', 'vue-router', 'pinia'],
         resolvers: [ElementPlusResolver()],
