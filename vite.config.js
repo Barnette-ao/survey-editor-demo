@@ -6,7 +6,10 @@ import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers' 
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { resolvePlugin } from "./src/views/creator/config/helpers";
+import rawMonacoEditorPlugin from 'vite-plugin-monaco-editor'
 
+const monacoEditorPlugin = resolvePlugin(rawMonacoEditorPlugin)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // https://vite.dev/config/
@@ -20,6 +23,9 @@ export default defineConfig(({ command }) => {
           defineModel: true,
           propsDestructure: true
         }
+      }),
+      monacoEditorPlugin({
+        languageWorkers: ['json', 'editorWorkerService']
       }),
       AutoImport({
         imports: ['vue', 'vue-router', 'pinia'],

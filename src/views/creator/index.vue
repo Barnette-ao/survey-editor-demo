@@ -15,6 +15,9 @@
       <div class="previewBox" v-if="checkedMenuIndex === 1">
         <preview></preview>
       </div>
+      <div class="jsonEidtorBox" v-if="checkedMenuIndex === 2">
+        <jsonEidtor></jsonEidtor>
+      </div>
     </div>
   </div>
 </template>
@@ -23,10 +26,12 @@
 import { ref, reactive } from 'vue'
 import design from "@/views/creator/components/design.vue"
 import preview from "@/views/creator/components/preview.vue"
+import jsonEidtor from "@/views/creator/components/jsonEditor.vue"
 import { Serializer } from "survey-core";
 
-const memu = reactive(["项目设计", "预览"]);
-const checkedMenuIndex = ref(0);
+const memu = reactive(["项目设计", "预览", "JSON编辑器"]);
+const checkedMenuIndex = ref(2);
+console.log("checkedMenuIndex",checkedMenuIndex.value)
 const checkMenu = (index) => {
   checkedMenuIndex.value = index;
 };

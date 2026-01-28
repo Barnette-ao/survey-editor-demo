@@ -4,6 +4,7 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import './style.css'
 import App from './App.vue'
 
+
 // Element Plus 按需引入 - 保持简单直接
 import {
   ElSegmented,
@@ -83,4 +84,5 @@ app.config.globalProperties.$message = ElMessage
 app.config.globalProperties.$messageBox = ElMessageBox
 
 app.use(pinia)
+
 app.mount('#app')

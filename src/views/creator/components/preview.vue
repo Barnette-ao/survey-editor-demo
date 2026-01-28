@@ -11,7 +11,6 @@
 import "survey-core/survey-core.css";
 import "survey-creator-core/survey-creator-core.css";
 
-import { loadSettingsFromDatabase } from "@/views/creator/config";
 
 import { showOrhideChoice, hcChoice } from "@/views/creator/config/setChoiceVisibleIf";
 import { SurveyCreatorComponent } from "survey-creator-vue";
@@ -29,8 +28,8 @@ import markdownit from "markdown-it";
 
 import {
 	afterGetInitialSettings,
-	generateLargeQuestionnaire
 } from "@/views/creator/config/helpers";
+import SurveyStorageService from '@/views/creator/services/SurveyStorageService'
 
 const zhcn = editorLocalization.getLocale("zh-cn");
 zhcn.ed.testSurvey = " ";
@@ -225,9 +224,12 @@ Cookies.set("islogic", "0");
 
 creator.survey.onTextMarkdown.add(applyHtml);
 creator.survey.autoAdvanceAllowComplete = false;
+
 const questionSettings = ref({})
-let generatedSettings = generateLargeQuestionnaire(1)
-questionSettings.value = afterGetInitialSettings(generatedSettings)
+const storageService = new SurveyStorageService() 
+let rawSettings = storageService.loadForRuntime(1)
+questionSettings.value = afterGetInitialSettings(rawSettings)
+
 questionSettings.value.locale = "zh-cn";
 // 使用 for...of 而不是 forEach，因为在回调函数中 
 // continue 只能跳出当前回调，不能跳到下一次循环

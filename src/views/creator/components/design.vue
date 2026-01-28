@@ -201,15 +201,15 @@ import { questionTypeList } from "@/views/creator/utils/questionTypeList";
 import page from "@/views/creator/components/page.vue";
 
 import { 
-  updateDefaultSettings, 
+  saveQuestionSettings, 
 } from "@/views/creator/config";
 import {
   settingComponentMap,
 } from "@/views/creator/config/componentAndSettingMap";
 import {
   getSettingProps,
-  generateLargeQuestionnaire
 } from "@/views/creator/config/helpers";
+import SurveyStorageService from '@/views/creator/services/SurveyStorageService'
 import {
   handleDeletePage,
 } from "@/views/creator/config/handleElementAndPage";
@@ -257,9 +257,11 @@ const questionSettings = ref({});
 const instructionElementId = ref("");
 const instructionElement = ref({});
 
+
+const storageService = new SurveyStorageService()
 // 创建防抖函数，延迟5秒执行
 const saveToDefault = debounce((newValue) => {
-  updateDefaultSettings(newValue);
+  storageService.saveRuntimeSettings(newValue);
 }, 1000);
 
 // 监听 questionSettings 的变化
@@ -281,8 +283,10 @@ const incrementalLoadingInstance = ref({})
 onMounted(async () => {
   // let defaultQuestionSettings = await loadSettingsFromDatabase();
   // 获取问卷 ID（从 URL 或使用默认值）
-  let settings = generateLargeQuestionnaire(1)
-  questionSettings.value = afterGetInitialSettings(settings)
+  const rawSettings = storageService.loadForRuntime(1)
+
+  questionSettings.value = afterGetInitialSettings(rawSettings)
+  console.log("questionSettings",questionSettings.value)
   
   instructionElement.value = questionSettings.value.pages[0].elements[0];
   instructionElementId.value = questionSettings.value.pages[0].elements[0].id;

@@ -324,7 +324,6 @@ export const htmlToPlainText = (html) => {
 }
 
 
-
 export const afterGetInitialSettings = (settings) => {
 	const copy = cloneDeep(settings)
 	let addNumber = createNumberGenerator()
@@ -352,21 +351,20 @@ export const afterGetInitialSettings = (settings) => {
 	return copy
 }
 
-// 备用的动态生成函数（仅用于超大数据测试）
-export const generateLargeQuestionnaire = (count) => {
-  const lastCount = localStorage.getItem('questionNumber');
-  const lastCountNum = lastCount ? parseInt(lastCount, 10) : null;
-  
-  console.log("执行时的questionNumber",lastCountNum)	
-  if(count === lastCountNum){
-	console.log("从loacalStorage中读取")
-	console.log('generateLargeQuestionnaire baseQuestion',
-		JSON.parse(localStorage.getItem("baseQuestion")))
-	return JSON.parse(localStorage.getItem("baseQuestion"))
-  }
-  else {
-	console.log("执行创建")
-	const baseQuestion = {
+export function resolvePlugin(mod) {
+  if (typeof mod === 'function') return mod
+  if (mod && typeof mod.default === 'function') return mod.default
+  throw new Error('Invalid plugin export')
+}
+
+export const createQuestionnaireTemplate = (count, surveyId) => {
+  const baseQuestion = {
+	    id: surveyId,
+		meta: {
+			createdAt: Date.now(),
+			type: 'performance-test',
+			questionCount: count
+		},
 		title: '性能测试问卷',
 		description: '用于测试长列表渲染性能',
 		pages: [{
@@ -379,8 +377,8 @@ export const generateLargeQuestionnaire = (count) => {
 		}],
 		logicRules: []
 	}
-	
-	for (let i = 1; i <= count; i++) {
+
+  for (let i = 1; i <= count; i++) {
 		baseQuestion.pages[0].elements.push({
 			id: `test-question-${i}`,
 			name: `Q${i}`,
@@ -397,11 +395,7 @@ export const generateLargeQuestionnaire = (count) => {
 			]
 		})
 	}
-	
-	localStorage.setItem("questionNumber", count.toString());
-	console.log("创建时questionNumber",count)
-	localStorage.setItem("baseQuestion", JSON.stringify(baseQuestion))
-	return baseQuestion
-  }	 
-  
+ 
+
+  return baseQuestion
 }
