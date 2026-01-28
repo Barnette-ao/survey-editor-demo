@@ -25,7 +25,7 @@ export function useSurveyValidation() {
     try {
         const survey = new Model(data as any)
         console.log("model化的surveyJS", survey)
-
+        console.log("model化的getAllErrors输出", survey.getAllErrors())
         if (!survey.pages || survey.pages.length === 0) {
             errors.push({ message: '问卷中未定义任何页面', path: 'pages' })
         }

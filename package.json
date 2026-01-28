@@ -34,10 +34,12 @@
     "vxe-table": "^4.17.20"
   },
   "devDependencies": {
+    "@types/node": "^25.0.10",
     "@vitejs/plugin-vue": "^6.0.1",
     "mockjs": "^1.1.0",
     "msw": "^2.12.4",
     "sass-embedded": "^1.97.2",
+    "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
     "unplugin-auto-import": "^20.3.0",
     "unplugin-vue-components": "^30.0.0",
