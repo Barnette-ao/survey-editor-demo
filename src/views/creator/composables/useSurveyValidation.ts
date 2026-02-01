@@ -4,8 +4,9 @@ import * as monaco from 'monaco-editor'
 
 export interface SurveySchemaError {
   message: string
-  path?: string
   type?: string
+  className?: string,
+  propertyName?: string
 }
 
 export function useSurveyValidation() {
@@ -18,31 +19,48 @@ export function useSurveyValidation() {
   })
 
   function validateSurveySchema(data: unknown): SurveySchemaError[] {
-    console.log("validateSurveySchema是否正确传递了参数", data)
-    
     const errors: SurveySchemaError[] = []
+    let survey
 
     try {
-        const survey = new Model(data as any)
-        console.log("model化的surveyJS", survey)
-        console.log("model化的getAllErrors输出", survey.getAllErrors())
-        if (!survey.pages || survey.pages.length === 0) {
-            errors.push({ message: '问卷中未定义任何页面', path: 'pages' })
+        // 尝试创建 SurveyJS Model
+        survey = new Model(data)
+        
+        // 收集 jsonErrors
+        if (survey.jsonErrors && survey.jsonErrors.length > 0) {
+            errors.push(...survey.jsonErrors.map((error: any) => ({
+                type: error.type,
+                className: error.className,
+                propertyName: error.propertyName,
+                message: error.message || '未知的 JSON 错误'
+            })))
         }
-
-        survey.pages.forEach((page, pageIndex) => {
-            page.elements.forEach((q, qIndex) => {
-                if (!q.getType || typeof q.getType !== 'function') {
-                    errors.push({
-                        message: '无法识别的问题类型',
-                        path: `pages[${pageIndex}].elements[${qIndex}]`
-                    })
-                }
+        
+        // 检查基本结构完整性
+        if (!survey.pages || survey.pages.length === 0) {
+            errors.push({
+                type: 'structureError',
+                message: '问卷必须包含至少一个页面'
             })
+        }
+        
+        // 检查每个页面是否有效
+        survey.pages.forEach((page: any, pageIndex: number) => {
+            if (!page.elements || page.elements.length === 0) {
+                // 空页面不一定是错误，但可以记录为警告
+                errors.push({
+                    type: 'warning',
+                    message: `页面 ${pageIndex + 1} 没有包含任何元素`
+                })
+            }
         })
-    } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : 'SurveyJS 校验异常'
-        errors.push({ message: msg, type: 'fatal' })
+        
+    } catch (error) {
+        // 捕获创建 Model 时的异常
+        errors.push({
+            type: 'fatalError',
+            message: error instanceof Error ? error.message : '创建 SurveyJS Model 时发生未知错误'
+        })
     }
 
     return errors
@@ -50,7 +68,6 @@ export function useSurveyValidation() {
 
   function validate(jsonText: string) {
     // reset
-    console.log("validate执行了==============================")
 
     validationState.hasJsonSyntaxError = false
     validationState.hasSurveySchemaError = false
@@ -69,14 +86,42 @@ export function useSurveyValidation() {
     
     // 2️⃣ Schema 校验
     try {
-        console.log("parsed object", parsed)
         const surveyErrors = validateSurveySchema(parsed)
-        console.log("surveyErrors----", surveyErrors)
-        if (surveyErrors.length > 0) {
+
+        // 过滤掉surveyError
+        const filteredSurveyErrors = surveyErrors.filter((error: any) => {
+            // 如果是这三种类型，必定保留，不过滤
+            if (['structureError', 'warning', 'fatalError'].includes(error.type)) {
+                return true
+            }
+            
+            // 对于其他类型，进行过滤逻辑
+            
+            // 如果 propertyName 非空，并且为 id 或 number，并且 type 为 "unknownproperty"，则过滤掉
+            if (error.propertyName && 
+                ['id', 'number'].includes(error.propertyName) && 
+                error.type === 'unknownproperty'
+            ) {
+                return false
+            }
+            
+            // 如果 className 是 'survey'，并且 type 为 "unknownproperty"，并且 propertyName 为 meta、logicRules 或 id，则过滤掉
+            if (error.className === 'survey' && 
+                error.type === 'unknownproperty' && 
+                ['meta', 'logicRules', 'id'].includes(error.propertyName)
+            ) {
+                return false
+            }
+            
+            // 其他情况保留
+            return true
+        })
+
+        if (filteredSurveyErrors.length > 0) {
             validationState.hasSurveySchemaError = true
-            validationState.surveyErrors = surveyErrors
+            validationState.surveyErrors = filteredSurveyErrors
             validationState.stage = 'schema-error'
-            return { ok: false, errors: surveyErrors }
+            return { ok: false, errors: filteredSurveyErrors }
         }
     } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : 'SurveyJS 校验异常'

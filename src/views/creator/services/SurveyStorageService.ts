@@ -1,12 +1,75 @@
 import {
-	generateUUID,
-    createQuestionnaireTemplate,
     beforeSaveToDatabase
 } from "@/views/creator/config/helpers";
 import {
     validateStorageSchema,
     persist
 } from "@/views/creator/config";
+import { toRaw } from 'vue';
+
+const updateQuestionnairesTitle = () => {
+  const questionnaire = localStorage.getItem("questionnaires")
+  const questionnaires = JSON.parse(localStorage.getItem("questionnaires") || '{}')
+  const keys = Object.keys(questionnaires)
+  keys.forEach((key, index) => {
+    if (questionnaires[key] && typeof questionnaires[key] === 'object') {
+      questionnaires[key].title = `测试问卷${index + 1}`
+    }
+  })
+  localStorage.setItem("questionnaires", JSON.stringify(questionnaires))
+}
+
+const getTestQuestionnaireNumber = () => {
+  const questionnaires = JSON.parse(localStorage.getItem("questionnaires") || '{}')
+  const keys_length = Object.keys(questionnaires).length
+  return keys_length + 1
+}
+
+export const createQuestionnaireTemplate = (count: number, surveyId: string) => {
+  // console.log("createQuestionnaireTemplate count,surveyId",count,surveyId)
+
+  const baseQuestion = {
+	  id: surveyId,
+		meta: {
+			createdAt: Date.now(),
+			type: 'performance-test',
+			questionCount: count
+		},
+		title: `测试问卷${getTestQuestionnaireNumber()}`,
+		description: '用于测试长列表渲染性能',
+		pages: [{
+			name: 'page1',
+			elements: [{
+				html: "<h3>欢迎参与问卷调查</h3><p>请认真填写以下问题。</p>",
+				id: "intro-2",
+        name:"html",
+				type: "html"
+			}]
+		}],
+		logicRules: []
+	}
+
+  for (let i = 1; i <= count; i++) {
+		baseQuestion.pages[0].elements.push({
+			id: `test-question-${i}`,
+			name: `Q${i}`,
+			type: 'radiogroup',
+			title: `测试题目 ${i}：这是第 ${i} 个测试题目，用于性能测试`,
+			description: `这是题目 ${i} 的描述信息`,
+			isRequired: true,
+			hideNumber: false,
+			choices: [
+				{ value: `选项A-${i}`, showText: false, textType: 'text', required: true },
+				{ value: `选项B-${i}`, showText: false, textType: 'text', required: true },
+				{ value: `选项C-${i}`, showText: false, textType: 'text', required: true },
+				{ value: `选项D-${i}`, showText: false, textType: 'text', required: true }
+			]
+		} as any)
+	}
+ 
+  // console.log("createQuestionnaireTemplate baseQuestion.id",baseQuestion.id)
+  return baseQuestion
+}
 
 
 /**
@@ -27,54 +90,22 @@ import {
 * - 编辑层允许脏数据，存储层必须是最终值
 * - 并且编辑页和预览页的数据需要
 */
-export default class SurveyStorageService {
+export class SurveyStorageService {
   /** 明确这是全局 surveyId 的唯一来源 */
-  private getActiveSurveyId(): string {
-    let id = localStorage.getItem('activeSurveyId')
-
-    if (!id) {
-      id = `survey-${generateUUID()}`
-      localStorage.setItem('activeSurveyId', id)
-    }
-
-    return id
+  getCurrentSurveyId(): string | null {
+    return localStorage.getItem('activeSurveyId')
   }
 
   /** 受控修改入口，而不是随便 set localStorage */
   setActiveSurveyId(surveyId: string) {
-    if (!surveyId || typeof surveyId !== 'string') {
+    if ( typeof surveyId !== 'string') {
       throw new Error('surveyId 必须是非空字符串')
     }
     localStorage.setItem('activeSurveyId', surveyId)
   }
 
-  // ========================
-  // load 相关
-  // ========================
 
-  /**
-   * 运行态使用：返回 storage 层的原始数据
-   * 由调用方决定如何转换为 runtime 数据
-   */
-  loadForRuntime(count: number) {
-    return this.loadFromStorage(count)
-  }
-
-  /**
-   * JSON 编辑页使用：直接操作 storage 结构
-   */
-  loadForJsonEditor(count: number) {
-    return this.loadFromStorage(count)
-  }
-  
-  // 真实的 load 实现（内部复用）
-  // 备用的动态生成函数（仅用于超大数据测试）
-  private loadFromStorage(count: number) {
-    const surveyId = this.getActiveSurveyId()
-    return this.load(count, surveyId)
-  }
-
-  private load(count: number, surveyId: string) {
+  load(count: number, surveyId: string) {
     const all = JSON.parse(
       localStorage.getItem('questionnaires') || '{}'
     )
@@ -86,8 +117,8 @@ export default class SurveyStorageService {
 
     //没有，那就直接创建给核心问卷
     const base = createQuestionnaireTemplate(
-      surveyId,
-      count
+      count,
+      surveyId
     )
 
     // 存储层和编辑层应该最好分为两层，编辑层是允许脏数据的，而存储层是不允许的，
@@ -118,7 +149,8 @@ export default class SurveyStorageService {
    */
   saveFromJsonEditor(storageSettings: unknown) {
     validateStorageSchema(storageSettings)
-    const surveyId = this.getActiveSurveyId()
+    const surveyId = this.getCurrentSurveyId()
+    
     persist(storageSettings, surveyId)
   }
 
@@ -139,9 +171,28 @@ export default class SurveyStorageService {
    * 
    */
   saveRuntimeSettings(runtimeSettings: unknown) {
-    const surveyId = this.getActiveSurveyId()
+    const surveyId = this.getCurrentSurveyId()
     const rawObject = toRaw(runtimeSettings)
     const dataToSave = beforeSaveToDatabase(rawObject)
     persist(dataToSave, surveyId)
   }
 }
+
+export const getRawSettings = () => {
+	const storageService = new SurveyStorageService()	
+	const currentSurveyId = storageService.getCurrentSurveyId()
+  // console.log("currentSurveyId",currentSurveyId)
+  if(!currentSurveyId){
+		throw new TypeError("currentSurveyId must be a string")
+	}
+	const count = 1
+  // console.log("currentSurveyId",currentSurveyId)
+	const rawSettings = storageService.load(count, currentSurveyId)
+	if(!rawSettings){
+		throw new Error("storageService.load() has something wrong")
+	}
+	return rawSettings
+}
+
+// updateQuestionnairesTitle()
+

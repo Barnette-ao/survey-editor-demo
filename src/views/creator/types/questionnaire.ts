@@ -111,7 +111,7 @@ export interface CommentElement extends BaseQuestionElement {
 
 // 量表题类型（label/stars/smileys）
 export interface RatingElement extends BaseQuestionElement {
-  type: 'ratinglabel' | 'ratingstars' | 'ratingsmileys'
+  type:'rating'
   title: string
   description: string
   isRequired: boolean

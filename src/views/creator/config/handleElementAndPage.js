@@ -207,8 +207,18 @@ export const getMaxNumOfName = (questionSettings, element) => {
 
 
 export const createNewElement = (type, questionSettings) => {
-	let elementTemplate = questionTemplates.find(element => element.type === type);
+	let elementTemplate
 
+	if(['ratinglabel','ratingsmileys','ratingstars'].includes(type)){
+		const rateType = type.replace(/^rating/, '');
+
+		elementTemplate = questionTemplates
+			.filter(element => element.type === "rating")
+			.find(element => element.rateType === rateType)
+	}else{
+		elementTemplate = questionTemplates.find(element => element.type === type);
+	}
+	
 	const number = getMaxNumOfName(questionSettings, elementTemplate)
 
 	return {

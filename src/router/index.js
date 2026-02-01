@@ -1,21 +1,19 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import SurveyEntry from '@/views/entry/index.vue'
+import SurveyEditor from '@/views/creator/index.vue'
 
 const routes = [
   {
     path: '/',
-    name: 'Home',
-    component: () => import('../components/QuestionnaireList.vue')
+    name: 'entry',
+    component: () => import('@/views/entry/index.vue')
   },
   {
-    path: '/creator',
-    name: 'Creator',
-    component: () => import('../views/creator/index.vue')
+    path: '/editor/:surveyId',
+    name: 'editor',
+    component: () => import('@/views/creator/index.vue'),
+    props: true,
   },
-  {
-    path: '/creator/:id',
-    name: 'CreatorEdit',
-    component: () => import('../views/creator/index.vue')
-  }
 ]
 
 const router = createRouter({

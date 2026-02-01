@@ -21,7 +21,7 @@
 <script setup lang='ts'>
 import SurveySchemaErrorPanel from '@/views/creator/components/SurveySchemaErrorPanel.vue'
 import customerJsonEditor from '@/views/creator/components/customerJsonEditor.vue'
-import SurveyStorageService from '@/views/creator/services/SurveyStorageService'
+import { getRawSettings, SurveyStorageService} from '@/views/creator/services/SurveyStorageService'
 import { useSurveyValidation } from '@/views/creator/composables/useSurveyValidation'
 
 
@@ -30,26 +30,23 @@ const jsonString = ref<string>(JSON.stringify(surveyJSON.value, null, 2))
 const language = ref('json')
 
 const editorMounted = (editor: monaco.editor.IStandaloneCodeEditor) => {
-   console.log('editor实例加载完成', editor)
+  //  console.log('editor实例加载完成', editor)
 }
 
 const storageService = new SurveyStorageService()
 
 onMounted(() => {   
-  surveyJSON.value = storageService.loadForJsonEditor(1)
+  surveyJSON.value = getRawSettings()
   jsonString.value = JSON.stringify(surveyJSON.value, null, 2)
 })
 
 const { validationState, validate } = useSurveyValidation()
 function onJsonChange(newValue: string) {
-  console.log("实时修改之后数据传递到了这里")
   try {
     const result = validate(newValue)
-    console.log("校验结果", result)
     // debugger
 
     if (!result.ok) {
-        showErrors(result.errors) // 永远安全
         return
     }
 

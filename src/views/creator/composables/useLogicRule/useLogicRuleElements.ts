@@ -50,7 +50,7 @@ export function useLogicRuleElements(
     return (ruleIndex: number, index: number, state: string) => {
       const element = getLogicRuleElement.value(ruleIndex, index)
 
-      if (!element || !('type' in element) || element.type !== 'ratinglabel') return false
+      if (!element || !('type' in element) || element.type !== 'rating' || element.rateType !== 'label' ) return false
       
       return ['equal', 'lessThan', 'greaterThan', 'greaterOrEqual', 'lesserOrEqual'].includes(state)
     }

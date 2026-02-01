@@ -69,10 +69,6 @@ const wangEditorValue = computed(() => {
 
 // 显示在 div 中的文本
 const displayText = computed(() => {
-  if(props.editorId === "surveyName"){
-    console.log("custom props.modelValue",props.modelValue)
-  }
-
   return props.modelValue || "请输入内容";
 });
 

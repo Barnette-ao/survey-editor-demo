@@ -200,16 +200,13 @@ import instruction from "@/views/creator/components/instruction.vue";
 import { questionTypeList } from "@/views/creator/utils/questionTypeList";
 import page from "@/views/creator/components/page.vue";
 
-import { 
-  saveQuestionSettings, 
-} from "@/views/creator/config";
 import {
   settingComponentMap,
 } from "@/views/creator/config/componentAndSettingMap";
 import {
   getSettingProps,
 } from "@/views/creator/config/helpers";
-import SurveyStorageService from '@/views/creator/services/SurveyStorageService'
+import { getRawSettings, SurveyStorageService } from '@/views/creator/services/SurveyStorageService'
 import {
   handleDeletePage,
 } from "@/views/creator/config/handleElementAndPage";
@@ -220,7 +217,7 @@ import {
 } from "@/views/creator/config/updateLogic";
 
 import { watch, nextTick } from "vue";
-import { debounce, isEqual } from "lodash-es";
+import { debounce } from "lodash-es";
 import customEditor from "@/views/creator/components/customEditor.vue";
 import { useIncrementalLoading } from "@/views/creator/composables/useIncreamentalLoading"
 import { useQuestionDisplay } from "@/views/creator/composables/useQuestionNumberDisplay"
@@ -283,8 +280,7 @@ const incrementalLoadingInstance = ref({})
 onMounted(async () => {
   // let defaultQuestionSettings = await loadSettingsFromDatabase();
   // 获取问卷 ID（从 URL 或使用默认值）
-  const rawSettings = storageService.loadForRuntime(1)
-
+  const rawSettings = getRawSettings()
   questionSettings.value = afterGetInitialSettings(rawSettings)
   console.log("questionSettings",questionSettings.value)
   

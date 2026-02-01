@@ -7,6 +7,9 @@
           {{ item }}
         </div>
       </div>
+      <div class="exitBox">
+        <el-button type="primary" @click="$emit('exit', activeSurveyId)">退出编辑</el-button>
+      </div>
     </div>
     <div class="tabContentBox">
       <div class="designer" v-if="checkedMenuIndex === 0">
@@ -28,6 +31,8 @@ import design from "@/views/creator/components/design.vue"
 import preview from "@/views/creator/components/preview.vue"
 import jsonEidtor from "@/views/creator/components/jsonEditor.vue"
 import { Serializer } from "survey-core";
+import { SurveyStorageService } from '@/views/creator/services/SurveyStorageService'
+
 
 const memu = reactive(["项目设计", "预览", "JSON编辑器"]);
 const checkedMenuIndex = ref(2);
@@ -35,6 +40,11 @@ console.log("checkedMenuIndex",checkedMenuIndex.value)
 const checkMenu = (index) => {
   checkedMenuIndex.value = index;
 };
+
+const activeSurveyId = ref("")
+const storageService = new SurveyStorageService()
+activeSurveyId.value = storageService.getCurrentSurveyId
+
 
 //// 给所有选择类型题目添加选项逻辑设置 属性
 Serializer.addProperty("selectbase", {
@@ -67,10 +77,14 @@ Serializer.addProperty("selectbase", {
       z-index: 999;
 
       display: flex;
+      align-items: center;
+
+      
 
       .menu {
         width: 80%;
         height: 100%;
+        background-color:"skyblue";
 
         display: flex;
 
@@ -90,25 +104,13 @@ Serializer.addProperty("selectbase", {
         }
       }
 
-      .toolBar {
+      .exitBox {
         width: 20%;
         height: 100%;
-
         display: flex;
-
-        .toolBarBtn {
-          cursor: pointer;
-          width: 30%;
-          height: 100%;
-
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          .btnIcon:hover {
-            background-color: rgb(243, 243, 243);
-          }
-        }
+        align-items: center;
+        justify-content: center;
+        padding: 0 20px; // 可选：添加一些左右间距
       }
     }
 

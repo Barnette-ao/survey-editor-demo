@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { cloneDeep } from 'lodash-es'
 import _ from "lodash-es";
 
+
 export const generateUUID = () => {
 	return uuidv4()
 }
@@ -178,9 +179,6 @@ export const isRating = (type) => {
 // 定义一个函数，用于将多个函数组合成一个函数
 const pipe = (...fns) => (x) => fns.reduce((result, f) => f(result), x);
 
-// 将多个map提取出来
-const mapPipe = (...fns) => (elements) => elements.map(element => pipe(...fns)(element))
-
 export const beforeSaveToDatabase = (settings) => {
 	let copy = cloneDeep(settings)
 
@@ -201,32 +199,22 @@ export const beforeSaveToDatabase = (settings) => {
 		return page
 	}
 
-	const resetRatingType = (element) => {
-		if (isRating(element.type)) {
-			element.type = "rating"
+	const checkTypeProp = (page) => {
+		if(page.elements){
+			page.elements = page.elements.map(element => {
+				if (element.type) {
+					return element
+				}
+			})
 		}
-		return element
-	}
-
-	const checkTypeProp = (element) => {
-		if (element.type) {
-			return element
-		}
-	}
-	
-	const mapProcessElements = mapPipe(
-		resetRatingType,
-		checkTypeProp
-	);
-
-	const resetPageElements = (page, index) => {
-		page.elements = mapProcessElements(page.elements)
+		
 		return page
 	}
 
 	copy.pages = copy.pages
-		.map(resetPageElements)
 		.map(resetPageName)
+		.map(checkTypeProp)
+		
 
 	return copy
 }
@@ -357,45 +345,4 @@ export function resolvePlugin(mod) {
   throw new Error('Invalid plugin export')
 }
 
-export const createQuestionnaireTemplate = (count, surveyId) => {
-  const baseQuestion = {
-	    id: surveyId,
-		meta: {
-			createdAt: Date.now(),
-			type: 'performance-test',
-			questionCount: count
-		},
-		title: '性能测试问卷',
-		description: '用于测试长列表渲染性能',
-		pages: [{
-			name: 'page1',
-			elements: [{
-				html: "<h3>欢迎参与问卷调查</h3><p>请认真填写以下问题。</p>",
-				id: "intro-2",
-				type: "html"
-			}]
-		}],
-		logicRules: []
-	}
 
-  for (let i = 1; i <= count; i++) {
-		baseQuestion.pages[0].elements.push({
-			id: `test-question-${i}`,
-			name: `Q${i}`,
-			type: 'radiogroup',
-			title: `测试题目 ${i}：这是第 ${i} 个测试题目，用于性能测试`,
-			description: `这是题目 ${i} 的描述信息`,
-			isRequired: true,
-			hideNumber: false,
-			choices: [
-				{ value: `选项A-${i}`, showText: false, textType: 'text', required: true },
-				{ value: `选项B-${i}`, showText: false, textType: 'text', required: true },
-				{ value: `选项C-${i}`, showText: false, textType: 'text', required: true },
-				{ value: `选项D-${i}`, showText: false, textType: 'text', required: true }
-			]
-		})
-	}
- 
-
-  return baseQuestion
-}

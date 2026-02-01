@@ -9,6 +9,7 @@ export const questionTemplates = [
 		"title": "请选择一个选项",
 		"description": "",
 		"isRequired": true,
+        "hideNumber":false,
 		"choices": [{
 			"value": "选项1",
 			"showText": false,

@@ -10,16 +10,12 @@ type ComponentMapKey = keyof typeof componentMap
 
 export function useComponentMapping() {
   const componentIs: ComputedRef<
-    (element: QuestionElement) => any
+    (element: QuestionElement | RatingElement ) => any
   > = computed(() => {
     return (element: QuestionElement) => {
       let type: ComponentMapKey
 
-      if (
-        element.type === 'ratinglabel' ||
-        element.type === 'ratingstars' ||
-        element.type === 'ratingsmileys'
-      ) {
+      if (element.type === 'rating') {
         const ratingElement = element as RatingElement
         type = ratingTypeMap[ratingElement.rateType] as ComponentMapKey
       } else {

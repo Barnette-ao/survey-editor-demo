@@ -138,7 +138,7 @@ export const questionTemplates = [
 		],
 	},
 	{
-		"type": 'ratinglabel',
+		"type": 'rating',
 		"isRequired": true,
 		"title": "请您对此项目进行评价",
 		"description": "",
@@ -146,7 +146,7 @@ export const questionTemplates = [
 		"displayMode": "buttons",
 	},
 	{
-		"type": 'ratingstars',
+		"type": 'rating',
 		"title": "请您对我们的服务进行评价",
 		"description": "",
 		"isRequired": true,
@@ -154,7 +154,7 @@ export const questionTemplates = [
 		"displayMode": "buttons"
 	},
 	{
-		"type": 'ratingsmileys',
+		"type": 'rating',
 		"title": "请您对我们的服务进行评价",
 		"description": "",
 		"isRequired": true,

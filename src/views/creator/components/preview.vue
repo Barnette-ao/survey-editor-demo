@@ -29,7 +29,7 @@ import markdownit from "markdown-it";
 import {
 	afterGetInitialSettings,
 } from "@/views/creator/config/helpers";
-import SurveyStorageService from '@/views/creator/services/SurveyStorageService'
+import { getRawSettings } from '@/views/creator/services/SurveyStorageService'
 
 const zhcn = editorLocalization.getLocale("zh-cn");
 zhcn.ed.testSurvey = " ";
@@ -225,9 +225,8 @@ Cookies.set("islogic", "0");
 creator.survey.onTextMarkdown.add(applyHtml);
 creator.survey.autoAdvanceAllowComplete = false;
 
-const questionSettings = ref({})
-const storageService = new SurveyStorageService() 
-let rawSettings = storageService.loadForRuntime(1)
+const questionSettings = ref({}) 
+let rawSettings = getRawSettings()
 questionSettings.value = afterGetInitialSettings(rawSettings)
 
 questionSettings.value.locale = "zh-cn";

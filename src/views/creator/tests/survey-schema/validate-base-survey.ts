@@ -12,7 +12,13 @@ export function createBaseSurveyShell() {
         name: "page1",
         elements: []
       }
-    ]
+    ],
+  }
+}
+
+const adapteRatingQuestion = (question:any) => {
+  if(['ratinglabel', 'ratingsmileys', 'ratingstars'].includes(question.type)){
+    question.type = 'rating'
   }
 }
 
@@ -23,10 +29,8 @@ export function createBaseSurveyShell() {
  */
 export function buildSurveyWithSingleQuestion(question: any) {
   const survey = createBaseSurveyShell()
-  // 适配rating类型的题目
-  if(['ratinglabel', 'ratingsmileys', 'ratingstars'].includes(question.type)){
-    question.type = 'rating'
-  }
+  // 适配rating类型的题目对象
+  adapteRatingQuestion(question)
 
   // 确保问题有唯一的 name 属性
 
