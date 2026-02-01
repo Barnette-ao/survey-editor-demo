@@ -91,21 +91,19 @@ export const createQuestionnaireTemplate = (count: number, surveyId: string) => 
 * - 并且编辑页和预览页的数据需要
 */
 export class SurveyStorageService {
-  /** 明确这是全局 surveyId 的唯一来源 */
-  getCurrentSurveyId(): string | null {
-    return localStorage.getItem('activeSurveyId')
+  getLastSurveyId(): string | null {
+    return localStorage.getItem('lastSurveyId')
   }
 
-  /** 受控修改入口，而不是随便 set localStorage */
-  setActiveSurveyId(surveyId: string) {
-    if ( typeof surveyId !== 'string') {
-      throw new Error('surveyId 必须是非空字符串')
+  setLastSurveyId(id: string) {
+    if(typeof id !== 'string'){
+      throw new Error("survey id must be a string")
     }
-    localStorage.setItem('activeSurveyId', surveyId)
+    localStorage.setItem('lastSurveyId', id)
   }
 
 
-  load(count: number, surveyId: string) {
+  private load(count: number, surveyId: string) {
     const all = JSON.parse(
       localStorage.getItem('questionnaires') || '{}'
     )
@@ -136,6 +134,14 @@ export class SurveyStorageService {
 
     return base
   }
+
+  loadRawSettings(count: number, surveyId: string) {
+    const rawSettings = this.load(count, surveyId)
+    if (!rawSettings) {
+      throw new Error("storageService.load() failed")
+    }
+    return rawSettings
+  }
   
   /**
    *
@@ -147,10 +153,8 @@ export class SurveyStorageService {
    * JSON编辑器是loadQuestion之后直接使用
    * 预览页和编辑器页是loadQuestion之后还要after直接使用
    */
-  saveFromJsonEditor(storageSettings: unknown) {
+  saveFromJsonEditor(surveyId:string, storageSettings: unknown) {
     validateStorageSchema(storageSettings)
-    const surveyId = this.getCurrentSurveyId()
-    
     persist(storageSettings, surveyId)
   }
 
@@ -170,29 +174,13 @@ export class SurveyStorageService {
    * 所以要对该对象去掉一些存储态不需要的属性或者不合法的属性
    * 
    */
-  saveRuntimeSettings(runtimeSettings: unknown) {
-    const surveyId = this.getCurrentSurveyId()
+  saveRuntimeSettings(surveyId:string, runtimeSettings: unknown) {
     const rawObject = toRaw(runtimeSettings)
     const dataToSave = beforeSaveToDatabase(rawObject)
     persist(dataToSave, surveyId)
   }
 }
 
-export const getRawSettings = () => {
-	const storageService = new SurveyStorageService()	
-	const currentSurveyId = storageService.getCurrentSurveyId()
-  // console.log("currentSurveyId",currentSurveyId)
-  if(!currentSurveyId){
-		throw new TypeError("currentSurveyId must be a string")
-	}
-	const count = 1
-  // console.log("currentSurveyId",currentSurveyId)
-	const rawSettings = storageService.load(count, currentSurveyId)
-	if(!rawSettings){
-		throw new Error("storageService.load() has something wrong")
-	}
-	return rawSettings
-}
 
 // updateQuestionnairesTitle()
 

@@ -26,16 +26,19 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { SurveyStorageService} from '@/views/creator/services/SurveyStorageService'
+import { generateUUID } from '@/views/creator/config/helpers'
+import { useRouter } from 'vue-router'
+
+
+const router = useRouter()
+const appService = new SurveyStorageService()
+
 
 interface SurveyMeta {
   surveyId: string
   title: string
 }
-
-const emit = defineEmits<{
-  (e: 'open', surveyId: string): void,
-  (e: 'create'): void
-}>()
 
 const surveys = ref<SurveyMeta[]>([])
 
@@ -49,11 +52,12 @@ function loadSurveyList() {
 }
 
 function handleCreate() {
-  emit('create')
+  const id = generateUUID()
+  router.push(`/editor/${id}`)
 }
 
 function handleOpen(id: string) {
-  emit('open', id)
+  router.push(`/editor/${id}`)
 }
 
 onMounted(() => {

@@ -26,10 +26,11 @@ import Cookies from "js-cookie";
 import { setLicenseKey, Serializer } from "survey-core";
 import markdownit from "markdown-it";
 
-import {
-	afterGetInitialSettings,
-} from "@/views/creator/config/helpers";
-import { getRawSettings } from '@/views/creator/services/SurveyStorageService'
+import { afterGetInitialSettings} from "@/views/creator/config/helpers";
+import { useSurveyContext } from "@/views/creator/composables/useSurveyId";
+
+
+
 
 const zhcn = editorLocalization.getLocale("zh-cn");
 zhcn.ed.testSurvey = " ";
@@ -225,8 +226,10 @@ Cookies.set("islogic", "0");
 creator.survey.onTextMarkdown.add(applyHtml);
 creator.survey.autoAdvanceAllowComplete = false;
 
-const questionSettings = ref({}) 
-let rawSettings = getRawSettings()
+const questionSettings = ref({})
+
+const { loadInitialRawSettings } = useSurveyContext() 
+const rawSettings = loadInitialRawSettings()
 questionSettings.value = afterGetInitialSettings(rawSettings)
 
 questionSettings.value.locale = "zh-cn";
@@ -248,45 +251,6 @@ creator.survey.locale = "zh-cn";
 const testTab = creator.getPlugin("test");
 testTab.setDevice("androidPhone");
 
-
-// 创建 MutationObserver 来监控 DOM 的变化
-// const observer = new MutationObserver((mutationsList, observer) => {
-//   console.log("执行到来这里开始观察预览界面的 DOM 变化");
-//   const previewContainer = document.querySelector(".svc-plugin-tab__content");
-//   if (previewContainer) {
-//     CreateQrCodeYl(qid).then((res) => {
-//       if (res.code == 200) {
-//         //创建二维码容器
-        
-//         observer.disconnect();
-//       }
-//     });
-//   }
-// });
-
-// // 开始观察 body 的子节点变化
-// observer.observe(document.body, { childList: true, subtree: true });
-
-// const deviceListChinese = ["电脑", "苹果手机", "安卓手机", "平板"]
-// const deviceList = ["Desktop", "iPhone 15", "Android Phone", "Android Tablet"]
-// // 创建 MutationObserver 来监控 DOM 的变化
-// const deviceObeserver = new MutationObserver((mutationsList, observer) => {
-//   const deviceListContainer = document.querySelector(".svc-list");
-//   if (deviceListContainer) {
-//     // htmlCollection转成数组使用forEach循环遍历 , 然后删除不需要的dom元素，然后修改需要的dom元素的文本内容
-//     Array.from(deviceListContainer.children).forEach((item) => {
-//       if (!deviceList.includes(item.children[0].textContent)) {
-//         deviceListContainer.removeChild(item)
-//       } else {
-//         const index = deviceList.indexOf(item.children[0].textContent) 
-//         item.children[0].textContent = deviceListChinese[index]
-//       } 
-//     })
-//     observer.disconnect();
-//   }
-// });
-// // 开始观察 body 的子节点变化
-// deviceObeserver.observe(document.body, { childList: true, subtree: true });
 
 </script>
 

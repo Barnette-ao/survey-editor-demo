@@ -206,7 +206,7 @@ import {
 import {
   getSettingProps,
 } from "@/views/creator/config/helpers";
-import { getRawSettings, SurveyStorageService } from '@/views/creator/services/SurveyStorageService'
+import { SurveyStorageService } from '@/views/creator/services/SurveyStorageService'
 import {
   handleDeletePage,
 } from "@/views/creator/config/handleElementAndPage";
@@ -232,6 +232,7 @@ import { useSettingPanelState } from '@/views/creator/composables/useSettingPane
 import { useLogicDialogState } from '@/views/creator/composables/useLogicDialogState'
 import { useOptionEditingState } from '@/views/creator/composables/useOptionEditingState'
 import { useSelectionState } from '@/views/creator/composables/useSelectionState'
+import { useSurveyContext } from "@/views/creator/composables/useSurveyId";
 
 
 import {
@@ -254,11 +255,15 @@ const questionSettings = ref({});
 const instructionElementId = ref("");
 const instructionElement = ref({});
 
+const { 
+  surveyId, 
+  loadInitialRawSettings, 
+  saveRuntimeSettings,
+} = useSurveyContext()
 
-const storageService = new SurveyStorageService()
 // 创建防抖函数，延迟5秒执行
 const saveToDefault = debounce((newValue) => {
-  storageService.saveRuntimeSettings(newValue);
+  saveRuntimeSettings(newValue);
 }, 1000);
 
 // 监听 questionSettings 的变化
@@ -280,7 +285,7 @@ const incrementalLoadingInstance = ref({})
 onMounted(async () => {
   // let defaultQuestionSettings = await loadSettingsFromDatabase();
   // 获取问卷 ID（从 URL 或使用默认值）
-  const rawSettings = getRawSettings()
+  const rawSettings = loadInitialRawSettings()
   questionSettings.value = afterGetInitialSettings(rawSettings)
   console.log("questionSettings",questionSettings.value)
   

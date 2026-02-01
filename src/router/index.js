@@ -10,9 +10,29 @@ const routes = [
   },
   {
     path: '/editor/:surveyId',
-    name: 'editor',
-    component: () => import('@/views/creator/index.vue'),
+    component: () => import('@/views/creator/index.vue'), // SurveyEditor 壳子
     props: true,
+    children: [
+      {
+        path: '',
+        redirect: { name: 'editor-design' },
+      },
+      {
+        path: 'design',
+        name: 'editor-design',
+        component: () => import('@/views/creator/pages/design.vue'),
+      },
+      {
+        path: 'preview',
+        name: 'editor-preview',
+        component: () => import('@/views/creator/pages/preview.vue'),
+      },
+      {
+        path: 'json',
+        name: 'editor-json',
+        component: () => import('@/views/creator/pages/jsonEditor.vue'),
+      },
+    ],
   },
 ]
 

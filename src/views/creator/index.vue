@@ -8,19 +8,11 @@
         </div>
       </div>
       <div class="exitBox">
-        <el-button type="primary" @click="$emit('exit', activeSurveyId)">退出编辑</el-button>
+        <el-button type="primary" @click="handleExit">退出编辑</el-button>
       </div>
     </div>
     <div class="tabContentBox">
-      <div class="designer" v-if="checkedMenuIndex === 0">
-        <design></design>
-      </div>
-      <div class="previewBox" v-if="checkedMenuIndex === 1">
-        <preview></preview>
-      </div>
-      <div class="jsonEidtorBox" v-if="checkedMenuIndex === 2">
-        <jsonEidtor></jsonEidtor>
-      </div>
+      <router-view />
     </div>
   </div>
 </template>
@@ -33,18 +25,21 @@ import jsonEidtor from "@/views/creator/components/jsonEditor.vue"
 import { Serializer } from "survey-core";
 import { SurveyStorageService } from '@/views/creator/services/SurveyStorageService'
 
+import { useRouter } from 'vue-router'
+
 
 const memu = reactive(["项目设计", "预览", "JSON编辑器"]);
 const checkedMenuIndex = ref(2);
-console.log("checkedMenuIndex",checkedMenuIndex.value)
 const checkMenu = (index) => {
   checkedMenuIndex.value = index;
 };
 
-const activeSurveyId = ref("")
+const router = useRouter()
 const storageService = new SurveyStorageService()
-activeSurveyId.value = storageService.getCurrentSurveyId
 
+const handleExit = () => {
+  router.push('/')
+}
 
 //// 给所有选择类型题目添加选项逻辑设置 属性
 Serializer.addProperty("selectbase", {
