@@ -1,11 +1,4 @@
-import { toRaw } from 'vue'
 import { getQuestionnaireById, updateQuestionnaire } from "@/api/questionnaire.js";
-
-
-// 获取问卷 ID（从 URL 或使用默认值）
-const urlParams = new URLSearchParams(window.location.search);
-const qid = urlParams.get("id") || '1'; // 默认使用 ID 为 1 的问卷
-
 
 // 校验JSON编辑页保存的对象是否有必要的属性
 // 以及它们的属性的类型是否合格
@@ -74,10 +67,5 @@ export function validateStorageSchema(data) {
 }
 
 
-export const persist = (dataToSave, surveyId) => {
-	const all = JSON.parse(localStorage.getItem('questionnaires') || '{}')
-	all[surveyId] = dataToSave
-	// 保存到 localStorage
-	localStorage.setItem(`questionnaires`, JSON.stringify(all));
-}
+
 

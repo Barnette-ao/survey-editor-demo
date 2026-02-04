@@ -2,9 +2,13 @@
   <div class="creatorBox">
     <div class="navBox">
       <div class="menu">
-        <div :class="checkedMenuIndex == index ? 'menuItem checkedMenuItem' : 'menuItem'" @click="checkMenu(index)"
-          v-for="(item, index) in memu" :key="index">
-          {{ item }}
+        <div 
+          :class="['menuItem', { checkedMenuItem: menuItems[index].routeName === $route.name }]" 
+          @click="checkMenu(index)"
+          v-for="(item, index) in menuItems" 
+          :key="index"
+        >
+          {{ item.label }}
         </div>
       </div>
       <div class="exitBox">
@@ -18,30 +22,39 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
-import design from "@/views/creator/components/design.vue"
-import preview from "@/views/creator/components/preview.vue"
-import jsonEidtor from "@/views/creator/components/jsonEditor.vue"
+import { ref, reactive, inject } from 'vue'
 import { Serializer } from "survey-core";
-import { SurveyStorageService } from '@/views/creator/services/SurveyStorageService'
+import { useSurveyContext } from '@/views/creator/composables/useSurveyContext'
 
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
+const menuItems = reactive([
+  { label: "项目设计", routeName: "editor-design" },
+  { label: "预览", routeName: "editor-preview" },
+  { label: "JSON编辑器", routeName: "editor-json" }
+]);
 
-const memu = reactive(["项目设计", "预览", "JSON编辑器"]);
-const checkedMenuIndex = ref(2);
 const checkMenu = (index) => {
-  checkedMenuIndex.value = index;
+  router.push({ 
+    name: menuItems[index].routeName, 
+    params: { surveyId: route.params.surveyId } 
+  });
 };
 
 const router = useRouter()
-const storageService = new SurveyStorageService()
+const route = useRoute()
+const { exists } = useSurveyContext()
+
+// 注入运行态数据
+const runtimeStorageData = inject('runtimeStorageData')
 
 const handleExit = () => {
+  const surveyId = route.params.surveyId
+  exists(surveyId, runtimeStorageData.value)
   router.push('/')
 }
 
-//// 给所有选择类型题目添加选项逻辑设置 属性
+// 给所有选择类型题目添加选项逻辑设置 属性
 Serializer.addProperty("selectbase", {
   name: "choicesShowHide:text", // 属性名及类型
   title: "choicesShowHide", // 属性的标题

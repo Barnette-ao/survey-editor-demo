@@ -24,7 +24,7 @@ import customerJsonEditor from '@/views/creator/components/customerJsonEditor.vu
 
 import { SurveyStorageService} from '@/views/creator/services/SurveyStorageService'
 import { useSurveyValidation } from '@/views/creator/composables/useSurveyValidation'
-import { useSurveyContext } from "@/views/creator/composables/useSurveyId";
+import { useSurveyContext } from "@/views/creator/composables/useSurveyContext";
 
 import * as monaco from 'monaco-editor'
 

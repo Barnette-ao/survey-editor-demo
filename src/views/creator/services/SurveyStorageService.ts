@@ -1,23 +1,12 @@
 import {
-    beforeSaveToDatabase
+    beforeSaveToDatabase,
+    generateUUID
 } from "@/views/creator/config/helpers";
 import {
     validateStorageSchema,
-    persist
 } from "@/views/creator/config";
 import { toRaw } from 'vue';
 
-const updateQuestionnairesTitle = () => {
-  const questionnaire = localStorage.getItem("questionnaires")
-  const questionnaires = JSON.parse(localStorage.getItem("questionnaires") || '{}')
-  const keys = Object.keys(questionnaires)
-  keys.forEach((key, index) => {
-    if (questionnaires[key] && typeof questionnaires[key] === 'object') {
-      questionnaires[key].title = `测试问卷${index + 1}`
-    }
-  })
-  localStorage.setItem("questionnaires", JSON.stringify(questionnaires))
-}
 
 const getTestQuestionnaireNumber = () => {
   const questionnaires = JSON.parse(localStorage.getItem("questionnaires") || '{}')
@@ -91,31 +80,46 @@ export const createQuestionnaireTemplate = (count: number, surveyId: string) => 
 * - 并且编辑页和预览页的数据需要
 */
 export class SurveyStorageService {
+  // 查询
+  // surveyId是否是已经创建的问卷
+  exists(surveyId: string): boolean {
+    if (!surveyId) return false
+
+    const all = JSON.parse(
+      localStorage.getItem('questionnaires') || '{}'
+    )
+
+    return Boolean(all[surveyId])
+  }
+
+  // 查询
   getLastSurveyId(): string | null {
     return localStorage.getItem('lastSurveyId')
   }
 
+  // 设置系统状态
   setLastSurveyId(id: string) {
     if(typeof id !== 'string'){
       throw new Error("survey id must be a string")
     }
     localStorage.setItem('lastSurveyId', id)
   }
-
-
-  private load(count: number, surveyId: string) {
+  
+  // 生命周期：创建
+  create(): string {
     const all = JSON.parse(
       localStorage.getItem('questionnaires') || '{}'
     )
 
-    // 如果存了，直接从localStorage中取出来
+    const surveyId = generateUUID() // 你自己的规则
+
     if (all[surveyId]) {
-      return all[surveyId]
+      throw new Error('SurveyId collision')
     }
 
-    //没有，那就直接创建给核心问卷
+    const DEFAULT_COUNT = 1 
     const base = createQuestionnaireTemplate(
-      count,
+      DEFAULT_COUNT,
       surveyId
     )
 
@@ -124,29 +128,29 @@ export class SurveyStorageService {
     // 更新本地保存的值
     all[surveyId] = base
 
-    // 这中间可以插入其他适配操作。
-
     // 更新本地存储
     localStorage.setItem(
       'questionnaires',
       JSON.stringify(all)
     )
 
-    return base
+    return surveyId
   }
 
-  loadRawSettings(count: number, surveyId: string) {
-    const rawSettings = this.load(count, surveyId)
+  // 生命周期：打开
+  open(surveyId: string) {
+    const rawSettings = this.load(surveyId)
     if (!rawSettings) {
       throw new Error("storageService.load() failed")
     }
     return rawSettings
   }
   
-  /**
-   *
+  /**领域事件
+   * 生命周期：保存JSON编辑页
    * @param {object} storageSettings
    * @memberof SurveyStorageService
+   * 
    * 存储态的JSON核心数据的结构和属性必须是合法的
    * 而在保存之前必须对其进行校验
    * 这里说一下JSON编辑器使用的JSON核心数据和其他两个页面使用的结构和属性是不一致的
@@ -155,12 +159,13 @@ export class SurveyStorageService {
    */
   saveFromJsonEditor(surveyId:string, storageSettings: unknown) {
     validateStorageSchema(storageSettings)
-    persist(storageSettings, surveyId)
+    this.persist(storageSettings, surveyId)
   }
 
   
   /**
-   *
+   * 领域事件
+   * 生命周期：保存运行态的问卷数据（编辑器页）
    * @param {RefValue} runtimeSettings
    * 
    * @memberof SurveyStorageService
@@ -177,10 +182,52 @@ export class SurveyStorageService {
   saveRuntimeSettings(surveyId:string, runtimeSettings: unknown) {
     const rawObject = toRaw(runtimeSettings)
     const dataToSave = beforeSaveToDatabase(rawObject)
-    persist(dataToSave, surveyId)
+    this.persist(dataToSave, surveyId)
+  }
+
+  // 生命周期，删除一个已有的问卷
+  delete(surveyId: string) {
+    const all = this.getAll()
+    if (!all[surveyId]) return
+    delete all[surveyId]
+    this.saveAll(all)
+  }
+
+
+
+    // 技术实现，加载
+  private load(surveyId: string) {
+    const all = JSON.parse(
+      localStorage.getItem('questionnaires') || '{}'
+    )
+
+    const data = all[surveyId]
+
+    if (!data) {
+      throw new Error(`Survey ${surveyId} does not exist`)
+    }
+
+    return data
+  }
+
+  // 技术实现保存单用户的多个问卷
+  private persist(settings:unknown, surveyId:string){
+    const all = this.getAll() 
+    all[surveyId] = settings
+    // 保存到 localStorage
+    this.saveAll(all)  
+  }
+
+  // 获取所有的问卷
+  private getAll(){
+    return JSON.parse(localStorage.getItem('questionnaires') || '{}')
+  }
+
+  // 保存所有的问卷
+  private saveAll(all:object){
+    localStorage.setItem(`questionnaires`, JSON.stringify(all));
   }
 }
 
 
-// updateQuestionnairesTitle()
 

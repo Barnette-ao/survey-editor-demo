@@ -27,7 +27,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { SurveyStorageService} from '@/views/creator/services/SurveyStorageService'
-import { generateUUID } from '@/views/creator/config/helpers'
 import { useRouter } from 'vue-router'
 
 
@@ -52,8 +51,8 @@ function loadSurveyList() {
 }
 
 function handleCreate() {
-  const id = generateUUID()
-  router.push(`/editor/${id}`)
+  const newId = appService.create()
+  router.push(`/editor/${newId}`)
 }
 
 function handleOpen(id: string) {

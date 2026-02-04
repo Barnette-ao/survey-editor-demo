@@ -27,7 +27,7 @@ import { setLicenseKey, Serializer } from "survey-core";
 import markdownit from "markdown-it";
 
 import { afterGetInitialSettings} from "@/views/creator/config/helpers";
-import { useSurveyContext } from "@/views/creator/composables/useSurveyId";
+import { useSurveyContext } from "@/views/creator/composables/useSurveyContext";
 
 
 

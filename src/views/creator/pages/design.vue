@@ -205,8 +205,8 @@ import {
 } from "@/views/creator/config/componentAndSettingMap";
 import {
   getSettingProps,
+  afterGetInitialSettings,
 } from "@/views/creator/config/helpers";
-import { SurveyStorageService } from '@/views/creator/services/SurveyStorageService'
 import {
   handleDeletePage,
 } from "@/views/creator/config/handleElementAndPage";
@@ -216,7 +216,7 @@ import {
   handleLogicRulesUpdate,
 } from "@/views/creator/config/updateLogic";
 
-import { watch, nextTick } from "vue";
+import { watch, nextTick, provide } from "vue";
 import { debounce } from "lodash-es";
 import customEditor from "@/views/creator/components/customEditor.vue";
 import { useIncrementalLoading } from "@/views/creator/composables/useIncreamentalLoading"
@@ -232,12 +232,7 @@ import { useSettingPanelState } from '@/views/creator/composables/useSettingPane
 import { useLogicDialogState } from '@/views/creator/composables/useLogicDialogState'
 import { useOptionEditingState } from '@/views/creator/composables/useOptionEditingState'
 import { useSelectionState } from '@/views/creator/composables/useSelectionState'
-import { useSurveyContext } from "@/views/creator/composables/useSurveyId";
-
-
-import {
-	afterGetInitialSettings,
-} from "@/views/creator/config/helpers";
+import { useSurveyContext } from "@/views/creator/composables/useSurveyContext";
 
 
 const LogicSettingDialog = defineAsyncComponent({
@@ -255,8 +250,13 @@ const questionSettings = ref({});
 const instructionElementId = ref("");
 const instructionElement = ref({});
 
+// 提供运行态数据给父组件
+// TODO: 演进步骤：runningStorage的定义权转给SurveyEditor组件而不是现在的Design组件
+// 这种控制权，我认为使用composable包装questionSettings，将其上升到SurveyEditor组件
+// 中，现在很明显questionSettings成为了一个上下文变量，所以我不想选择prop传递的方式
+provide('runtimeStorageData', questionSettings)
+
 const { 
-  surveyId, 
   loadInitialRawSettings, 
   saveRuntimeSettings,
 } = useSurveyContext()
