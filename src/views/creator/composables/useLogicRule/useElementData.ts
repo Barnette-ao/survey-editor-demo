@@ -2,7 +2,62 @@ import { computed } from 'vue'
 import type { 
   QuestionSettings, QuestionElement, CanSetLogicElement 
 } from '@/views/creator/types/questionnaire.ts'
-import { htmlToPlainText } from "@/views/creator/config/helpers"
+// import { htmlToPlainText } from "@/views/creator/config/helpers"
+
+// 提前结束选项类型
+interface CompleteOption {
+  id: 'complete'
+  title: '提前结束'
+}
+
+export function useElementData(
+  props: { 
+    questionSettings: QuestionSettings; 
+    element: QuestionElement 
+  }, 
+  filterType: string[]
+) {
+  const allElements = computed<QuestionElement[]>(() => {
+    return (props.questionSettings.pages ?? []).flatMap(page => page.elements)
+      .map(element => adapteElement(element))
+  })
+
+  const allIfElement = computed<CanSetLogicElement[]>(() => {
+    return allElements.value.filter(isCanSetLogicElement)
+  })
+
+  // 创建类型守卫函数
+  const isCanSetLogicElement = (element: QuestionElement): element is CanSetLogicElement => {
+    return !filterType.includes(element.type)
+  }
+  
+  const allTargetElements = computed<(QuestionElement | CompleteOption)[]>(() => {
+    const elements = [...allElements.value]
+    elements.shift() // 移除简介页面
+    return [...elements, { id: "complete", title: "提前结束" }]
+  })
+  
+  // 是否是第一个能够设置逻辑规则题目中，第二个题目元素
+  const isFistElement = computed<boolean>(() => {
+    if (!props.element) return false
+    let elementIndex = allElements.value.findIndex(el => props.element.id === el.id)
+    return elementIndex === 1
+  })
+
+  const getCurrentElementIndex = computed<number>(() => {
+    return allIfElement.value.findIndex(item =>
+        props.element.id === item.id
+    )
+  })
+  
+  return {
+    allElements,
+    allIfElement,
+    allTargetElements,
+    isFistElement,
+    getCurrentElementIndex,
+  }
+}
 
 const adapteElement = (element: QuestionElement): QuestionElement => {
   const result: any = { ...element }
@@ -56,59 +111,47 @@ const adapteElement = (element: QuestionElement): QuestionElement => {
   return result
 }
 
-export function useElementData(
-  props: { 
-    questionSettings: QuestionSettings; 
-    element: QuestionElement 
-  }, 
-  filterType: string[]
-) {
-  const allElements = computed<QuestionElement[]>(() => {
-    return (props.questionSettings.pages ?? []).flatMap(page => page.elements)
-      .map(element => adapteElement(element))
-  })
-
-
-  // 创建类型守卫函数
-  const isCanSetLogicElement = (element: QuestionElement): element is CanSetLogicElement => {
-    return !filterType.includes(element.type)
-  }
-
-  const allIfElement = computed<CanSetLogicElement[]>(() => {
-    return allElements.value
-      .filter(isCanSetLogicElement)
-  })
-  
-  // 提前结束选项类型
-  interface CompleteOption {
-    id: 'complete'
-    title: '提前结束'
+/**
+ * 将 Tiptap 生成的 HTML 转换为纯文本
+ * 专门针对你的 Toolbar 配置：Bold、H1、红色字体、14px 字号
+ */
+export const htmlToPlainText = (html:string) => {
+  // 边界情况处理
+  if (!html || typeof html !== 'string') {
+    return ''
   }
   
-  const allTargetElements = computed<(QuestionElement | CompleteOption)[]>(() => {
-    const elements = [...allElements.value]
-    elements.shift() // 移除简介页面
-    return [...elements, { id: "complete", title: "提前结束" }]
-  })
+  // 处理 Tiptap 常见的空内容
+  const trimmedHtml = html.trim()
+  if (
+    trimmedHtml === '' ||
+    trimmedHtml === '<p></p>' ||
+    trimmedHtml === '<p><br></p>' ||
+    trimmedHtml === '<p>&nbsp;</p>'
+  ) {
+    return ''
+  }
   
-  // 是否是第一个能够设置逻辑规则题目中，第二个题目元素
-  const isFistElement = computed<boolean>(() => {
-    if (!props.element) return false
-    let elementIndex = allElements.value.findIndex(el => props.element.id === el.id)
-    return elementIndex === 1
-  })
-
-  const getCurrentElementIndex = computed<number>(() => {
-    return allIfElement.value.findIndex(item =>
-        props.element.id === item.id
-    )
-  })
-  
-  return {
-    allElements,
-    allIfElement,
-    allTargetElements,
-    isFistElement,
-    getCurrentElementIndex,
+  try {
+    // 创建 DOMParser 实例
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(html, 'text/html')
+    
+    // 提取纯文本内容（自动忽略所有 HTML 标签和样式）
+    let text = doc.body.textContent || doc.body.innerText || ''
+    
+    // 清理空白字符
+    text = text
+      .replace(/\s+/g, ' ') // 将多个连续空白字符替换为单个空格
+      .trim()
+    
+    return text
+  } catch (error) {
+    console.warn('HTML to plain text conversion failed:', error)
+    // 兜底方案：直接移除所有 HTML 标签
+    return html
+      .replace(/<[^>]*>/g, '') // 移除所有 HTML 标签
+      .replace(/\s+/g, ' ')     // 清理空白字符
+      .trim()
   }
 }

@@ -376,7 +376,7 @@ const handleStructrueChange = (isStructrueChanged: boolean): void => {
 ```typescript
 // 统一处理元素更新
 const handleElementUpdate = (key: string, value: any): void => {
-  const { pageIndex, elementIndex } = getPageAndElementIndexOfSelectElement(
+  const { pageIndex, elementIndex } = getSelectedElementPosition(
     questionSettings,
     currentQuestionId.value
   )
@@ -435,7 +435,7 @@ const handleQuestionTypeUpdate = (newType: string): void => {
     currentElement.value!
   )
 
-  const { elementIndex, pageIndex } = getPageAndElementIndexOfSelectElement(
+  const { elementIndex, pageIndex } = getSelectedElementPosition(
     questionSettings,
     currentQuestionId.value
   )
@@ -544,7 +544,7 @@ export declare function addPage(
   isCurrentPage: boolean
 ): void
 
-export declare function getPageAndElementIndexOfSelectElement(
+export declare function getSelectedElementPosition(
   settings: QuestionSettings,
   elementId: string
 ): { pageIndex?: number; elementIndex?: number }

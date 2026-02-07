@@ -1,6 +1,6 @@
 import type { Ref } from "vue"
 import {
-  getPageAndElementIndexOfSelectElement,
+  getSelectedElementPosition,
   switchElementByType,
   removeLogicRulesOfDeletedRule
 } from "@/views/creator/config/handleElementAndPage"
@@ -25,7 +25,7 @@ export function useElementTypeSwitch(
     ) as QuestionElement
 
     const { pageIndex, elementIndex } =
-      getPageAndElementIndexOfSelectElement(
+      getSelectedElementPosition(
         questionSettings,
         currentQuestionId.value
       )

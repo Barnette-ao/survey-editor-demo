@@ -22,7 +22,6 @@
 import SurveySchemaErrorPanel from '@/views/creator/components/SurveySchemaErrorPanel.vue'
 import customerJsonEditor from '@/views/creator/components/customerJsonEditor.vue'
 
-import { SurveyStorageService} from '@/views/creator/services/SurveyStorageService'
 import { useSurveyValidation } from '@/views/creator/composables/useSurveyValidation'
 import { useSurveyContext } from "@/views/creator/composables/useSurveyContext";
 
@@ -36,14 +35,13 @@ const editorMounted = (editor: monaco.editor.IStandaloneCodeEditor) => {
   //  console.log('editor实例加载完成', editor)
 }
 
-const storageService = new SurveyStorageService()
 const {  
-  loadInitialRawSettings,
-  saveFromJsonEditor
+  loadStorageState,
+  saveFromJsonEditorNow
 } = useSurveyContext()
 
 onMounted(() => {   
-  surveyJSON.value = loadInitialRawSettings()
+  surveyJSON.value = loadStorageState() as object
   jsonString.value = JSON.stringify(surveyJSON.value, null, 2)
 })
 
@@ -57,7 +55,7 @@ function onJsonChange(newValue: string) {
         return
     }
 
-    saveFromJsonEditor(result.data)
+    saveFromJsonEditorNow(result.data)
   } catch {
     // JSON 错误时不更新 surveyJson
   }

@@ -37,58 +37,17 @@ export const spliteOffOnePageIntoPages = (questionSettings, elementIndex, pageIn
 	const newPgaeElements = questionSettings.value.pages[pageIndex].elements.splice(
 		elementIndex + 1
 	);
-
 	questionSettings.value.pages.splice(pageIndex + 1, 0, {
 		name: `page${pageIndex + 1}`,
 		elements: newPgaeElements,
 	});
 }
 
-// 如果没有选中任何元素，新元素插入问卷末尾，反之，则插入选中元素的页面末尾
-export const addQuestionElement = (questionSettings, elemntType, selectedQuestionId) => {
-	const newElement = createNewElement(elemntType, questionSettings);
 
-	const { elementIndex, pageIndex } =
-		getPageAndElementIndexOfSelectElement(questionSettings, selectedQuestionId);
 
-	if (elementIndex === undefined) {
-		questionSettings.value.pages[questionSettings.value.pages.length - 1].elements.push(newElement);
-	} else {
-		questionSettings.value.pages[pageIndex].elements.splice(elementIndex + 1, 0, newElement);
-	}
 
-	// 修改添加新题目之后，题目的序号序列不对的问题
-	// 更新题目的序号序列
-	formattedNumber(questionSettings.value)
 
-	// 滚动到新添加的题目
-	// 注意，这里的滚动是在页面中滚动，而不是在整个页面中滚动
-	// 上述代码执行之后，DOM不会立即更新，所以这是一个异步任务，在下一次事件循环之后再执行
-	nextTick(() => {
-		const newElementDom = document.getElementById(newElement.id);
-		if (newElementDom) {
-			newElementDom.scrollIntoView({ behavior: 'smooth', block: 'center' });
-		}
-	});
 
-	return newElement.id
-};
-
-export const getPageAndElementIndexOfSelectElement = (questionSettings, selectedQuestionId) => {
-	let elementIndex, pageIndex;
-	const page = questionSettings.value.pages.find((page) =>
-		page.elements.some((el) => el && el.id === selectedQuestionId)
-	);
-
-	if (page) {
-		pageIndex = questionSettings.value.pages.indexOf(page);
-		elementIndex = page.elements.findIndex(
-			(el) => el && el.id === selectedQuestionId
-		);
-	}
-
-	return { elementIndex, pageIndex };
-};
 
 export const addPage = (questionSettings, selectedQuestionId, pageIndex, isPageSelected) => {
 	// 未选中任何题目和页面，在页数组最后添加一个空页
@@ -137,7 +96,7 @@ const isLastElementOfAnyPageSelected = (questionSettings, selectedQuestionId) =>
 };
 
 const addEmptyPageAfterPage = (questionSettings, selectedQuestionId) => {
-	const { pageIndex } = getPageAndElementIndexOfSelectElement(questionSettings, selectedQuestionId);
+	const { pageIndex } = getSelectedElementPosition(questionSettings, selectedQuestionId);
 	questionSettings.value.pages.splice(pageIndex + 1, 0, {
 		name: `page${pageIndex + 1}`,
 		elements: [],
@@ -145,7 +104,7 @@ const addEmptyPageAfterPage = (questionSettings, selectedQuestionId) => {
 };
 
 const addPageBySpliteOffOnePage = (questionSettings, selectedQuestionId) => {
-	const { elementIndex, pageIndex } = getPageAndElementIndexOfSelectElement(questionSettings, selectedQuestionId);
+	const { elementIndex, pageIndex } = getSelectedElementPosition(questionSettings, selectedQuestionId);
 
 	if (pageIndex !== undefined) {
 		spliteOffOnePageIntoPages(questionSettings, elementIndex, pageIndex);
@@ -187,46 +146,8 @@ export const removeLogicRulesOfDeletedRule = (questionSettings, elementId) => {
 	})
 }
 
-// 为新元素的name属性赋值
-// name会一直递增，是对所有的非html和panel的元素进行计数而已
-// 会执行插入，删除，复制等操作，会改变整个题目元素的长度，
-// 只需要统计所有的非html和panel的元素的name属性，然后取最大值加1即可
-export const getMaxNumOfName = (questionSettings, element) => {
-	// 不为html和panel计数，这两种题型都没有name属性
-	if (element.type === "html" || element.type === "panel") return;
-
-	const numOfNames = (questionSettings.value.pages ?? [])
-		.flatMap(page => page.elements)
-		.filter(element => element.type !== "html" && element.type !== "panel")
-		.map(element => parseInt(element.name.substring(1)));
-
-	// 用Math.max(...numOfName)当数组有几万个元素时会报错。用reduce适应任何长度的元素
-	return numOfNames.reduce((max, cur) => Math.max(max, cur), 0);
-}
 
 
-
-export const createNewElement = (type, questionSettings) => {
-	let elementTemplate
-
-	if(['ratinglabel','ratingsmileys','ratingstars'].includes(type)){
-		const rateType = type.replace(/^rating/, '');
-
-		elementTemplate = questionTemplates
-			.filter(element => element.type === "rating")
-			.find(element => element.rateType === rateType)
-	}else{
-		elementTemplate = questionTemplates.find(element => element.type === type);
-	}
-	
-	const number = getMaxNumOfName(questionSettings, elementTemplate)
-
-	return {
-		id: uuidv4(),
-		name: `Q${number + 1}`,
-		...elementTemplate
-	}
-}
 
 
 export const switchElementByType = (newType, questionSettings, switchedElement) => {

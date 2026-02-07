@@ -205,7 +205,6 @@ import {
 } from "@/views/creator/config/componentAndSettingMap";
 import {
   getSettingProps,
-  afterGetInitialSettings,
 } from "@/views/creator/config/helpers";
 import {
   handleDeletePage,
@@ -257,7 +256,7 @@ const instructionElement = ref({});
 provide('runtimeStorageData', questionSettings)
 
 const { 
-  loadInitialRawSettings, 
+  loadRunningState, 
   saveRuntimeSettings,
 } = useSurveyContext()
 
@@ -285,8 +284,7 @@ const incrementalLoadingInstance = ref({})
 onMounted(async () => {
   // let defaultQuestionSettings = await loadSettingsFromDatabase();
   // 获取问卷 ID（从 URL 或使用默认值）
-  const rawSettings = loadInitialRawSettings()
-  questionSettings.value = afterGetInitialSettings(rawSettings)
+  questionSettings.value = loadRunningState()
   console.log("questionSettings",questionSettings.value)
   
   instructionElement.value = questionSettings.value.pages[0].elements[0];

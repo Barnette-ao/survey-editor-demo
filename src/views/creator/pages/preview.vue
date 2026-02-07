@@ -86,7 +86,6 @@ const qid = urlParams.get("id");
 let creator = new SurveyCreatorModel(createOptions);
 
 function upfileSurvey(_, options) {
-  console.log("_", options);
   const formData = new FormData();
   //console.log("Files uploaded:", options.files);
 
@@ -94,25 +93,6 @@ function upfileSurvey(_, options) {
   options.files.forEach(function (file) {
     formData.append(file.name, file);
   });
-
-  // 模拟文件上传到服务器
-  // UploadImages(formData).then((resd) => {
-  //   const { code, data, msg } = resd;
-  //   if (code == 200) {
-  //     options.callback(
-  //       "success",
-  //       options.files.map((file) => {
-  //         return {
-  //           file: file,
-  //           content: data[0],
-  //         };
-  //       })
-  //     );
-  //   } else {
-  //     // 处理上传失败的情况
-  //     console.error(`上传失败，原因:${msg}!`);
-  //   }
-  // });
 }
 
 creator.onSurveyInstanceCreated.add((_, options) => {
@@ -228,9 +208,8 @@ creator.survey.autoAdvanceAllowComplete = false;
 
 const questionSettings = ref({})
 
-const { loadInitialRawSettings } = useSurveyContext() 
-const rawSettings = loadInitialRawSettings()
-questionSettings.value = afterGetInitialSettings(rawSettings)
+const { loadRunningState } = useSurveyContext() 
+questionSettings.value = loadRunningState()
 
 questionSettings.value.locale = "zh-cn";
 // 使用 for...of 而不是 forEach，因为在回调函数中 

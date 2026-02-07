@@ -5,7 +5,7 @@ import type {
 } from '@/views/creator/types/questionnaire'
 
 import {
-  getPageAndElementIndexOfSelectElement,
+  getSelectedElementPosition,
 } from '@/views/creator/config/handleElementAndPage'
 import { generateUUID } from '@/views/creator/config/helpers'
 
@@ -21,7 +21,7 @@ export function useElementMutation(
     value: QuestionElement[K]
   ) => {
     const { pageIndex, elementIndex } =
-      getPageAndElementIndexOfSelectElement(
+      getSelectedElementPosition(
         questionSettings,
         currentQuestionId.value
       )

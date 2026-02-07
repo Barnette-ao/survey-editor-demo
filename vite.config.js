@@ -6,7 +6,6 @@ import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers' 
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { resolvePlugin } from "./src/views/creator/config/helpers";
 import rawMonacoEditorPlugin from 'vite-plugin-monaco-editor'
 
 const monacoEditorPlugin = resolvePlugin(rawMonacoEditorPlugin)
@@ -88,3 +87,9 @@ export default defineConfig(({ command }) => {
     }
   }
 })
+
+function resolvePlugin(mod) {
+  if (typeof mod === 'function') return mod
+  if (mod && typeof mod.default === 'function') return mod.default
+  throw new Error('Invalid plugin export')
+}
