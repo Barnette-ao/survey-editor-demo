@@ -1,8 +1,6 @@
-import { getQuestionnaireById, updateQuestionnaire } from "@/api/questionnaire.js";
 
-// 校验JSON编辑页保存的对象是否有必要的属性
 // 以及它们的属性的类型是否合格
-export function validateStorageSchema(data) {
+export function validateStorageSchema(data: any): void {
   // 1️⃣ 顶层必须是对象
   if (typeof data !== 'object' || data === null || Array.isArray(data)) {
     throw new Error('问卷数据必须是一个对象')
@@ -13,7 +11,7 @@ export function validateStorageSchema(data) {
     throw new Error('问卷必须包含 pages 数组')
   }
 
-  data.pages.forEach((page, pageIndex) => {
+  data.pages.forEach((page: any, pageIndex: number) => {
     // 3️⃣ page 必须是对象
     if (typeof page !== 'object' || page === null) {
       throw new Error(`pages[${pageIndex}] 必须是对象`)
@@ -29,7 +27,7 @@ export function validateStorageSchema(data) {
       throw new Error(`pages[${pageIndex}].elements 必须是数组`)
     }
 
-    page.elements.forEach((el, elIndex) => {
+    page.elements.forEach((el: any, elIndex: number) => {
       // 6️⃣ element 必须是对象
       if (typeof el !== 'object' || el === null) {
         throw new Error(
@@ -65,7 +63,3 @@ export function validateStorageSchema(data) {
     })
   })
 }
-
-
-
-

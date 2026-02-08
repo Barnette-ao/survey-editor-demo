@@ -186,7 +186,6 @@ export const questionTemplates = [
 	{
 		"type": 'imagepicker',
 		"isRequired": true,
-		"isRequired": true,
 		"title": "请选择以下图片",
 		"choices": [],
 		"imageFit": "cover"

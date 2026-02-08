@@ -1,11 +1,6 @@
 import { cloneDeep } from 'lodash-es'
 
 /**
- * 定义一个函数，用于将多个函数组合成一个函数
- */
-const pipe = (...fns: Function[]) => (x: any) => fns.reduce((result, f) => f(result), x)
-
-/**
  * 重置页面名称
  */
 const resetPageName = (page: any, index: number) => {

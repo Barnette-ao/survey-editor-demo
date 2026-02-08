@@ -1,6 +1,6 @@
 // 定义题型分组
 export const CHOICE_TYPES = ['radiogroup', 'checkbox', 'dropdown', 'imagepicker']
-import { isRating } from "@/views/creator/config/helpers";
+
 
 // 获取不同题目类型对应的条件选择状态
 export const getConditionStatesByType = (element) => {
@@ -22,7 +22,8 @@ export const getConditionStatesByType = (element) => {
 		];
 	}
 	// 打分类题型：量表，打分，评价
-	if (element.type === 'rating' || isRating(element.type)) {
+	if (element.type === 'rating' 
+	    || ["ratinglabel", "ratingstars", "ratingsmileys"].includes(element.type)) {
 		// 量表
 		return [
 			{ label: "等于", value: "equal" },

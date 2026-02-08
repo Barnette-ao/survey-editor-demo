@@ -176,7 +176,7 @@
               @setting-update="(key, value) => handleSettingUpdate(key, value)"
               @update:questionType="switchQuestionType"
               @setLogic="openLogicDialog"
-              v-bind="getSettingProps(currentElement)"
+              :showNumberItem="currentElement.hideNumber !== undefined"
             />
             <div v-else>未选中任何题目</div>
           </div>
@@ -202,10 +202,7 @@ import page from "@/views/creator/components/page.vue";
 
 import {
   settingComponentMap,
-} from "@/views/creator/config/componentAndSettingMap";
-import {
-  getSettingProps,
-} from "@/views/creator/config/helpers";
+} from "@/views/creator/config/registry";
 import {
   handleDeletePage,
 } from "@/views/creator/config/handleElementAndPage";

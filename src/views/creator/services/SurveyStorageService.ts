@@ -1,6 +1,6 @@
 import {
     generateUUID
-} from "@/views/creator/config/helpers";
+} from "@/views/creator/config/shared/utils";
 import {
     validateStorageSchema,
 } from "@/views/creator/config";
