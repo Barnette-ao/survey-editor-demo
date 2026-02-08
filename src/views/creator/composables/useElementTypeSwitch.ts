@@ -1,13 +1,8 @@
 import type { Ref } from "vue"
 import {
-  removeLogicRulesOfDeletedRule
-} from "@/views/creator/config/handleElementAndPage"
-import {
-  getSelectedElementPosition,
-} from "@/views/creator/config/element/research"
-import {
   getSwitchTargetElement,
-} from "@/views/creator/config/element/getSwitchTargetElement"
+} from "@/views/creator/config/element/create"
+import { replaceElement } from "@/views/creator/config/element/update"
 import type { 
     QuestionElement, 
     QuestionSettings 
@@ -28,21 +23,7 @@ export function useElementTypeSwitch(
       currentElement.value
     ) as QuestionElement
 
-    const { pageIndex, elementIndex } =
-      getSelectedElementPosition(
-        questionSettings,
-        currentQuestionId.value
-      )
-
-    if (pageIndex === undefined || elementIndex === undefined) return
-    
-    removeLogicRulesOfDeletedRule(questionSettings, currentQuestionId.value)
-    
-    questionSettings.value.pages[pageIndex].elements.splice(
-      elementIndex,
-      1,
-      newElement
-    )
+    replaceElement(questionSettings.value, currentQuestionId.value, newElement)
     // 更新当前选中的题目ID
     currentQuestionId.value = newElement.id
   }

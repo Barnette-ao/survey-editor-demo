@@ -1,8 +1,7 @@
 import type { Ref } from 'vue'
 import type { QuestionSettings } from '@/views/creator/types/questionnaire'
-
+import { addQuestionElement } from "@/views/creator/config/element/create"
 import {
-  handleCopyElement,
   deleteQuestion
 } from '@/views/creator/config/handleElementAndPage'
 import { formattedNumber } from '@/views/creator/config/helpers'
@@ -15,7 +14,11 @@ export function useElementCommands(
   settingType: Ref<SettingType>
 ) {
   const copyElement = (elementId: string, elementType: string) => {
-    handleCopyElement(elementId, questionSettings, elementType)
+    addQuestionElement(
+      questionSettings.value,
+      elementType,
+      elementId
+    )
     formattedNumber(questionSettings.value)
     ElMessage.success('复制成功')
   }

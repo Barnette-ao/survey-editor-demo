@@ -110,12 +110,6 @@ const addPageBySpliteOffOnePage = (questionSettings, selectedQuestionId) => {
 	}
 };
 
-import { addQuestionElement } from "@/views/creator/config/element/addQuestionElement"
-
-// 未验证，复制，未测试
-export const handleCopyElement = (elementId, questionSettings, elementType) => {
-	addQuestionElement(questionSettings, elementType, elementId)
-}
 
 
 

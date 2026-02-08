@@ -23,16 +23,13 @@ export const addQuestionElement = (state: any, elemntType: string, selectedQuest
     nextTick(() => {
         scrollToNewElement(newElement)
     });
-    return {
-        id: newElement.id,
-        cloned
-    } 
+    return { id: newElement.id, cloned } 
 };
 
 export const getSwitchTargetElement = (targetType: string, questionSettings: any, sourceElement: any) => {
 	if (!sourceElement) return;
-	
-    let targetElement: any = createNewElement(targetType, questionSettings);
+	const cloned = structuredClone(questionSettings) 
+    let targetElement: any = createNewElement(targetType, cloned);
 	const { type: sourceType } = sourceElement;
     // 同步切换元素和被切换的元素之间相同属性的值 
 	const omitKeys = setOmitKeys(sourceType,targetType)

@@ -12,7 +12,7 @@ export const getSelectedElementPosition = (questionSettings: any, selectedQuesti
     return { elementIndex, pageIndex };
 };
 
-export const getElement = (elementId:string, questionSettings:any) => {
+export const findElementById = (elementId:string, questionSettings:any) => {
     const { elementIndex, pageIndex } = getSelectedElementPosition(questionSettings, elementId);
     if (elementIndex !== undefined && pageIndex !== undefined) {
         return questionSettings.pages[pageIndex].elements[elementIndex];

@@ -3,7 +3,7 @@ import {
 } from '@/views/creator/config/logicRule/research'
 import { LogicRule } from '../../types/questionnaire';
 import { isEqual, } from "@/views/creator/config/helpers";
-import { getElement } from '@/views/creator/config/element/research'
+import { findElementById } from '@/views/creator/config/element/research'
 import { getLogicExpression } from '@/views/creator/config/logicRule/expression'
 
 export const deleteLogicRulesById = (questionSettings:any, elementId:string) => {
@@ -50,7 +50,7 @@ const createDeletedTrigger = (removedRule: LogicRule, expression: string | undef
             "expression": expression,
         }
     } else {
-        const thenElement = getElement(removedRule.thenCondition.targetElementId, questionSettings)
+        const thenElement = findElementById(removedRule.thenCondition.targetElementId, questionSettings)
         return {
             "type": "skip",
             "expression": expression,
@@ -69,7 +69,7 @@ const deleteTriggerItem = (deletedTrigger: any, questionSettings: any) => {
 }
 
 const deleteVisibleIf = (removedRule: LogicRule, questionSettings: any) => {
-    const element = getElement(removedRule.thenCondition.targetElementId, questionSettings)
+    const element = findElementById(removedRule.thenCondition.targetElementId, questionSettings)
     if (element) {
         // 不能用解构赋值，只能用delete删除visibleIf属性
         delete element.visibleIf

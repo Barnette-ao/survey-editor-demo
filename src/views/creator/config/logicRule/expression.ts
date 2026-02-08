@@ -1,4 +1,4 @@
-import { getElement } from '@/views/creator/config/element/research'
+import { findElementById } from '@/views/creator/config/element/research'
 
 /**
  * 获取逻辑表达式
@@ -12,7 +12,7 @@ export const getLogicExpression = (ifConditions: any[], questionSettings: any): 
 	// 1.如果条件分句只有一个的情况
 	// 2.如果条件分句有多个的情况,每一个逻辑分句决定一个expression，用逻辑连接符号串联
 	for (let i = 0; i < ifConditions.length; i++) {
-		let ifElement = getElement(ifConditions[i].elementId, questionSettings)
+		let ifElement = findElementById(ifConditions[i].elementId, questionSettings)
 		if (!ifElement) return
 		setExpression(ifElement, ifConditions[i], expressionList)
 	}

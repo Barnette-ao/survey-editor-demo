@@ -14,6 +14,8 @@
 import {
 	isEqual,
 } from "@/views/creator/config/helpers";
+import { getLogicExpression, setExpression, getChoiceValue } from "@/views/creator/config/logicRule/expression";
+import { findElementById } from "@/views/creator/config/element/research";
 
 /**
  * 处理逻辑规则的更新
@@ -108,67 +110,6 @@ export const setLogicRule = (logicRule, questionSettings) => {
 	setThenCondition(thenCondition, expression, questionSettings)
 }
 
-export const getLogicExpression = (ifConditions, questionSettings) => {
-	let expressionList = []
-	// 解析如果分句，构造expression
-	// 1.如果条件分句只有一个的情况
-	// 2.如果条件分句有多个的情况,每一个逻辑分句决定一个expression，用逻辑连接符号串联
-	for (let i = 0; i < ifConditions.length; i++) {
-		// 获取第一个逻辑分句的题目
-		let ifElement = getElement(ifConditions[i].elementId, questionSettings)
-		if (!ifElement) return
-
-		// 根据如果从句的选择状态，设置表达式的值
-		setExpression(ifElement, ifConditions[i], expressionList)
-	}
-
-	// 获取写到then条件里的表达式
-	let expression = (expressionList.length > 1) ?
-		expressionList.join(' ' + ifConditions[1].connector + ' ')
-		: expressionList[0];
-
-	return expression
-}
-
-// 设置逻辑规则的表达式
-// expressionList是一个数组，用来存放表达式
-export const setExpression = (ifElement, ifCondition, expressionList) => {
-	const operatorMap = {
-		'equal': '=',
-		'lessThan': '<',
-		'greaterThan': '>',
-		'greaterOrEqual': '>=',
-		'lesserOrEqual': '<='
-	};
-	let expression;
-	// 如果是选中或者未选中的单选，多选，下拉，选图片
-	// 多选题的条件表达式和单选，多选，下拉，选图片的条件表达式不同，
-	// 多选的choiceIndex是数组，单选，多选，下拉，选图片的choiceIndex是数字
-	// 多选题的条件表达式是{element1.name} = 或者 != ['choice1.value', 'choice2.value']
-	// 单选，多选，下拉，选图片的条件表达式是{element1.name} = 或者 != 'choice1.value'
-	if (['selected', 'notBeSelected'].includes(ifCondition.state)) {
-		const operator = ifCondition.state === 'selected' ? '=' : '!='
-		let choiceValue = getChoiceValue(ifElement, ifCondition.choiceIndex)
-		if (Array.isArray(ifCondition.choiceIndex)) {
-			expression = `{${ifElement.name}} ${operator} ['${choiceValue.join("', '")}']`
-		} else {
-			expression = `{${ifElement.name}} ${operator} '${choiceValue}'`
-		}
-	}
-	// 如果是已答的情况
-	else if (ifCondition.state === 'answered') {
-		expression = `{${ifElement.name}} notempty`
-	}
-	// 如果是等于，小于，大于，大于等于，小于等于的情况	
-	else {
-		if (operatorMap.hasOwnProperty(ifCondition.state)) {
-			expression = `{${ifElement.name} } ${operatorMap[ifCondition.state]} ${ifCondition.score}`
-		}
-	}
-
-	expressionList.push(expression)
-}
-
 // 处理跳转逻辑则条件
 const handleJumpCondition = (targetElementId, expression, questionSettings, thenElement) => {
 	if (!questionSettings.value.triggers) {
@@ -196,19 +137,13 @@ const handleShowCondition = (thenElement, expression) => {
 
 export const setThenCondition = (thenCondition, expression, questionSettings) => {
 	const { targetElementId, action } = thenCondition;
-
-	// 获取目标元素（除了提前结束的情况）
 	const thenElement = targetElementId !== 'complete'
-		? getElement(targetElementId, questionSettings)
+		? findElementById(targetElementId, questionSettings)
 		: null;
-
-	// 如果需要目标元素但未找到，则返回
 	if (targetElementId !== 'complete' && !thenElement) {
 		console.warn(`目标元素 ${targetElementId} 不存在`);
 		return;
 	}
-
-	// 处理不同的操作类型
 	switch (action) {
 		case 'jump':
 			handleJumpCondition(targetElementId, expression, questionSettings, thenElement);
@@ -218,101 +153,6 @@ export const setThenCondition = (thenCondition, expression, questionSettings) =>
 			break;
 		default:
 			console.warn(`不支持的操作类型: ${action}`);
-	}
-}
-
-const getElement = (elementId, questionSettings) => {
-	let element;
-	for (const page of questionSettings.value.pages) {
-		const index = page.elements.findIndex(el => el.id === elementId);
-		if (index !== -1) {
-			element = page.elements[index];
-			break; // 找到后立即跳出循环
-		}
-	}
-	return element
-}
-
-export const getChoiceValue = (element, choiceIndex) => {
-	if (!element) return
-	// 如果是多选，checkIndex为数组
-	if (element.type === 'checkbox') {
-		let choices = element.choices
-			.filter((choice, index) => choiceIndex.includes(index))
-			.map(choice => choice.value);
-		return choices;
-	}
-	// 如果是单选或者多选题或者选图片，读取element.choices[choiceIndex].value
-	// 这里有个问题需要确定如果题型是选图片， "{element1.name} =/!= choice.value"这样是否合法
-	else if (['radiogroup', 'imagepicker'].includes(element.type)) {
-		return element.choices[choiceIndex].value;
-	}
-	// 如果是下拉题型
-	else return element.choices[choiceIndex]
-}
-
-// 删除已经设置过的逻辑规则questionSettings中的逻辑规则
-// 1.从questionSettings.logicRules中删除
-// 2.从questionSettings中删除对应的设置项
-export const removeLogicRule = (removedRule, questionSettings) => {
-	// 如果removedRule为undefined或者null,则中止执行函数
-	if (!removedRule) return;
-
-	// 将删除的逻辑规则从questionSettings.logicRules中删除
-	if (questionSettings.value.logicRules.length !== 0) {
-		const removedRuleIndex = questionSettings.value.logicRules.findIndex(rule =>
-			isEqual(rule, removedRule)
-		);
-
-		if (removedRuleIndex !== -1) {
-			questionSettings.value.logicRules.splice(removedRuleIndex, 1)
-		}
-	}
-
-	// 从questionSettings中删除对应的设置项
-	const expression = getLogicExpression(removedRule.ifConditions, questionSettings)
-	console.log("removed expression", expression)
-
-	// 如果是提前结束，对应的设置项和一般的跳转逻辑不同
-	let deletedTrigger;
-	switch (removedRule.thenCondition.action) {
-		// 跳转
-		case 'jump':
-			if (removedRule.thenCondition.targetElementId === 'complete') {
-				deletedTrigger = {
-					"type": "complete",
-					"expression": expression,
-				}
-			} else {
-				const thenElement = getElement(removedRule.thenCondition.targetElementId, questionSettings)
-				deletedTrigger = {
-					"type": "skip",
-					"expression": expression,
-					"gotoName": `${thenElement.name}`
-				}
-			}
-			const deletedTriggerIndex = questionSettings.value.triggers.findIndex(trigger =>
-				isEqual(trigger, deletedTrigger)
-			);
-
-			if (deletedTriggerIndex !== -1) {
-				questionSettings.value.triggers.splice(deletedTriggerIndex, 1)
-			}
-
-			break;
-		// 显示
-		case 'show':
-			for (const page of questionSettings.value.pages) {
-				const element = page.elements.find(
-					el => el.id === removedRule.thenCondition.targetElementId);
-				if (element) {
-					// 需要直接从questionSettings.pages[i].elements[j]中删除visibleIf，
-					// 不能用解构赋值，只能用delete删除visibleIf属性
-					delete element.visibleIf
-					break; // 找到后立即跳出循环
-				}
-			}
-			break;
 	}
 }
 
@@ -332,20 +172,3 @@ export const getLogicRulesOfElement = (rules, elementId) => {
 	)
 }
 
-export const findLogicRulesByElementId = (rules, elementId) => {
-  return rules.filter(rule => {
-    // 跳转逻辑规则
-    if (rule.thenCondition.action === "jump") {
-      // 触发条件包含被删除题目 OR 目标题目是被删除题目
-      return rule.ifConditions.some(ifCondition => ifCondition.elementId === elementId) ||
-             rule.thenCondition.targetElementId === elementId;
-    }
-    // 显示逻辑规则  
-    else if (['show', 'hide'].includes(rule.thenCondition.action)) {
-      // 触发条件包含被删除题目 OR 目标题目是被删除题目
-      return rule.ifConditions.some(ifCondition => ifCondition.elementId === elementId) ||
-             rule.thenCondition.targetElementId === elementId;
-    }
-    return false;
-  });
-}
