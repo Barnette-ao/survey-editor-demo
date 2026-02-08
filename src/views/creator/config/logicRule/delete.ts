@@ -4,6 +4,7 @@ import {
 import { LogicRule } from '../../types/questionnaire';
 import { isEqual, } from "@/views/creator/config/helpers";
 import { getElement } from '@/views/creator/config/element/research'
+import { getLogicExpression } from '@/views/creator/config/logicRule/expression'
 
 export const deleteLogicRulesById = (questionSettings:any, elementId:string) => {
 	// 查找删除该题目关联的逻辑规则
@@ -19,61 +20,58 @@ export const deleteLogicRulesById = (questionSettings:any, elementId:string) => 
 export const removeLogicRule = (removedRule:any, questionSettings:any) => {
     if (!removedRule || !questionSettings.logicRules.length ) return;
     deleteRuleFromRules(questionSettings.logicRules, removedRule)
-
+    deleteExpression(removedRule,questionSettings)
 }
 
 const deleteRuleFromRules = (logicRules:LogicRule[],removedRule:LogicRule) => {
     const removedRuleIndex = logicRules.findIndex(rule =>
         isEqual(rule, removedRule)
     );
-
-    if (removedRuleIndex !== -1) {
-        logicRules.splice(removedRuleIndex, 1)
-    }
+    if (removedRuleIndex !== -1) { logicRules.splice(removedRuleIndex, 1)}
 }
 
 const deleteExpression = (removedRule:LogicRule,questionSettings:any) => {
-    // 从questionSettings中删除对应的设置项
     const expression = getLogicExpression(removedRule.ifConditions, questionSettings)
-
-    // 如果是提前结束，对应的设置项和一般的跳转逻辑不同
-    let deletedTrigger:any;
     switch (removedRule.thenCondition.action) {
-        // 跳转
         case 'jump':
-            if (removedRule.thenCondition.targetElementId === 'complete') {
-                deletedTrigger = {
-                    "type": "complete",
-                    "expression": expression,
-                }
-            } else {
-                const thenElement = getElement(removedRule.thenCondition.targetElementId, questionSettings)
-                deletedTrigger = {
-                    "type": "skip",
-                    "expression": expression,
-                    "gotoName": `${thenElement.name}`
-                }
-            }
-            const deletedTriggerIndex = questionSettings.value.triggers.findIndex(trigger =>
-                isEqual(trigger, deletedTrigger)
-            );
-
-            if (deletedTriggerIndex !== -1) {
-                questionSettings.value.triggers.splice(deletedTriggerIndex, 1)
-            }
-
+            const deletedTrigger = createDeletedTrigger(removedRule, expression, questionSettings)
+            deleteTriggerItem(deletedTrigger, questionSettings)
             break;
-        // 显示
         case 'show':
-            for (const page of questionSettings.value.pages) {
-                const element = page.elements.find(
-                    el => el.id === removedRule.thenCondition.targetElementId);
-                if (element) {
-                    // 不能用解构赋值，只能用delete删除visibleIf属性
-                    delete element.visibleIf
-                    break; // 找到后立即跳出循环
-                }
-            }
+            deleteVisibleIf(removedRule, questionSettings)
             break;
     }
+}
+
+const createDeletedTrigger = (removedRule: LogicRule, expression: string | undefined, questionSettings: any) => {
+    if (removedRule.thenCondition.targetElementId === 'complete') {
+        return {
+            "type": "complete",
+            "expression": expression,
+        }
+    } else {
+        const thenElement = getElement(removedRule.thenCondition.targetElementId, questionSettings)
+        return {
+            "type": "skip",
+            "expression": expression,
+            "gotoName": `${thenElement.name}`
+        }
+    }
+}
+
+const deleteTriggerItem = (deletedTrigger: any, questionSettings: any) => {
+    const deletedTriggerIndex = questionSettings.value.triggers.findIndex((trigger: any) =>
+        isEqual(trigger, deletedTrigger)
+    );
+    if (deletedTriggerIndex !== -1) {
+        questionSettings.value.triggers.splice(deletedTriggerIndex, 1)
+    }
+}
+
+const deleteVisibleIf = (removedRule: LogicRule, questionSettings: any) => {
+    const element = getElement(removedRule.thenCondition.targetElementId, questionSettings)
+    if (element) {
+        // 不能用解构赋值，只能用delete删除visibleIf属性
+        delete element.visibleIf
+    }    
 } 
