@@ -332,7 +332,7 @@ export const getLogicRulesOfElement = (rules, elementId) => {
 	)
 }
 
-export const getLogicRulesOfDeletedElement = (rules, elementId) => {
+export const findLogicRulesByElementId = (rules, elementId) => {
   return rules.filter(rule => {
     // 跳转逻辑规则
     if (rule.thenCondition.action === "jump") {

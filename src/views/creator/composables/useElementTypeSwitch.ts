@@ -1,9 +1,13 @@
 import type { Ref } from "vue"
 import {
-  getSelectedElementPosition,
-  switchElementByType,
   removeLogicRulesOfDeletedRule
 } from "@/views/creator/config/handleElementAndPage"
+import {
+  getSelectedElementPosition,
+} from "@/views/creator/config/element/research"
+import {
+  getSwitchTargetElement,
+} from "@/views/creator/config/element/getSwitchTargetElement"
 import type { 
     QuestionElement, 
     QuestionSettings 
@@ -18,7 +22,7 @@ export function useElementTypeSwitch(
   const switchQuestionType = (newType: QuestionElement["type"]) => {
     if (!currentElement.value) return
     // 题目类型切换逻辑
-    const newElement = switchElementByType(
+    const newElement = getSwitchTargetElement(
       newType,
       questionSettings,
       currentElement.value
@@ -31,9 +35,9 @@ export function useElementTypeSwitch(
       )
 
     if (pageIndex === undefined || elementIndex === undefined) return
-    // 删除与被切换的题目元素关联的所有逻辑规则
+    
     removeLogicRulesOfDeletedRule(questionSettings, currentQuestionId.value)
-    // 替换元素并触发响应式更新
+    
     questionSettings.value.pages[pageIndex].elements.splice(
       elementIndex,
       1,

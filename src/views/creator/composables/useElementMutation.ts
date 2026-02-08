@@ -3,10 +3,9 @@ import type {
   QuestionSettings,
   QuestionElement,
 } from '@/views/creator/types/questionnaire'
-
-import {
-  getSelectedElementPosition,
-} from '@/views/creator/config/handleElementAndPage'
+import { 
+  getSelectedElementPosition 
+} from '@/views/creator/config/element/research'
 import { generateUUID } from '@/views/creator/config/helpers'
 
 export function useElementMutation(

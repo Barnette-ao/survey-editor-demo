@@ -429,7 +429,7 @@ const handleQuestionTypeClick = (elementType: string): void => {
 
 // 题目类型更新
 const handleQuestionTypeUpdate = (newType: string): void => {
-  const newElement = switchElementByType(
+  const newElement = getSwitchTargetElement(
     newType, 
     questionSettings, 
     currentElement.value!
@@ -560,7 +560,7 @@ export declare function deleteQuestion(
   elementId: string
 ): number
 
-export declare function switchElementByType(
+export declare function getSwitchTargetElement(
   newType: string,
   settings: QuestionSettings,
   element: QuestionElement

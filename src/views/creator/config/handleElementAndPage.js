@@ -3,7 +3,7 @@ import { cloneElement, isEqual, formattedNumber } from "@/views/creator/config/h
 import { v4 as uuidv4 } from 'uuid'
 import { 
 	removeLogicRule, 
-	getLogicRulesOfDeletedElement,
+	findLogicRulesByElementId,
 	getLogicRulesOfElement 
 } from "@/views/creator/config/updateLogic";
 
@@ -105,107 +105,24 @@ const addEmptyPageAfterPage = (questionSettings, selectedQuestionId) => {
 
 const addPageBySpliteOffOnePage = (questionSettings, selectedQuestionId) => {
 	const { elementIndex, pageIndex } = getSelectedElementPosition(questionSettings, selectedQuestionId);
-
 	if (pageIndex !== undefined) {
 		spliteOffOnePageIntoPages(questionSettings, elementIndex, pageIndex);
 	}
 };
+
+import { addQuestionElement } from "@/views/creator/config/element/addQuestionElement"
 
 // 未验证，复制，未测试
 export const handleCopyElement = (elementId, questionSettings, elementType) => {
 	addQuestionElement(questionSettings, elementType, elementId)
 }
 
-// 删除某个题目元素，注意在删除某个特定的题目元素之前，
-// 一定要提前删除该元素所涉及的逻辑规则
-export const deleteQuestion = (questionSettings, elementId) => {
-	let index;
-	for (let page of questionSettings.value.pages) {
-		index = page.elements.findIndex((el) => el.id === elementId);
-
-		if (index !== -1) {
-			// 从questionSettings中删除该题目元素关联的所有逻辑规则
-			removeLogicRulesOfDeletedRule(questionSettings, elementId)
-			// 从questionSettings中删除该题目元素
-			page.elements.splice(index, 1);
-			break; // 找到之后立即中断循环
-		}
-	}
-
-	return index
-}
-
-export const removeLogicRulesOfDeletedRule = (questionSettings, elementId) => {
-	// 查找删除该题目关联的逻辑规则
-	const deletedRules = getLogicRulesOfDeletedElement(questionSettings.value.logicRules, elementId)
-
-	// 从questionSettings中删除这些规则
-	// 然后再从questionSettings.logicRules中删除这些规则
-	deletedRules.forEach(deletedRule => {
-		removeLogicRule(deletedRule, questionSettings);
-	})
-}
 
 
 
 
 
-export const switchElementByType = (newType, questionSettings, switchedElement) => {
-	if (!switchedElement) return;
 
-	// 根据切换的题型，创建对应的新的题目元素
-	let newElement = createNewElement(newType, questionSettings);
 
-	// 获取被切换的题目元素的类型oldType
-	const { type: oldType } = switchedElement;
 
-	// 被切换的题目元素中需要，不同的题型的元素中需要被删除的属性
-	const excludeProps = {
-		radiogroup: ['id', 'type'],
-		checkbox: ['id', 'type', 'showSelectAllItem', 'selectAllText'],
-		dropdown: ['id', 'type']
-	};
-
-	// 'radiogroup'和'checkbox'题型需要保留itmeComponent属性,
-	// 其他被切换的类型需要删除itemComponent属性
-	const needsItemComponent = ['radiogroup', 'checkbox'];
-	if (!needsItemComponent.includes(newType)) {
-		excludeProps[oldType].push('itemComponent');
-	}
-
-	// 从被切换的题目元素中获取需要保留的属性，并生成一个新对象
-	const restProps = Object.keys(switchedElement)
-		.filter(key => !excludeProps[oldType].includes(key))
-		.reduce((obj, key) => {
-			obj[key] = switchedElement[key];
-			return obj;
-		}, {});
-
-	// 将需要保留的属性添加到新类型的题目元素模版中，或者覆盖旧的属性
-	// 这种直接用解构合并的方式适合radiogroup和checkbox题型的相互切换
-	newElement = { ...newElement, ...restProps };
-
-	// 直接用解构合并的方式不适合dropdown和radiogroup/checkbox的相互切换
-	// 关键在于dropdown的choices属性是一个字符串数组，而radiogroup/checkbox的choices属性是一个对象数组
-	// 当从radiogroup/checkbox切换到dropdown时，需要将radiogroup/checkbox的choices对象数组转换成
-	// dropdown的choices字符串数组
-	if (newType === 'dropdown' &&
-		['radiogroup', 'checkbox'].includes(oldType)) {
-		newElement.choices = newElement.choices
-			.map(choice => choice.value);
-	}
-	// 当从dropdown切换到radiogroup/checkbox时，需要将dropdown的choices
-	// 属性转换为radiogroup/checkbox的choices属性
-	else if (
-		['radiogroup', 'checkbox'].includes(newType) &&
-		oldType === 'dropdown') {
-		newElement.choices = newElement.choices.map(choice => ({
-			value: choice,
-			showText: false,
-			textType: 'text',
-			required: true
-		}));
-	}
-
-	return newElement;
-} 
+ 

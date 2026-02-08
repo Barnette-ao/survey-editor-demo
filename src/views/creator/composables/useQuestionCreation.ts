@@ -3,6 +3,8 @@ import type { QuestionSettings } from "@/views/creator/types/questionnaire"
 
 import {
   addQuestionElement,
+} from "@/views/creator/config/element/addQuestionElement"
+import {
   addPage,
 } from "@/views/creator/config/handleElementAndPage"
 
@@ -24,7 +26,7 @@ export function useQuestionCreation(
     } else {
       // 当前选中的题目改为新添加的题目
       currentQuestionId.value = addQuestionElement(
-        questionSettings,
+        questionSettings.value,
         elementType,
         currentQuestionId.value
       )
