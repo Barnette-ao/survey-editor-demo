@@ -1,10 +1,10 @@
 import {
-    beforeSaveToDatabase,
     generateUUID
 } from "@/views/creator/config/helpers";
 import {
     validateStorageSchema,
 } from "@/views/creator/config";
+import { beforeSaveToDatabase } from "@/views/creator/config/adapter/adapteForRunningSettings";
 import { toRaw } from 'vue';
 
 

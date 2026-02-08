@@ -1,5 +1,5 @@
 import { computed, ComputedRef, Ref } from 'vue'
-import { getLogicRulesOfElement } from '@/views/creator/config/updateLogic'
+import { getLogicRulesAffectingElement } from '@/views/creator/config/updateLogic'
 
 import type { QuestionSettings } from '@/views/creator/types/questionnaire' // 路径按你项目调整
 
@@ -13,7 +13,7 @@ export function useLogicRules(
     (elementId: string) => number
   > = computed(() => {
     return (elementId: string): number => {
-      const rules = getLogicRulesOfElement(
+      const rules = getLogicRulesAffectingElement(
         questionSettings.value?.logicRules ?? [],
         elementId
       )

@@ -223,13 +223,13 @@ export function usePageStructure(questionSettings) {
 ```javascript
 // src/views/creator/composables/useLogicRules.js
 import { computed } from 'vue'
-import { getLogicRulesOfElement } from "@/views/creator/config/updateLogic"
+import { getLogicRulesAffectingElement } from "@/views/creator/config/updateLogic"
 
 export function useLogicRules(questionSettings) {
   // 获取元素的逻辑规则数量
   const getLogicRuleNum = computed(() => {
     return (elementId) => {
-      const rules = getLogicRulesOfElement(
+      const rules = getLogicRulesAffectingElement(
         questionSettings.logicRules ?? [], 
         elementId
       )

@@ -2,19 +2,18 @@ import type {
   LogicRule 
 } from '@/views/creator/types/questionnaire'
 
-
-export const findLogicRulesByElementId = (rules:LogicRule[], elementId:string) => {
+// 
+export const findLogicRulesByElementId = (rules: LogicRule[], elementId: string) => {
   return rules.filter(rule => {
-    if (rule.thenCondition.action === "jump") {
-      return rule.ifConditions.some(
-                ifCondition => ifCondition.elementId === elementId) 
-          || rule.thenCondition.targetElementId === elementId;
-    }
-    else if (['show', 'hide'].includes(rule.thenCondition.action)) {
-      return rule.ifConditions.some(
-                ifCondition => ifCondition.elementId === elementId) 
-          || rule.thenCondition.targetElementId === elementId;
-    }
-    return false;
+    // 检查该元素是否在条件中
+    const isInConditions = rule.ifConditions.some(
+      ifCondition => ifCondition.elementId === elementId
+    );
+    
+    // 检查该元素是否是目标
+    const isTarget = rule.thenCondition.targetElementId === elementId;
+    
+    // 只要元素在条件中或作为目标，就应该删除这条规则
+    return isInConditions || isTarget;
   });
 }

@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
-import { formattedNumber } from '@/views/creator/config/helpers'
+import { formattedNumber } from '@/views/creator/config/adapter/adapterForRawSettings'
 import { nextTick } from 'vue'
 import { getSelectedElementPosition } from '@/views/creator/config/element/research'
 import { questionTemplates } from '@/views/creator/config/componentAndSettingMap'

@@ -212,7 +212,7 @@ import {
 import { initSortable } from "@/views/creator/config/dragElementOrPage";
 import { destroyAllOptionSortables } from "@/views/creator/config/dragOption.js";
 import {
-  handleLogicRulesUpdate,
+  handleLogicRulesUpdateWrapper as handleLogicRulesUpdate,
 } from "@/views/creator/config/updateLogic";
 
 import { watch, nextTick, provide } from "vue";

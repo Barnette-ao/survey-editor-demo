@@ -2,6 +2,8 @@ import type { ComputedRef } from 'vue'
 import { SurveyStorageService } from '@/views/creator/services/SurveyStorageService'
 import {
   afterGetInitialSettings,
+} from "@/views/creator/config/adapter/adapterForRawSettings";
+import {
   isEqual
 } from "@/views/creator/config/helpers";
 
@@ -168,3 +170,4 @@ export class DraftStorageService {
     )
   }
 }
+

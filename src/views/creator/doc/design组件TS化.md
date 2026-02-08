@@ -333,7 +333,7 @@ const getQuestionNameOf = computed(() => {
 
 const getLogicRuleNum = computed(() => {
   return (elementId: string): number => {
-    const rules = getLogicRulesOfElement(
+    const rules = getLogicRulesAffectingElement(
       questionSettings.logicRules ?? [], 
       elementId
     )

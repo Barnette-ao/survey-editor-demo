@@ -1,8 +1,5 @@
 import type { Ref } from "vue"
-import {
-  getSwitchTargetElement,
-} from "@/views/creator/config/element/create"
-import { replaceElement } from "@/views/creator/config/element/update"
+import { switchChoiceQuestion } from "@/views/creator/config/element/update"
 import type { 
     QuestionElement, 
     QuestionSettings 
@@ -16,16 +13,17 @@ export function useElementTypeSwitch(
   // 切换题目类型  
   const switchQuestionType = (newType: QuestionElement["type"]) => {
     if (!currentElement.value) return
-    // 题目类型切换逻辑
-    const newElement = getSwitchTargetElement(
-      newType,
-      questionSettings,
-      currentElement.value
-    ) as QuestionElement
-
-    replaceElement(questionSettings.value, currentQuestionId.value, newElement)
+    
+    const { id, cloned } = switchChoiceQuestion(
+      questionSettings.value,
+      currentQuestionId.value,
+      currentElement.value,
+      newType
+    )
+    
+    questionSettings.value = cloned
     // 更新当前选中的题目ID
-    currentQuestionId.value = newElement.id
+    currentQuestionId.value = id
   }
 
   return {
