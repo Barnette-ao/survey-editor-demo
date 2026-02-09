@@ -4,7 +4,7 @@ import type {
   QuestionElement,
 } from '@/views/creator/types/questionnaire'
 import { 
-  getSelectedElementPosition 
+  replaceElement,findElementById 
 } from '@/views/creator/config/element'
 import { generateUUID } from '@/views/creator/config/shared'
 
@@ -19,19 +19,8 @@ export function useElementMutation(
     key: K,
     value: QuestionElement[K]
   ) => {
-    const { pageIndex, elementIndex } =
-      getSelectedElementPosition(
-        questionSettings,
-        currentQuestionId.value
-      )
-
-    if (pageIndex === undefined || elementIndex === undefined) return
     
-    // 直接修改源数据，确保响应式更新
-    // 创建新对象保证引用变化
-    const element =
-      questionSettings.value?.pages[pageIndex]?.elements[elementIndex]
-
+    const element = findElementById(currentQuestionId.value, questionSettings.value)
     if(!element) return  
     // 数组 → 触发强制替换
     // 如果value是数组，要通过创建新元素，替换旧元素来触发响应式更新视图
@@ -49,7 +38,27 @@ export function useElementMutation(
       }
 
       // 同步逻辑规则
-      if (questionSettings.value.logicRules?.length) {
+      syncNewIdWithLogicRule(questionSettings)
+      // 用newElement替换currentQuestionId所表示的题目
+      replaceElement(
+        questionSettings.value,
+        currentQuestionId.value,
+        newElement
+      )
+      // currentQuestionId.value更新之后，计算属性currentElement的值也会更新，
+      // 渲染视图需要currentElement，currentElement改变，就会触发视图更新,如果不更新
+      // currentQuestionId.value，下一步执行之后，旧元素被删掉，原来的currentQuestionId没有了相应元素，
+      // 那么currentElement的值为undefined
+      // 这样渲染的时候会报错：Cannot read properties of undefined (reading 'isRequired')
+      currentQuestionId.value = newElement.id
+    } 
+    else {
+      ;(element as any)[key] = value
+    }
+  }
+
+  const syncNewIdWithLogicRule = (questionSettings:any) => {
+    if (questionSettings.value.logicRules?.length) {
         // 更新选中题目的逻辑规则中的元素ID
         questionSettings.value.logicRules =
           questionSettings.value.logicRules.map(rule => {
@@ -72,24 +81,6 @@ export function useElementMutation(
             return rule
           })
       }
-      // currentQuestionId.value更新之后，计算属性currentElement的值也会更新，
-      // 渲染视图需要currentElement，currentElement改变，就会触发视图更新,如果不更新
-      // currentQuestionId.value，下一步执行之后，旧元素被删掉，原来的currentQuestionId没有了相应元素，
-      // 那么currentElement的值为undefined
-      // 这样渲染的时候会报错：Cannot read properties of undefined (reading 'isRequired')
-      currentQuestionId.value = newElement.id
-
-      // 替换元素并触发响应式更新
-      questionSettings.value.pages[pageIndex].elements.splice(
-        elementIndex,
-        1,
-        newElement as QuestionElement
-      )
-    }
-    // 如果value是原始数据类型，那么直接修改源数据就可以触发响应式更新视图 
-    else {
-      ;(element as any)[key] = value
-    }
   }
 
   return {

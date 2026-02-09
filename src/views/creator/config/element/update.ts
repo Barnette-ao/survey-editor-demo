@@ -35,7 +35,7 @@ export const switchChoiceQuestion = (
  * @param questionId - 要替换的题目ID
  * @param newElement - 新的元素对象
  */
-const replaceElement = (
+export const replaceElement = (
     questionSettings: any,
     questionId: string,
     newElement: QuestionElement
