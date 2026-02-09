@@ -2,7 +2,7 @@ import {
     findLogicRulesByElementId 
 } from '@/views/creator/config/logicRule/research'
 import { LogicRule } from '../../types/questionnaire';
-import { isEqual, } from "@/views/creator/config/helpers";
+import { isEqual, } from "@/views/creator/config/logicRule/predicate";
 import { findElementById } from '@/views/creator/config/element/research'
 import { getLogicExpression } from '@/views/creator/config/logicRule/expression'
 
@@ -60,11 +60,11 @@ const createDeletedTrigger = (removedRule: LogicRule, expression: string | undef
 }
 
 const deleteTriggerItem = (deletedTrigger: any, questionSettings: any) => {
-    const deletedTriggerIndex = questionSettings.value.triggers.findIndex((trigger: any) =>
+    const deletedTriggerIndex = questionSettings.triggers.findIndex((trigger: any) =>
         isEqual(trigger, deletedTrigger)
     );
     if (deletedTriggerIndex !== -1) {
-        questionSettings.value.triggers.splice(deletedTriggerIndex, 1)
+        questionSettings.triggers.splice(deletedTriggerIndex, 1)
     }
 }
 

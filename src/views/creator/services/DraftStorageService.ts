@@ -5,7 +5,7 @@ import {
 } from "@/views/creator/config/adapter/adapterForRawSettings";
 import {
   isEqual
-} from "@/views/creator/config/helpers";
+} from "@/views/creator/config/logicRule/predicate";
 
 
 type DraftState = unknown

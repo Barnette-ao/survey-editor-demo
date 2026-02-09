@@ -81,8 +81,6 @@ const setLogicRule = (logicRule: any, questionSettings: QuestionSettings) => {
         questionSettings.logicRules.push(logicRule)
     }
     // 2.根据logicRule设置questionSettings中的设置项
-
-    // 每一条逻辑规则的则条件,如果条件有多个，则条件只有一个
     const { ifConditions, thenCondition } = logicRule
     const expression = getLogicExpression(ifConditions, { value: questionSettings } as any)
     setThenCondition(thenCondition, expression, questionSettings)

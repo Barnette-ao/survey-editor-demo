@@ -6,7 +6,7 @@ import type {
 import { 
   getSelectedElementPosition 
 } from '@/views/creator/config/element/research'
-import { generateUUID } from '@/views/creator/config/helpers'
+import { generateUUID } from '@/views/creator/config/shared/utils'
 
 export function useElementMutation(
   questionSettings: Ref<QuestionSettings>,

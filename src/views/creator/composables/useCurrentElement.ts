@@ -31,17 +31,6 @@ export function useCurrentElement(
   const getCurrentElementType: ComputedRef<string> = computed(() => {
     const element = currentElement.value
     if (!element) return ''
-
-    // rating 是联合类型，需要显式收窄
-    if (
-      element.type === 'ratinglabel' ||
-      element.type === 'ratingstars' ||
-      element.type === 'ratingsmileys'
-    ) {
-      const ratingElement = element as RatingElement
-      return ratingTypeMap[ratingElement.rateType]
-    }
-
     return element.type
   })
 

@@ -3,7 +3,7 @@ import type { QuestionSettings } from "@/views/creator/types/questionnaire"
 
 import {
   addQuestionElement,
-} from "@/views/creator/config/element/addQuestionElement"
+} from "@/views/creator/config/element/create"
 import {
   addPage,
 } from "@/views/creator/config/handleElementAndPage"

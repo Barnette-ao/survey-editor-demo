@@ -140,7 +140,7 @@ import {
 	isDefaultRule, 
 	isEqual, 
 	isCompleteRule
-} from "@/views/creator/config/helpers";
+} from "@/views/creator/config/logicRule/predicate";
 import { useHistory} from "@/views/creator/composables/useLogicRule/useHistory"
 import { useElementData} from "@/views/creator/composables/useLogicRule/useElementData"
 import { useLogicClass } from "@/views/creator/composables/useLogicRule/useLogicClass"

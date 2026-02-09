@@ -3,7 +3,7 @@ import {
 } from "@/views/creator/config/shared/utils";
 import {
     validateStorageSchema,
-} from "@/views/creator/config";
+} from "@/views/creator/config/adapter/storage";
 import { beforeSaveToDatabase } from "@/views/creator/config/adapter/adapteForRunningSettings";
 import { toRaw } from 'vue';
 

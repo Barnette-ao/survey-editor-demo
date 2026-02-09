@@ -1,10 +1,7 @@
 import type { Ref } from 'vue'
 import type { QuestionSettings } from '@/views/creator/types/questionnaire'
 import { addQuestionElement } from "@/views/creator/config/element/create"
-import {
-  deleteQuestion
-} from '@/views/creator/config/handleElementAndPage'
-import { formattedNumber } from '@/views/creator/config/helpers'
+import { deleteQuestion } from '@/views/creator/config/element/delete'
 
 type SettingType = 'quickSetting' | 'questionSetting'
 
@@ -19,7 +16,6 @@ export function useElementCommands(
       elementType,
       elementId
     )
-    formattedNumber(questionSettings.value)
     ElMessage.success('复制成功')
   }
 
@@ -29,11 +25,10 @@ export function useElementCommands(
       cancelButtonText: '取消',
       type: 'warning',
     }).then(() => {
-      const index = deleteQuestion(questionSettings, elementId)
+      const { elementIndex, cloned } = deleteQuestion(questionSettings.value, elementId)
+      questionSettings.value = cloned
 
-      formattedNumber(questionSettings.value)
-
-      if (index !== -1 && elementId === currentQuestionId.value) {
+      if (elementIndex !== -1 && elementId === currentQuestionId.value) {
         currentQuestionId.value = ''
         settingType.value = 'quickSetting'
       }
