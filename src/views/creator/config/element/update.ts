@@ -1,6 +1,6 @@
-import { getSelectedElementPosition } from '@/views/creator/config/element/research'
-import { deleteLogicRulesById } from '@/views/creator/config/logicRule/delete'
-import { getSwitchTargetElement } from '@/views/creator/config/element/create'
+import { getSelectedElementPosition } from '@/views/creator/config/element'
+import { deleteLogicRulesById } from '@/views/creator/config/logicRule'
+import { getSwitchTargetElement } from '@/views/creator/config/element'
 import type { QuestionElement } from '@/views/creator/types/questionnaire'
 
 /**

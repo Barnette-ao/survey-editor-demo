@@ -1,4 +1,4 @@
-import { getSelectedElementPosition } from '@/views/creator/config/element/research'
+import { getSelectedElementPosition } from '@/views/creator/config/element'
 import type { QuestionSettings } from '@/views/creator/types/questionnaire'
 
 /**

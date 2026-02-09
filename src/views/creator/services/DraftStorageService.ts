@@ -2,10 +2,10 @@ import type { ComputedRef } from 'vue'
 import { SurveyStorageService } from '@/views/creator/services/SurveyStorageService'
 import {
   afterGetInitialSettings,
-} from "@/views/creator/config/adapter/adapterForRawSettings";
+} from "@/views/creator/config/adapter";
 import {
   isEqual
-} from "@/views/creator/config/logicRule/predicate";
+} from "@/views/creator/config/logicRule";
 
 
 type DraftState = unknown

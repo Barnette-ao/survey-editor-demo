@@ -1,4 +1,4 @@
-import { handleLogicRulesUpdate } from "@/views/creator/config/logicRule/update";
+import { handleLogicRulesUpdate } from "@/views/creator/config/logicRule";
 
 
 /**

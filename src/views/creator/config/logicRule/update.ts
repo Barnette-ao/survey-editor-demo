@@ -1,6 +1,6 @@
-import { getLogicExpression } from '@/views/creator/config/logicRule/expression'
-import { removeLogicRule } from '@/views/creator/config/logicRule/delete'
-import { findElementById } from '@/views/creator/config/element/research'
+import { getLogicExpression } from '@/views/creator/config/logicRule'
+import { removeLogicRule } from '@/views/creator/config/logicRule'
+import { findElementById } from '@/views/creator/config/element'
 import type { QuestionSettings } from '@/views/creator/types/questionnaire'
 
 /**

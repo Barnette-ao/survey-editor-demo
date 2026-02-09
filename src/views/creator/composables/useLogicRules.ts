@@ -1,7 +1,7 @@
 import { computed, ComputedRef, Ref } from 'vue'
 import { 
     findLogicRulesByElementId 
-} from '@/views/creator/config/logicRule/research'
+} from '@/views/creator/config/logicRule'
 import type { QuestionSettings } from '@/views/creator/types/questionnaire' // 路径按你项目调整
 
 export function useLogicRules(

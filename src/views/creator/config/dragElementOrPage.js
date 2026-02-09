@@ -1,7 +1,7 @@
 import Sortable from "sortablejs";
-import { formattedNumber } from "@/views/creator/config/adapter/adapterForRawSettings";
-import { handleDeletePage } from "@/views/creator/config/page/delete";
-import { spliteOffOnePageIntoPages,addEmptyPageBeforePage } from "@/views/creator/config/page/create";
+import { formattedNumber } from "@/views/creator/config/adapter";
+import { handleDeletePage } from "@/views/creator/config/page";
+import { spliteOffOnePageIntoPages,addEmptyPageBeforePage } from "@/views/creator/config/page";
 
 
 // 存储所有创建的 Sortable 实例

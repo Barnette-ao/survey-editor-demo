@@ -5,8 +5,8 @@ import type {
 } from '@/views/creator/types/questionnaire'
 import { 
   getSelectedElementPosition 
-} from '@/views/creator/config/element/research'
-import { generateUUID } from '@/views/creator/config/shared/utils'
+} from '@/views/creator/config/element'
+import { generateUUID } from '@/views/creator/config/shared'
 
 export function useElementMutation(
   questionSettings: Ref<QuestionSettings>,

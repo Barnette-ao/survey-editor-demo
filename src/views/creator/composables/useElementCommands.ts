@@ -1,7 +1,6 @@
 import type { Ref } from 'vue'
 import type { QuestionSettings } from '@/views/creator/types/questionnaire'
-import { addQuestionElement } from "@/views/creator/config/element/create"
-import { deleteQuestion } from '@/views/creator/config/element/delete'
+import { addQuestionElement,deleteQuestion } from "@/views/creator/config/element"
 
 type SettingType = 'quickSetting' | 'questionSetting'
 

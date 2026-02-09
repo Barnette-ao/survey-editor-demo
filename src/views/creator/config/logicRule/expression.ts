@@ -1,4 +1,4 @@
-import { findElementById } from '@/views/creator/config/element/research'
+import { findElementById } from '@/views/creator/config/element'
 
 /**
  * 获取逻辑表达式

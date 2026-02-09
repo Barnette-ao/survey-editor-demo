@@ -1,5 +1,5 @@
-import { handleDeletePage as handleDeletePageCore } from "@/views/creator/config/page/delete";
-import { addPage as addPageCore } from "@/views/creator/config/page/create";
+import { handleDeletePage as handleDeletePageCore } from "@/views/creator/config/page";
+import { addPage as addPageCore } from "@/views/creator/config/page";
 
 
 export const addPage = (questionSettings, selectedQuestionId, pageIndex, isPageSelected) => {
