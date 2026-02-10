@@ -15,6 +15,7 @@ export interface Command {
   execute(state: DraftState): DraftState
   // 反向操作变更   
   undo(state: DraftState): DraftState
+  getNeta():any
 }
 
 const adapteStorageState = (storageState:unknown) => {
@@ -128,31 +129,27 @@ export class DraftStorageService {
    * undoStack: 添加
    * redoStatk：重置为空，一编辑新内容那么前面的操作作废 
    */
-  applyOperation(op: Command) {
-    this.draftState = op.execute(this.draftState)
-    this.undoStackBaseOperation.push(op)
+  applyOperation(cmd: Command) {
+    const nextState = cmd.execute(this.draftState)
+    this.draftState = nextState 
+    this.undoStackBaseOperation.push(cmd)
     this.redoStackBaseOperation = []
+    return cmd.getNeta?.()
   }
 
   undoBaseOperation(){
     if(!this.undoStackBaseOperation.length) return 
-    const draftOperation = this.undoStackBaseOperation.pop()
-    if (!draftOperation) {
-      throw new Error('Unexpected: draftOperation is undefined')
-    }
-    this.draftState = draftOperation.undo(this.draftState)
-    this.redoStackBaseOperation.push(draftOperation)
+    const undoCommand:Command = this.undoStackBaseOperation.pop()!
+    this.draftState = undoCommand.undo(this.draftState)
+    this.redoStackBaseOperation.push(undoCommand)
     return this.draftState
   }
-
+  // 这里必须存在一个时序耦合，即redo必须在undo之后执行
   redoBaseOperation(){
     if(!this.redoStackBaseOperation.length) return 
-    const draftOperation = this.redoStackBaseOperation.pop()
-    if (!draftOperation) {
-      throw new Error('Unexpected: draftOperation is undefined')
-    }
-    this.draftState = draftOperation.execute(this.draftState)
-    this.undoStackBaseOperation.push(draftOperation)
+    const redoCommand:Command = this.redoStackBaseOperation.pop()!
+    this.draftState = redoCommand.execute(this.draftState)  
+    this.undoStackBaseOperation.push(redoCommand)
     return this.draftState
   }
 

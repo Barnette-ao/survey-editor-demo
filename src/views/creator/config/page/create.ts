@@ -23,11 +23,21 @@ export const addPage = (
     }
     // 如果选中的题目是某一页面最后一道题目，那么在该页面后添加新的空页面
     else if (isLastElementOfAnyPageSelected(cloned, selectedQuestionId)) {
-        addEmptyPageAfterPage(cloned, selectedQuestionId)
+        addEmptyPageAfterPage(
+            cloned, 
+            selectedQuestionId,
+            isPageSelected = false, 
+            pageIndex = -1
+        )
     }
-    // 如果点击的是页面块，点击添加页面，是在该页之前添加一个空页
+    // 如果点击的是页面块，点击添加页面，是在该页之后添加一个空页
     else if (isPageSelected) {
-        addEmptyPageBeforePage(cloned, pageIndex)
+        addEmptyPageAfterPage(
+            cloned,
+            selectedQuestionId="", 
+            isPageSelected, 
+            pageIndex
+        )
     }
     // 如果选中的题目不是某一页的最后一道题目，那么在该页面后添加一个新页面，并且
     // 将该页面该题目之后的所有的题目都加入新的页面。
@@ -76,29 +86,29 @@ const isLastElementOfAnyPageSelected = (questionSettings: QuestionSettings, sele
 /**
  * 在指定页面后添加一个空页
  */
-const addEmptyPageAfterPage = (questionSettings: QuestionSettings, selectedQuestionId: string): void => {
-    const { pageIndex } = getSelectedElementPosition(questionSettings, selectedQuestionId)
-    if (pageIndex !== undefined) {
-        questionSettings.pages.splice(pageIndex + 1, 0, {
-            name: `page${pageIndex + 1}`,
+const addEmptyPageAfterPage = (
+    questionSettings: QuestionSettings,   
+    selectedQuestionId: string,
+    isSelectAPage:boolean,
+    pageIndex: number
+): void => {
+    if (isSelectAPage){
+        questionSettings.pages.splice(pageIndex, 0, {
+            name: `page${pageIndex}`,
             elements: [],
         } as any)
-    }
+    }else{
+        const { pageIndex } = getSelectedElementPosition(questionSettings, selectedQuestionId)
+        if (pageIndex !== undefined) {
+            questionSettings.pages.splice(pageIndex + 1, 0, {
+                name: `page${pageIndex + 1}`,
+                elements: [],
+            } as any)
+        }
+    } 
 }
 
-/**
- * 在指定页面前添加一个空页
- */
-export const addEmptyPageBeforePage = (questionSettings: QuestionSettings, pageIndex: number): void => {
-    if (!questionSettings?.pages) {
-        return
-    }
 
-    questionSettings.pages.splice(pageIndex, 0, {
-        name: `page${pageIndex}`,
-        elements: [],
-    } as any)
-}
 
 /**
  * 通过分割一页来添加页面

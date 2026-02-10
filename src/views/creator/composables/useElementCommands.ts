@@ -24,10 +24,10 @@ export function useElementCommands(
       cancelButtonText: '取消',
       type: 'warning',
     }).then(() => {
-      const { elementIndex, cloned } = deleteQuestion(questionSettings.value, elementId)
+      const cloned = deleteQuestion(questionSettings.value, elementId)
       questionSettings.value = cloned
 
-      if (elementIndex !== -1 && elementId === currentQuestionId.value) {
+      if (elementId === currentQuestionId.value) {
         currentQuestionId.value = ''
         settingType.value = 'quickSetting'
       }

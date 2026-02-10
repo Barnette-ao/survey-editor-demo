@@ -12,10 +12,22 @@ type ExcludePropsMap = {
 }
 
 // 如果没有选中任何元素，新元素插入问卷末尾，反之，则插入选中元素的页面末尾
-export const addQuestionElement = (state: any, elemntType: string, selectedQuestionId: string) => {
+export const addQuestionElement = (
+    state: any, 
+    elemntType: string, 
+    selectedQuestionId: string,
+    isCurrentQuestionAPage:boolean = false,
+    selectedPageIndex:number = -1,
+) => {
     const cloned = structuredClone(state)
     const newElement = createNewElement(elemntType, cloned);
-    addNewElement(cloned, selectedQuestionId,newElement)
+    addNewElement(
+        cloned, 
+        selectedQuestionId,
+        newElement,
+        isCurrentQuestionAPage,
+        selectedPageIndex
+    )
     formattedNumber(cloned)
     // 滚动到新添加的题目
     // 注意，这里的滚动是在页面中滚动，而不是在整个页面中滚动
@@ -80,14 +92,25 @@ const getMaxNumOfName = (questionSettings: any, element: any) => {
     return numOfNames.reduce((max: number, cur: number) => Math.max(max, cur), 0);
 }
 
-const addNewElement = (cloned:any, selectedQuestionId:string, newElement:any) => {
-    const { elementIndex, pageIndex } =
-        getSelectedElementPosition(cloned, selectedQuestionId);
+const addNewElement = (
+    cloned:any, 
+    selectedQuestionId:string, 
+    newElement:any,
+    isCurrentQuestionAPage:boolean,
+    selectedPageIndex:number
+) => {
+    // 选中了页码块
+    if(isCurrentQuestionAPage && selectedPageIndex >= 0){
+        cloned.pages[selectedPageIndex].elements.push(newElement)
+    }else {
+        const { elementIndex, pageIndex } =
+            getSelectedElementPosition(cloned, selectedQuestionId);
 
-    if (elementIndex === undefined) {
-        cloned.pages[cloned.pages.length - 1].elements.push(newElement);
-    } else {
-        cloned.pages[pageIndex].elements.splice(elementIndex + 1, 0, newElement);
+        if (elementIndex === undefined) {
+            cloned.pages[cloned.pages.length - 1].elements.push(newElement);
+        } else {
+            cloned.pages[pageIndex].elements.splice(elementIndex + 1, 0, newElement);
+        }
     }
 }
 
