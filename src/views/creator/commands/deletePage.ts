@@ -1,5 +1,5 @@
 import type { Command } from "@/views/creator/services/DraftStorageService"
-import { handleDeletePage } from "@/views/creator/config/page/delete"
+import { deletePage } from "@/views/creator/config/page/delete"
 
 export function createDeletePageCommand(payload: {
   pageIndex: number
@@ -16,7 +16,7 @@ export function createDeletePageCommand(payload: {
       }
       
       // 执行删除页面操作
-      const cloned = handleDeletePage(
+      const cloned = deletePage(
         state,
         state.pages[payload.pageIndex],
         payload.pageIndex
@@ -32,14 +32,6 @@ export function createDeletePageCommand(payload: {
       }
       
       return structuredClone(state)
-    },
-
-    getNeta() {
-      return {
-        pageIndex: payload.pageIndex,
-        deletedPageName: deletedPage?.name,
-        deletedElementsCount: deletedPageElements.length
-      }
     }
   }
 }

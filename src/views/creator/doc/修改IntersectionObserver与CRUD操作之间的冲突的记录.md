@@ -88,7 +88,7 @@ questionSettings已经完成了删除
 可以之后的一个优化，简化扁平化数组的数据结构，去除多余的page,之所以现在保留page是因为design组件的page中绑定的属性和事件处理函数
 ```js
 getQuestionNameOf(item.page)
-handleDeletePage(questionSettings, item.page, item.pageIndex)
+deletePage(questionSettings, item.page, item.pageIndex)
 ```
 上述都需要用到item.page，所以renderItems的page类型的对象元素中才会有page这个属性
 如果可以重构这两个，计算属性和函数，只要它接受pageIndex就行，那么就可以简化扁平化

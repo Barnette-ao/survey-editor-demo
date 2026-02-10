@@ -1,6 +1,6 @@
 import type { Command } from "@/views/creator/services/DraftStorageService"
 import { addPage } from "@/views/creator/config/page"
-import { handleDeletePage } from "@/views/creator/config/page"
+import { deletePage } from "@/views/creator/config/page"
 
 export function createAddPageCommand(payload: {
   selectedQuestionId: string
@@ -47,19 +47,10 @@ export function createAddPageCommand(payload: {
       // 删除添加的页面
       if (addedPageIndex >= 0 && addedPageIndex < state.pages.length) {
         deletedPage = state.pages[addedPageIndex]
-        const cloned = handleDeletePage(state, deletedPage, addedPageIndex)
+        const cloned = deletePage(state, deletedPage, addedPageIndex)
         return cloned
       }
       return state
-    },
-
-    getNeta() {
-      return {
-        addedPageIndex,
-        selectedQuestionId: payload.selectedQuestionId,
-        pageIndex: payload.pageIndex,
-        isPageSelected: payload.isPageSelected
-      }
     }
   }
 }

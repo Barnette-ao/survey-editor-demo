@@ -15,7 +15,7 @@ export interface Command {
   execute(state: DraftState): DraftState
   // 反向操作变更   
   undo(state: DraftState): DraftState
-  getNeta():any
+  getMeta?():any
 }
 
 const adapteStorageState = (storageState:unknown) => {
@@ -134,7 +134,7 @@ export class DraftStorageService {
     this.draftState = nextState 
     this.undoStackBaseOperation.push(cmd)
     this.redoStackBaseOperation = []
-    return cmd.getNeta?.()
+    return cmd.getMeta?.()
   }
 
   undoBaseOperation(){

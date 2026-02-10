@@ -52,15 +52,6 @@ export function createDeleteQuestionCommand(payload: {
         selectPageIndex
       )
       return cloned
-    },
-
-    getNeta() {
-      return { 
-        elementType,
-        selectedElementId: previousElementId,
-        isSelectAPage,
-        selectPageIndex 
-      }
     }
   }
 }

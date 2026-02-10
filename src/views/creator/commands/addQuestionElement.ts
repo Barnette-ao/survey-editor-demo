@@ -29,7 +29,7 @@ export function createAddQuestionCommand(payload: {
       )
     },
 
-    getNeta(){
+    getMeta(){
         return {elementId:addedElementId}
     }
   }

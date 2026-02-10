@@ -566,7 +566,7 @@ export declare function getSwitchTargetElement(
   element: QuestionElement
 ): QuestionElement
 
-export declare function handleDeletePage(
+export declare function deletePage(
   settings: QuestionSettings,
   page: any,
   pageIndex: number

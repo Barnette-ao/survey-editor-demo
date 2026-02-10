@@ -7,27 +7,26 @@ import type { QuestionElement } from '@/views/creator/types/questionnaire'
 /**
  * 切换选择题类型
  * @param questionSettings - 问卷设置对象
- * @param questionId - 要切换的题目ID
- * @param currentElement - 当前元素对象
- * @param newType - 新的题目类型
+ * @param sourceElementId - 要切换的原题目ID
+ * @param sourceElement - 原题目对象
+ * @param targetType - 切换后的目标题型
  * @returns 包含新元素ID和克隆后的问卷设置
  */
 export const switchChoiceQuestion = (
     questionSettings: any,
-    questionId: string,
-    currentElement: any,
-    newType: string
+    sourceElementId: string,
+    sourceElement: any,
+    targetType: string
 ) => {
     const cloned = structuredClone(questionSettings)   
-    const newElement = getSwitchTargetElement(
-        newType,
+    const targetElement = getSwitchTargetElement(
+        targetType,
         cloned,
-        currentElement
+        sourceElement
     ) as QuestionElement
+    replaceElement(cloned, sourceElementId, targetElement)
 
-    replaceElement(cloned, questionId, newElement)
-
-    return { id: newElement.id, cloned }
+    return { id: targetElement.id, cloned }
 }
 
 /**

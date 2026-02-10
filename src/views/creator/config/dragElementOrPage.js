@@ -1,6 +1,6 @@
 import Sortable from "sortablejs";
 import { formattedNumber } from "@/views/creator/config/adapter";
-import { handleDeletePage } from "@/views/creator/config/page";
+import { deletePage } from "@/views/creator/config/page";
 import { spliteOffOnePageIntoPages,addEmptyPageBeforePage } from "@/views/creator/config/page";
 
 
@@ -123,7 +123,7 @@ const dragPageToElement = (questionSettings, newIndex, fromPageIndex, toPageInde
 	const prePageSize = questionSettings.value.pages[prePageIndex].elements.length
 	// 将拖拽前的页码从整个问卷中删除
 	// 将被拖拽页的所有元素全部插入上一页中。该数据操作对应删除页码组件的操作。
-	handleDeletePage(
+	deletePage(
 		questionSettings,
 		questionSettings.value.pages[fromPageIndex],
 		fromPageIndex
@@ -179,7 +179,7 @@ const findIndexToAddNewPage = (questionSettings, fromPageIndex, toPageIndex, new
 }
 
 const dragPageToPage = (questionSettings, fromPageIndex, toPageIndex) => {
-	handleDeletePage(
+	deletePage(
 		questionSettings,
 		questionSettings.value.pages[fromPageIndex],
 		fromPageIndex

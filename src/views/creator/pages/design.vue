@@ -77,7 +77,7 @@
                     :currentPage="item.pageIndex + 1"
                     :selected="currentQuestionId === '' && pageIndex === item.pageIndex"
                     :questionList="getQuestionNameOf(item.page)"
-                    @delete="handleDeletePage(questionSettings, item.page, item.pageIndex)"
+                    @delete="deletePage(questionSettings, item.page, item.pageIndex)"
                     @click="handlePageClick(item.pageIndex)"
                   />
                 </div>
@@ -204,7 +204,7 @@ import {
   settingComponentMap,
 } from "@/views/creator/config/registry";
 import {
-  handleDeletePage,
+  deletePage,
 } from "@/views/creator/config/handleElementAndPage";
 import { initSortable } from "@/views/creator/config/dragElementOrPage";
 import { destroyAllOptionSortables } from "@/views/creator/config/dragOption.js";
