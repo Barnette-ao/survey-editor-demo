@@ -107,12 +107,8 @@ export class SurveyStorageService {
   
   // 生命周期：创建
   create(): string {
-    const all = JSON.parse(
-      localStorage.getItem('questionnaires') || '{}'
-    )
-
+    const all = JSON.parse(localStorage.getItem('questionnaires') || '{}')
     const surveyId = generateUUID() // 你自己的规则
-
     if (all[surveyId]) {
       throw new Error('SurveyId collision')
     }
@@ -122,18 +118,9 @@ export class SurveyStorageService {
       DEFAULT_COUNT,
       surveyId
     )
-
-    // 存储层和编辑层应该最好分为两层，编辑层是允许脏数据的，而存储层是不允许的，
-    // 做任何拦截或者修改都可以在编辑层做，但是存储的时候是最终值
-    // 更新本地保存的值
     all[surveyId] = base
-
-    // 更新本地存储
-    localStorage.setItem(
-      'questionnaires',
-      JSON.stringify(all)
-    )
-
+    localStorage.setItem('questionnaires',JSON.stringify(all))
+    
     return surveyId
   }
 
@@ -146,42 +133,17 @@ export class SurveyStorageService {
     return rawSettings
   }
   
-  /**领域事件
-   * 生命周期：保存JSON编辑页
-   * @param {object} storageSettings
-   * @memberof SurveyStorageService
-   * 
-   * 存储态的JSON核心数据的结构和属性必须是合法的
-   * 而在保存之前必须对其进行校验
-   * 这里说一下JSON编辑器使用的JSON核心数据和其他两个页面使用的结构和属性是不一致的
-   * JSON编辑器是loadQuestion之后直接使用
-   * 预览页和编辑器页是loadQuestion之后还要after直接使用
-   */
-  saveFromJsonEditor(surveyId:string, storageSettings: unknown) {
-    validateStorageSchema(storageSettings)
-    this.persist(storageSettings, surveyId)
-  }
-
-  
   /**
    * 领域事件
    * 生命周期：保存运行态的问卷数据（编辑器页）
    * @param {RefValue} runtimeSettings
    * 
    * @memberof SurveyStorageService
-   * 保存编辑器页和预览页的JSON核心对象。
-   * 将这两个页面的核心状态称之为运行态，最终保存的数据称之为存储态
-   * 该函数的职责是：将运行态的核心数据转换成存储态的核心数据数据
-   * 
-   * 
-   * 所以要先用toRaw()将其从ref还原成普通对象
-   * 预览页和编辑器页是loadQuestion之后还要after才能使用
-   * 所以要对该对象去掉一些存储态不需要的属性或者不合法的属性
-   * 
    */
-  saveRuntimeSettings(surveyId:string, runtimeSettings: unknown) {
-    const rawObject = toRaw(runtimeSettings)
+  save(surveyId:string, settings: unknown) {
+    const rawObject = toRaw(settings)
     const dataToSave = beforeSaveToDatabase(rawObject)
+    validateStorageSchema(dataToSave)
     this.persist(dataToSave, surveyId)
   }
 
@@ -193,20 +155,15 @@ export class SurveyStorageService {
     this.saveAll(all)
   }
 
-
-
     // 技术实现，加载
   private load(surveyId: string) {
     const all = JSON.parse(
       localStorage.getItem('questionnaires') || '{}'
     )
-
     const data = all[surveyId]
-
     if (!data) {
       throw new Error(`Survey ${surveyId} does not exist`)
     }
-
     return data
   }
 

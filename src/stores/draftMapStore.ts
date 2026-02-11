@@ -2,17 +2,30 @@ import { DraftStorageService } from '@/views/creator/services/DraftStorageServic
 import { SurveyStorageService } from '@/views/creator/services/SurveyStorageService'
 
 export const useDraftMapStore = defineStore('draftMap', () => {
-  const draftMap = shallowReactive(new Map())
+  const draftMap = shallowReactive(new Map<string, DraftStorageService>())
+  let opened:boolean
 
-  function getDraft(surveyIdRef:ComputedRef) {
-    const surveyId = surveyIdRef.value
-    if (!draftMap.has(surveyId)) {
+  function getDraft(surveyIdRef: ComputedRef<string>) {
+    const id = surveyIdRef.value
+
+    if (!draftMap.has(id)) {
+      opened = false
       const storage = new SurveyStorageService()
       const draft = new DraftStorageService(storage, surveyIdRef)
-      draftMap.set(surveyId, draft)
+      draftMap.set(id, draft)
     }
-    return draftMap.get(surveyId)
+    opened = true
+    return draftMap.get(id)!
   }
 
-  return { getDraft }
+  // 该函数一定与getDraft函数有时序上的耦合，必然是getDraft在前，hasOpened在后
+  function hasOpened(){
+    return opened 
+  }
+
+  return {
+    getDraft,
+    hasOpened
+  }
 })
+

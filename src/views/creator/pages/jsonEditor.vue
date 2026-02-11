@@ -21,13 +21,14 @@
 <script setup lang='ts'>
 import SurveySchemaErrorPanel from '@/views/creator/components/SurveySchemaErrorPanel.vue'
 import customerJsonEditor from '@/views/creator/components/customerJsonEditor.vue'
+import { useDraftContext } from "@/views/creator/composables/useDraftContext";
 
 import { useSurveyValidation } from '@/views/creator/composables/useSurveyValidation'
 import { useSurveyId } from "@/views/creator/composables/useSurveyId";
 
 import * as monaco from 'monaco-editor'
-
-const surveyJSON = ref<object>({})
+const { draftState } = useDraftContext()
+const surveyJSON = draftState 
 const jsonString = ref<string>(JSON.stringify(surveyJSON.value, null, 2))
 const language = ref('json')
 
@@ -35,27 +36,16 @@ const editorMounted = (editor: monaco.editor.IStandaloneCodeEditor) => {
   //  console.log('editor实例加载完成', editor)
 }
 
-const {  
-  loadStorageState,
-  saveFromJsonEditorNow
-} = useSurveyId()
-
-onMounted(() => {   
-  surveyJSON.value = loadStorageState() as object
-  jsonString.value = JSON.stringify(surveyJSON.value, null, 2)
-})
-
+// 先初始化 questionSettings
 const { validationState, validate } = useSurveyValidation()
 function onJsonChange(newValue: string) {
   try {
     const result = validate(newValue)
-    // debugger
-
+    
     if (!result.ok) {
         return
     }
 
-    saveFromJsonEditorNow(result.data)
   } catch {
     // JSON 错误时不更新 surveyJson
   }

@@ -228,7 +228,7 @@ import { useSettingPanelState } from '@/views/creator/composables/useSettingPane
 import { useLogicDialogState } from '@/views/creator/composables/useLogicDialogState'
 import { useOptionEditingState } from '@/views/creator/composables/useOptionEditingState'
 import { useSelectionState } from '@/views/creator/composables/useSelectionState'
-import { useSurveyId } from "@/views/creator/composables/useSurveyId";
+import { useDraftContext } from "@/views/creator/composables/useDraftContext";
 
 
 const LogicSettingDialog = defineAsyncComponent({
@@ -241,44 +241,19 @@ const LogicSettingDialog = defineAsyncComponent({
 
 //定义是否拖拽，拖拽则赋空值时不更新数据
 const istarg = ref(false);
+
 // 先初始化 questionSettings
-const questionSettings = ref({});
+const { draftState } = useDraftContext()
+const questionSettings = draftState
+
 const instructionElementId = ref("");
 const instructionElement = ref({});
-
-// 提供运行态数据给父组件
-// TODO: 演进步骤：runningStorage的定义权转给SurveyEditor组件而不是现在的Design组件
-// 这种控制权，我认为使用composable包装questionSettings，将其上升到SurveyEditor组件
-// 中，现在很明显questionSettings成为了一个上下文变量，所以我不想选择prop传递的方式
-// provide('runtimeStorageData', questionSettings)
-
-const { surveyId} = useSurveyId()
-
-// 创建防抖函数，延迟5秒执行
-// const saveToDefault = debounce((newValue) => {
-//   saveRuntimeSettings(newValue);
-// }, 1000);
-
-// // 监听 questionSettings 的变化
-// watch(
-//   questionSettings,
-//   (newValue) => {
-//     if (!istarg.value) {
-//       saveToDefault(newValue);
-//     }
-//   },
-//   { deep: true }
-// );
 
 const sentinelRef = ref(null)  // 直接在组件中创建
 // 增量加载相关状态 - 先定义默认值避免暂时性死区
 const incrementalLoadingInstance = ref({})
 
 onMounted(async () => {
-  
-  questionSettings.value = loadRunningState()
-  console.log("questionSettings",questionSettings.value)
-  
   instructionElement.value = questionSettings.value.pages[0].elements[0];
   instructionElementId.value = questionSettings.value.pages[0].elements[0].id;
   

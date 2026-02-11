@@ -34,14 +34,6 @@ const props = defineProps({
     type: String,
     default: "",
   },
-  targetObject: {
-    type: Object,
-    default: () => ({}),
-  },
-  targetKey: {
-    type: String,
-    default: "",
-  },
   width: {
     type: [String, Number],
     default: "100%",
@@ -56,7 +48,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['change'])
+const emit = defineEmits(['blur'])
 
 const editorStore = useEditorStore();
 
@@ -85,7 +77,7 @@ const handleBlur = (value) => {
   const content = formatContent(props.targetKey, value);
   // props.targetObject[props.targetKey] = content;
   const formatted = htmlToPlainText(currentHtml)
-  emit("change", formatted)
+  emit("blur", formatted)
 };
 
 // 点击 wrapper 时激活编辑器

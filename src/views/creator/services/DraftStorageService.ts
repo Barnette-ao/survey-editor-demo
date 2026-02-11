@@ -1,4 +1,5 @@
-import type { ComputedRef } from 'vue'
+import { ref, readonly } from 'vue'
+import type { ComputedRef, Ref } from 'vue'
 import { SurveyStorageService } from '@/views/creator/services/SurveyStorageService'
 import {
   afterGetInitialSettings,
@@ -23,6 +24,22 @@ const adapteStorageState = (storageState:unknown) => {
     return runingState
 }
 
+// 空数组结构
+function createEmptyDraftState(): DraftState {
+  return {
+    title:"",
+    description:"",
+    pages: [{
+      name:"",
+      elements:[]
+    }],
+    logicRules: [],
+    questionsOnPageMode:"", 
+    triggers:[],
+    showQuestionNumbers:true
+  }
+}
+
 /**
  *
  * Draft层只管何时何地如何调用领域层
@@ -36,8 +53,13 @@ export class DraftStorageService {
   ) {}
 
   // 草稿层一个很重要的状态就是当前的草稿状态
-  private draftState: unknown
+  private _draftState: Ref<DraftState> = ref(createEmptyDraftState())
   
+  // UI 只能读
+  get draftState() {
+    return readonly(this._draftState)
+  }
+
   /**
    * @private
    * @type {unknown[]}
@@ -53,22 +75,10 @@ export class DraftStorageService {
   openWithRunningState() {
     // 存储态 -> 运行态
     const rawSettings = this.storage.open(this.surveyId.value)
-    this.draftState = adapteStorageState(rawSettings)
-    this.undoStackBaseOperation = []
-    this.redoStackBaseOperation = []
-    
-    return this.draftState
+    this._draftState.value = adapteStorageState(rawSettings)
+  
+    return this._draftState.value
   }
-
-  openWithStorageState(){
-    // 直接使用存储态
-    this.draftState = this.storage.open(this.surveyId.value)
-    this.undoStackBaseSnapshot = []
-    this.redoStackBaseSnapshot = []
-
-    return this.draftState
-  }
-
   
   /**
    * @param {unknown} snapshot
@@ -91,25 +101,25 @@ export class DraftStorageService {
    * 
    */
   replaceState(snapshot: unknown) {
-    if (this.draftState !== null && !isEqual(snapshot,this.draftState)) {
-      this.undoStackBaseSnapshot.push(this.draftState)
+    if (!isEqual(snapshot,this._draftState.value)) {
+      this.undoStackBaseSnapshot.push(this._draftState.value)
       this.redoStackBaseSnapshot = []
     }
-    this.draftState = snapshot
+    this._draftState.value = snapshot
   }
 
   undoBaseSnapshot() {
     if (!this.undoStackBaseSnapshot.length) return
-    this.redoStackBaseSnapshot.push(this.draftState)
-    this.draftState = this.undoStackBaseSnapshot.pop() 
-    return this.draftState
+    this.redoStackBaseSnapshot.push(this._draftState.value)
+    this._draftState.value = this.undoStackBaseSnapshot.pop() 
+    return this._draftState.value
   }
 
   redoBaseSnapshot() {
     if (!this.redoStackBaseSnapshot.length) return
-    this.undoStackBaseSnapshot.push(this.draftState)
-    this.draftState = this.redoStackBaseSnapshot.pop()
-    return this.draftState
+    this.undoStackBaseSnapshot.push(this._draftState.value)
+    this._draftState.value = this.redoStackBaseSnapshot.pop()
+    return this._draftState.value
   }
 
   
@@ -130,8 +140,8 @@ export class DraftStorageService {
    * redoStatk：重置为空，一编辑新内容那么前面的操作作废 
    */
   applyOperation(cmd: Command) {
-    const nextState = cmd.execute(this.draftState)
-    this.draftState = nextState 
+    const nextState = cmd.execute(this._draftState.value)
+    this._draftState.value = nextState 
     this.undoStackBaseOperation.push(cmd)
     this.redoStackBaseOperation = []
     return cmd.getMeta?.()
@@ -140,30 +150,23 @@ export class DraftStorageService {
   undoBaseOperation(){
     if(!this.undoStackBaseOperation.length) return 
     const undoCommand:Command = this.undoStackBaseOperation.pop()!
-    this.draftState = undoCommand.undo(this.draftState)
+    this._draftState.value = undoCommand.undo(this._draftState.value)
     this.redoStackBaseOperation.push(undoCommand)
-    return this.draftState
+    return this._draftState.value
   }
   // 这里必须存在一个时序耦合，即redo必须在undo之后执行
   redoBaseOperation(){
     if(!this.redoStackBaseOperation.length) return 
     const redoCommand:Command = this.redoStackBaseOperation.pop()!
-    this.draftState = redoCommand.execute(this.draftState)  
+    this._draftState.value = redoCommand.execute(this._draftState.value)  
     this.undoStackBaseOperation.push(redoCommand)
-    return this.draftState
+    return this._draftState.value
   }
 
   commitRuntime() {
-    this.storage.saveRuntimeSettings(
+    this.storage.save(
       this.surveyId.value,
-      this.draftState
-    )
-  }
-
-  commitStorage() {
-    this.storage.saveFromJsonEditor(
-      this.surveyId.value,
-      this.draftState
+      this._draftState.value
     )
   }
 }
