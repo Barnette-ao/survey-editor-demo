@@ -23,7 +23,7 @@ import SurveySchemaErrorPanel from '@/views/creator/components/SurveySchemaError
 import customerJsonEditor from '@/views/creator/components/customerJsonEditor.vue'
 
 import { useSurveyValidation } from '@/views/creator/composables/useSurveyValidation'
-import { useSurveyContext } from "@/views/creator/composables/useSurveyContext";
+import { useSurveyId } from "@/views/creator/composables/useSurveyId";
 
 import * as monaco from 'monaco-editor'
 
@@ -38,7 +38,7 @@ const editorMounted = (editor: monaco.editor.IStandaloneCodeEditor) => {
 const {  
   loadStorageState,
   saveFromJsonEditorNow
-} = useSurveyContext()
+} = useSurveyId()
 
 onMounted(() => {   
   surveyJSON.value = loadStorageState() as object

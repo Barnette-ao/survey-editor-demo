@@ -26,7 +26,7 @@ import Cookies from "js-cookie";
 import { setLicenseKey, Serializer } from "survey-core";
 import markdownit from "markdown-it";
 
-import { useSurveyContext } from "@/views/creator/composables/useSurveyContext";
+import { useSurveyId } from "@/views/creator/composables/useSurveyId";
 
 
 
@@ -207,7 +207,7 @@ creator.survey.autoAdvanceAllowComplete = false;
 
 const questionSettings = ref({})
 
-const { loadRunningState } = useSurveyContext() 
+const { loadRunningState } = useSurveyId() 
 questionSettings.value = loadRunningState()
 
 questionSettings.value.locale = "zh-cn";

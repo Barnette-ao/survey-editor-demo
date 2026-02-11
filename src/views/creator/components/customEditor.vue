@@ -10,7 +10,7 @@
       </div>
       <TiipTapEditor
         v-if="isEditing"
-        v-model="wangEditorValue"
+        v-model"wangEditorValue"
         class="editable active"
         @focus="handleFocus"
         @blur="handleBlur"  
@@ -27,6 +27,7 @@ import { ref, computed, onMounted, onUnmounted } from "vue";
 import TiipTapEditor from "@/components/Editor/TiipTapEditor.vue"; // 导入你封装的 wangEditor 组件
 import { useEditorStore } from "@/stores/editorStore";
 import { formatContent } from "@/views/creator/config/helpers";
+import { htmlToPlainText } from "@/views/creator/config/adapter";
 
 const props = defineProps({
   modelValue: {
@@ -55,6 +56,7 @@ const props = defineProps({
   }
 });
 
+const emit = defineEmits(['change'])
 
 const editorStore = useEditorStore();
 
@@ -64,7 +66,7 @@ const isEditing = computed(() => {
 });
 
 const wangEditorValue = computed(() => {
-  return editorStore.getContent(props.editorId) || props.modelValue || "";
+  return props.modelValue || "";
 });
 
 // 显示在 div 中的文本
@@ -81,8 +83,9 @@ const handleFocus = () => {
 // 当编辑器失去焦点时，切换回 div
 const handleBlur = (value) => {
   const content = formatContent(props.targetKey, value);
-  editorStore.setContent(props.editorId, content);
-  props.targetObject[props.targetKey] = content;
+  // props.targetObject[props.targetKey] = content;
+  const formatted = htmlToPlainText(currentHtml)
+  emit("change", formatted)
 };
 
 // 点击 wrapper 时激活编辑器
@@ -97,6 +100,7 @@ const handleGlobalClick = (e) => {
     editorStore.clearActiveEditor();
   }
 };
+
 
 onMounted(() => {
   document.addEventListener("click", handleGlobalClick);

@@ -21,10 +21,10 @@
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, inject } from 'vue'
+<script setup lang="ts">
+import { ref, reactive } from 'vue'
 import { Serializer } from "survey-core";
-import { useSurveyContext } from '@/views/creator/composables/useSurveyContext'
+import { useSurveyId } from '@/views/creator/composables/useSurveyId'
 
 import { useRouter, useRoute } from 'vue-router'
 
@@ -34,23 +34,19 @@ const menuItems = reactive([
   { label: "JSON编辑器", routeName: "editor-json" }
 ]);
 
-const checkMenu = (index) => {
+const router = useRouter()
+const route = useRoute()
+const checkMenu = (index:number) => {
   router.push({ 
     name: menuItems[index].routeName, 
     params: { surveyId: route.params.surveyId } 
   });
 };
 
-const router = useRouter()
-const route = useRoute()
-const { exists } = useSurveyContext()
-
-// 注入运行态数据
-const runtimeStorageData = inject('runtimeStorageData')
-
 const handleExit = () => {
-  const surveyId = route.params.surveyId
-  exists(surveyId, runtimeStorageData.value)
+  const surveyId:ComputedRef = useSurveyId()
+  // 提交保存，获取问卷实例，即得草稿状态数据
+  // 根据JSONEditor还是Design页面，调用不同的提交方法。
   router.push('/')
 }
 

@@ -100,11 +100,6 @@ const hoverIndex = ref(-1)
 const batchDialogVisible = ref(false)
 const batchOptions = ref('')
 
-// 处理标题变化
-const handleTitleChange = (newValue) => {
-	emit('update', 'title', newValue)
-}
-
 // 更新选项列表
 const updateChoices = (newChoices) => {
 	emit('update', 'choices', newChoices)
@@ -124,12 +119,6 @@ const deleteOption = (index) => {
 	updateChoices(newChoices)
 }
 
-// 处理选项文本变化
-const handleChoiceChange = (index, newValue) => {
-	const newChoices = [...props.element.choices]
-	newChoices[index] = newValue.replace(/<\/?p>/g, '')
-	updateChoices(newChoices)
-}
 
 // 显示批量添加对话框
 const showBatchDialog = () => {

@@ -28,7 +28,9 @@ export function useQuestionCreation(
       currentQuestionId.value = addQuestionElement(
         questionSettings.value,
         elementType,
-        currentQuestionId.value
+        currentQuestionId.value,
+        isCurrentQuestionAPage.value,
+        pageIndex.value,
       )
     }
   }
