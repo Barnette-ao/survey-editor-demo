@@ -80,6 +80,13 @@ import customEditor from "@/views/creator/components/customEditor.vue";
 import DragHandler from "@/views/creator/components/Icons/dragIcon.vue";
 import { initOptionsSortable } from '@/views/creator/config/dragOption';
 import { ref, nextTick, onMounted } from 'vue'
+import { 
+  addSingleOption, 
+  addOtherOption as addOtherOptionUtil, 
+  deleteOptionAtIndex, 
+  addBatchOptions, 
+  parseBatchInput 
+} from '@/views/creator/composables/useChoiceOperations';
 
 const emit = defineEmits(['click', 'copy', 'delete', 'update', 'optionSetting', 'setLogic'])
 
@@ -113,53 +120,22 @@ const updateChoices = (newChoices) => {
 	emit('update', 'choices', newChoices)
 }
 
-const getNewChoiceItem = (otherOptionIndex, newChoices) => {
-	let index = otherOptionIndex === -1 ? newChoices.length + 1 : newChoices.length
-
-	return {
-		"value": `选项${index}`,
-		"showText": false,
-		"textType": "text",
-		"required": true,
-	}
-}
-
 // 添加单个选项
 const addOption = () => {
-	const newChoices = [...props.element.choices]
-	// 查找是否存在其他项
-	const otherOptionIndex = newChoices.findIndex(choice => choice.value === '其他')
-	const newChoiceItem = getNewChoiceItem(otherOptionIndex, newChoices)
-
-	// 如果存在其他项，在其他项之前插入新选项
-	if (otherOptionIndex !== -1) {
-		newChoices.splice(otherOptionIndex, 0, newChoiceItem)
-	} else {
-		// 如果不存在其他项，直接添加到末尾
-		newChoices.push(newChoiceItem)
-	}
-
+	const newChoices = addSingleOption(props.element.choices)
 	updateChoices(newChoices)
 }
 
 // 添加其他选项
 const addOtherOption = () => {
-	const newChoices = [...props.element.choices]
-	const otherChoiceItem = {
-		"value": '其他',
-		"showText": true,
-		"textType": "text",
-		"required": true,
-	}
-	newChoices.push(otherChoiceItem)
+	const newChoices = addOtherOptionUtil(props.element.choices)
 	updateChoices(newChoices)
 }
 
 
 // 删除选项
 const deleteOption = (index) => {
-	const newChoices = [...props.element.choices]
-	newChoices.splice(index, 1)
+	const newChoices = deleteOptionAtIndex(props.element.choices, index)
 	updateChoices(newChoices)
 }
 
@@ -169,47 +145,16 @@ const showBatchDialog = () => {
 	batchOptions.value = ''
 }
 
-const formattedNewOption = (newOptions) => {
-	return newOptions.map((element) => {
-		return {
-			"value": element,
-			"showText": false,
-			"textType": "text",
-			"required": true,
-		}
-	})
-}
-
-const addOptions = (newOptions) => {
-	let newChoices = [...props.element.choices]
-	// 查找是否存在其他项
-	const otherOptionIndex = newChoices.findIndex(choice => choice.value === '其他')
-
-	newOptions = formattedNewOption(newOptions)
-	// 如果存在其他项，在其他项之前插入新选项
-	if (otherOptionIndex !== -1) {
-		newChoices.splice(otherOptionIndex, 0, ...newOptions)
-	} else {
-		// 如果不存在其他项，直接添加到末尾
-		newChoices = [...props.element.choices, ...newOptions]
-	}
-
-	return newChoices
-}
-
 // 确认批量添加
 const confirmBatchAdd = () => {
-	const newOptions = batchOptions.value
-		.split('\n')
-		.filter(option => option.trim())
-		.map(option => option.trim())
+	const newOptions = parseBatchInput(batchOptions.value)
 
 	if (newOptions.length === 0) {
 		ElMessage.warning('请输入有效的选项')
 		return
 	}
 
-	const newChoices = addOptions(newOptions)
+	const newChoices = addBatchOptions(props.element.choices, newOptions)
 	updateChoices(newChoices)
 
 	batchDialogVisible.value = false
