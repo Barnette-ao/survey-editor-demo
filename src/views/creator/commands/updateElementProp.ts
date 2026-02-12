@@ -50,6 +50,54 @@ export function createUpdateElementPropCommand<K extends keyof QuestionElement>(
   }
 }
 
+export function createUpdateItemPropCommand<K extends keyof QuestionElement>(payload: {
+  questionId: string
+  itemIndex: number
+  key: K
+  value: QuestionElement[K]
+}): Command {
+  let oldValue: any = null
+  let oldElementId: string = ""
+  
+  return {
+    execute(state: any) {
+      const frozenValue = structuredClone(payload.value)
+      
+      // 保存旧值用于undo
+      const element = findElementById(payload.questionId, state)
+      if (element) {
+        const item = element.items?.[payload.itemIndex]
+        if (item) {
+          oldValue = structuredClone((item as any)[payload.key])
+        }
+        oldElementId = element.id
+      }
+
+      // 执行更新操作
+      const result = updateChoiceProp(
+        state,
+        payload.questionId,
+        payload.itemIndex,
+        payload.key,
+        frozenValue
+      )
+      
+      return result.cloned
+    },
+
+    undo(state: any) {
+      const result = updateChoiceProp(
+        state,
+        oldElementId,
+        payload.itemIndex,
+        payload.key,
+        oldValue
+      )
+      
+      return result.cloned
+    }
+  }
+}
 
 export function createUpdateChoicePropCommand<K extends keyof QuestionElement>(payload: {
   questionId: string

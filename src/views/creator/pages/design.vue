@@ -36,20 +36,18 @@
             <div class="surveyNameBox">
               <div class="surveyName">
                 <customEditor
-                  v-model="questionSettings.title"
-                  :targetObject="questionSettings"
-                  targetKey="title"
+                  :model-value="questionSettings.title"
                   width="400px"
                   editorId="surveyName"
+                  @blur="changeSurveyPorp('title')"
                 />
               </div>
               <div class="description">
                 <customEditor
-                  v-model="questionSettings.description"
-                  :targetObject="questionSettings"
-                  targetKey="description"
+                  :model-value="questionSettings.description"
                   width="400px"
                   editorId="description"
+                  @blur="changeSurveyPorp('description')"
                 />
               </div>
             </div>
@@ -113,11 +111,10 @@
               <div class="title">结束语</div>
               <div class="completeHtml">
                 <customEditor
-                  v-model="questionSettings.completedHtml"
-                  :targetObject="questionSettings"
-                  targetKey="completedHtml"
+                  :model-value="questionSettings.completedHtml"
                   width="400px"
                   editorId="completedHtml"
+                  @blur="changeSurveyPorp('completedHtml')"
                 />
               </div>
             </div>
@@ -195,11 +192,11 @@
 
 <script setup lang="ts">
 import { defineAsyncComponent } from "vue"
+import { QuestionSettings } from "@/views/creator/types/questionnaire"
 
 import instruction from "@/views/creator/components/instruction.vue";
 import { questionTypeList } from "@/views/creator/utils/questionTypeList";
 import page from "@/views/creator/components/page.vue";
-
 import {
   settingComponentMap,
 } from "@/views/creator/config/registry";
@@ -229,6 +226,7 @@ import { useLogicDialogState } from '@/views/creator/composables/useLogicDialogS
 import { useOptionEditingState } from '@/views/creator/composables/useOptionEditingState'
 import { useSelectionState } from '@/views/creator/composables/useSelectionState'
 import { useDraftContext } from "@/views/creator/composables/useDraftContext";
+import { useDraftActions } from "@/views/creator/composables/useDraftAction";
 
 
 const LogicSettingDialog = defineAsyncComponent({
@@ -238,6 +236,17 @@ const LogicSettingDialog = defineAsyncComponent({
   delay: 200,
   timeout: 3000
 })
+
+const { applySurveyPropChange } = useDraftActions()
+const changeSurveyPorp = (key: string) =>{
+  return (value:string, ) => {
+    applySurveyPropChange({
+      key,
+      value
+    })
+  }
+}
+  
 
 //定义是否拖拽，拖拽则赋空值时不更新数据
 const istarg = ref(false);

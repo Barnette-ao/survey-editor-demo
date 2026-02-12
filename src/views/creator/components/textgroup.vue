@@ -9,8 +9,12 @@
 					<div class="option-item">
 						<DragHandler :is-visible="hoverIndex === index" @mousedown="emit('click')" />
 						<div class="optionItemBox">
-							<customEditor v-model="textbox.name" :targetObject="element.items[index]" targetKey="name"
-								:editor-id="`textbox-${element.id}-${index}`" @click="$emit('click')">
+							<customEditor 
+								:model-value="textbox.name" 
+								:editor-id="`textbox-${element.id}-${index}`" 
+								@click="$emit('click')"
+								@blur="onItemNameChange(index,element.id)"
+							>
 							</customEditor>
 							<el-button class="delete-option" @click="deleteItem(index)">
 								<el-icon>
@@ -63,6 +67,7 @@ import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
 import DragHandler from "@/views/creator/components/Icons/dragIcon.vue";
 import { initOptionsSortable } from '@/views/creator/config/dragOption';
+import { useDraftAction } from "@/views/creator/composables/useDraftAction";
 
 const emit = defineEmits(['click', 'copy', 'delete', 'update'])
 
@@ -131,6 +136,18 @@ const confirmBatchAdd = () => {
 
 	batchDialogVisible.value = false
 	this.$message.success('批量添加成功')
+}
+
+const { applyItemPropChange } = useDraftAction()
+const onChoiceValueChange = (itemIndex, elementId) => {
+	return (value) =>{
+		applyItemPropChange({
+			questionId: elementId,
+			itemIndex: itemIndex,
+			key: "name",
+			value: value,
+		})
+      }
 }
 </script>
 

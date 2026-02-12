@@ -52,6 +52,27 @@ export const updateElementProp = <K extends keyof QuestionElement>(
     return { cloned }
 }
 
+// key指定是"name"
+export const updateItemProp = <K extends keyof QuestionElement>(
+    questionSettings: any,
+    questionId: string,
+    itemIndex:number,
+    key: K,
+    value: QuestionElement[K]
+) => {
+    const cloned = structuredClone(questionSettings)
+    const element = findElementById(questionId, cloned)
+    if (!element) return { cloned }
+
+    const item = element.items[itemIndex]
+    if (!item) return { cloned }
+    // 数据结构choices:[{name:"xxx",...},{name:"sss",...},...]
+    ;(item as any)[key] = value
+
+    return { cloned }
+}
+
+
 /**
  * 更新元素属性,
  * 给element中有choices的属性用

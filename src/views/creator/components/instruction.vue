@@ -10,8 +10,13 @@
 		<template #options>
 			<!-- 说明文字区域 -->
 			<div class="instruction-content">
-				<customEditor v-model="element.html" :targetObject="element" targetKey="html" width="600px"
-					:editor-id="`instruction-${element.id}`" @click="$emit('click')" />
+				<customEditor 
+					:model-value="element.html"  
+					width="600px"
+					:editor-id="`instruction-${element.id}`" 
+					@click="$emit('click')"
+					@blur="changeHtmlPorp" 
+				/>
 			</div>
 		</template>
 	</base-question>
@@ -21,6 +26,7 @@
 import { ref, computed } from 'vue'
 import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
+import { useDraftAction } from "@/views/creator/composables/useDraftAction";
 
 const emit = defineEmits(['click', 'copy', 'delete', 'update'])
 
@@ -39,6 +45,14 @@ const props = defineProps({
 	}
 })
 
+const { applyElementPropChange } = useDraftActions()
+const changeHtmlPorp = (value) => {
+	applyElementPropChange({
+		questionId:element.id,
+		key: "html",
+		value
+	})
+}
 </script>
 
 <style scoped>

@@ -12,9 +12,12 @@
 					@mouseleave="hoverIndex = -1">
 					<DragHandler :is-visible="hoverIndex === index" @mousedown="emit('click')" />
 					<div class="optionItemBox">
-						<customEditor :modelValue="choice" @update:modelValue="updateChoice(index, $event)"
-							:targetObject="element.choices" :targetKey="index + ''"
-							:editor-id="`choice-${element.id}-${index}`" @click="$emit('click')">
+						<customEditor 
+							:model-value="choice" 
+							:editor-id="`choice-${element.id}-${index}`" 
+							@click="$emit('click')"
+							@blur="onChoiceValueChange(index, element.id)"
+						>
 							<template #choiceIcon>
 								<el-icon color="#606266">
 									<CaretBottom />
@@ -70,6 +73,7 @@ import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
 import DragHandler from "@/views/creator/components/Icons/dragIcon.vue";
 import { initOptionsSortable } from '@/views/creator/config/dragOption';
+import { useDraftAction } from "@/views/creator/composables/useDraftAction";
 import { 
   addSimpleOption, 
   deleteSimpleOptionAtIndex, 
@@ -99,12 +103,6 @@ onMounted(() => {
     initOptionsSortable('dropdown-option-list', props.element, updateChoices);
   });
 });
-
-const updateChoice = (index, newValue) => {
-    const newChoices = [...props.element.choices]
-    newChoices[index] = newValue
-    updateChoices(newChoices)
-}
 
 const hoverIndex = ref(-1)
 
@@ -147,6 +145,11 @@ const confirmBatchAdd = () => {
 
 	batchDialogVisible.value = false
 	ElMessage.success('批量添加成功')
+}
+
+const { onChoiceValueChange } = useDraftAction()
+const onChoiceValueChange = (choiceIndex, elementId) => {
+	onChoiceValueChange(choiceIndex, elementId)
 }
 </script>
 

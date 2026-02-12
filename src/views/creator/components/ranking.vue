@@ -14,9 +14,10 @@
 					<div class="optionItemBox">
 						<customEditor 、
 							:model-value="choice"  
-							:targetObject="element.choices" 
-							:targetKey="index + ''"
-							:editor-id="`choice-${element.id}-${index}`" @click="$emit('click')">
+							:editor-id="`choice-${element.id}-${index}`" 
+							@click="$emit('click')"
+							@blur="onChoiceValueChange(index, element.id)"
+						>
 							<template #choiceIcon>
 								<el-icon color="#909399">
 									<Sort />
@@ -70,6 +71,7 @@ import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
 import DragHandler from "@/views/creator/components/Icons/dragIcon.vue";
 import { initOptionsSortable } from '@/views/creator/config/dragOption';
+import { useDraftAction } from "@/views/creator/composables/useDraftAction";
 import { 
   addSimpleOption, 
   deleteSimpleOptionAtIndex, 
@@ -140,6 +142,11 @@ const confirmBatchAdd = () => {
 
 	batchDialogVisible.value = false
 	ElMessage.success('批量添加成功')
+}
+
+const { onChoiceValueChange } = useDraftActions()
+const onChoiceValueChange = (choiceIndex, elementId) => {
+	onChoiceValueChange(choiceIndex, elementId)
 }
 </script>
 

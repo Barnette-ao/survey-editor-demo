@@ -13,8 +13,12 @@
 					 <div class="option-item">
 						<DragHandler :is-visible="hoverIndex === index" @mousedown="emit('click')"/>
 						<div class="optionItemBox"  >
-							<customEditor v-model="choice.value" :targetObject="element.choices[index]" targetKey="value"
-								:editor-id="`choice-${element.id}-${index}`" @click="emit('click')">
+							<customEditor 
+								:model-value="choice.value" 
+								:editor-id="`choice-${element.id}-${index}`" 
+								@click="emit('click')"
+								@blur="onChoiceValueChange(index, element.id)"
+							>
 								<template #choiceIcon>
 									<div class="choiceIcon"></div>
 								</template>
@@ -79,6 +83,7 @@ import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
 import DragHandler from "@/views/creator/components/Icons/dragIcon.vue";
 import { initOptionsSortable } from '@/views/creator/config/dragOption';
+import { useDraftAction } from "@/views/creator/composables/useDraftAction";
 import { ref, nextTick, onMounted } from 'vue'
 import { 
   addSingleOption, 
@@ -173,6 +178,11 @@ const handleClick = () => {
 	// 点击题目时，关闭选项设置模式
 	emit('optionSetting', { index: -1, isOpen: false })
 	emit('click')
+}
+
+const { onChoiceValueChange } = useDraftActions()
+const onChoiceValueChange = (choiceIndex, elementId) => {
+	onChoiceValueChange(choiceIndex, elementId)
 }
 
 </script>
