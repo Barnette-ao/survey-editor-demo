@@ -70,6 +70,12 @@ import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
 import DragHandler from "@/views/creator/components/Icons/dragIcon.vue";
 import { initOptionsSortable } from '@/views/creator/config/dragOption';
+import { 
+  addSimpleOption, 
+  deleteSimpleOptionAtIndex, 
+  addSimpleBatchOptions, 
+  parseBatchInput 
+} from '@/views/creator/composables/useChoiceOperations';
 
 const emit = defineEmits(['click', 'copy', 'delete', 'update', 'setLogic'])
 
@@ -111,15 +117,13 @@ const updateChoices = (newChoices) => {
 
 // 添加单个选项
 const addOption = () => {
-	const newChoices = [...props.element.choices]
-	newChoices.push(`选项${newChoices.length + 1}`)
+	const newChoices = addSimpleOption(props.element.choices)
 	updateChoices(newChoices)
 }
 
 // 删除选项
 const deleteOption = (index) => {
-	const newChoices = [...props.element.choices]
-	newChoices.splice(index, 1)
+	const newChoices = deleteSimpleOptionAtIndex(props.element.choices, index)
 	updateChoices(newChoices)
 }
 
@@ -129,25 +133,16 @@ const showBatchDialog = () => {
 	batchOptions.value = ''
 }
 
-const addOptions = (newOptions) => {
-	let newChoices = [...props.element.choices]
-	newChoices = [...props.element.choices, ...newOptions]
-	return newChoices
-}
-
 // 确认批量添加
 const confirmBatchAdd = () => {
-	const newOptions = batchOptions.value
-		.split('\n')
-		.filter(option => option.trim())
-		.map(option => option.trim())
+	const newOptions = parseBatchInput(batchOptions.value)
 
 	if (newOptions.length === 0) {
 		ElMessage.warning('请输入有效的选项')
 		return
 	}
 
-	const newChoices = addOptions(newOptions)
+	const newChoices = addSimpleBatchOptions(props.element.choices, newOptions)
 	updateChoices(newChoices)
 
 	batchDialogVisible.value = false

@@ -99,3 +99,30 @@ export const parseBatchInput = (input: string): string[] => {
     .filter(option => option.trim())
     .map(option => option.trim())
 }
+
+// ===== 简单字符串数组格式的选项操作 (用于dropdown等组件) =====
+
+/**
+ * 添加单个选项 (字符串格式)
+ */
+export const addSimpleOption = (choices: string[]): string[] => {
+  const newChoices = [...choices]
+  newChoices.push(`选项${newChoices.length + 1}`)
+  return newChoices
+}
+
+/**
+ * 删除指定索引的选项 (字符串格式)
+ */
+export const deleteSimpleOptionAtIndex = (choices: string[], index: number): string[] => {
+  const newChoices = [...choices]
+  newChoices.splice(index, 1)
+  return newChoices
+}
+
+/**
+ * 批量添加选项 (字符串格式)
+ */
+export const addSimpleBatchOptions = (choices: string[], newOptions: string[]): string[] => {
+  return [...choices, ...newOptions]
+}
