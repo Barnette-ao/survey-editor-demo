@@ -13,8 +13,12 @@
 					<div class="option-item">
 						<DragHandler :is-visible="hoverIndex === index" @mousedown="emit('click')" />
 						<div class="optionItemBox">
-							<customEditor v-model="choice.value" :targetObject="element.choices[index]" targetKey="value"
-								:editor-id="`choice-${element.id}-${index}`" @click="$emit('click')">
+							<customEditor 
+								:model-value="choice.value" 
+								:editor-id="`choice-${element.id}-${index}`" 
+								@click="$emit('click')"
+								@blur="onChoiceValueChange(index)"
+							>
 								<template #choiceIcon>
 									<div class="choiceIcon"></div>
 								</template>
@@ -78,6 +82,8 @@ import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
 import DragHandler from "@/views/creator/components/Icons/dragIcon.vue";
 import { initOptionsSortable } from '@/views/creator/config/dragOption';
+
+import { useDraftAction } from "@/views/creator/composables/useDraftAction";
 
 const emit = defineEmits(['click', 'copy', 'delete', 'update', 'optionSetting', 'setLogic'])
 
@@ -225,6 +231,19 @@ const handleClick = () => {
 	// 点击题目时，关闭选项设置模式
 	emit('optionSetting', { index: -1, isOpen: false })
 	emit('click')
+}
+
+
+const { applyChoicePropChange } = useDraftActions()
+const onChoiceValueChange = (choiceIndex) => {
+	return (value) =>{
+		applyChoicePropChange({
+			questionId: props.element.id,
+			choiceIndex: choiceIndex,
+			key: "value",
+			value: value,
+		})
+	}
 }
 
 

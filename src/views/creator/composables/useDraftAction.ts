@@ -1,4 +1,7 @@
-import { createUpdateElementPropCommand } from "@/views/creator/commands";
+import { 
+    createUpdateElementPropCommand,
+    createUpdateChoicePropCommand 
+} from "@/views/creator/commands";
 import { useDraftContext } from "@/views/creator/composables/useDraftContext";
 
 export function useDraftActions() {
@@ -9,7 +12,13 @@ export function useDraftActions() {
     draft.applyOperation(cmd)
   }
 
+  function applyChoicePropChange(payload:any) {
+    const cmd = createUpdateChoicePropCommand(payload)
+    draft.applyOperation(cmd)
+  }
+
   return {
-    applyElementPropChange
+    applyElementPropChange,
+    applyChoicePropChange
   }
 }
