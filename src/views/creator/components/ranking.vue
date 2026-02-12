@@ -12,8 +12,10 @@
 				>
 					<DragHandler :is-visible="hoverIndex === index"  @mousedown="$emit('click')"/>
 					<div class="optionItemBox">
-						<customEditor :model-value="choice" @update:modelValue="updateChoice(index, $event)" 
-							:targetObject="element.choices" :targetKey="index + ''"
+						<customEditor 、
+							:model-value="choice"  
+							:targetObject="element.choices" 
+							:targetKey="index + ''"
 							:editor-id="`choice-${element.id}-${index}`" @click="$emit('click')">
 							<template #choiceIcon>
 								<el-icon color="#909399">
@@ -68,6 +70,12 @@ import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
 import DragHandler from "@/views/creator/components/Icons/dragIcon.vue";
 import { initOptionsSortable } from '@/views/creator/config/dragOption';
+import { 
+  addSimpleOption, 
+  deleteSimpleOptionAtIndex, 
+  addSimpleBatchOptions, 
+  parseBatchInput 
+} from '@/views/creator/composables/useChoiceOperations';
 
 const emit = defineEmits(['click', 'copy', 'delete', 'update'])
 
@@ -89,12 +97,6 @@ onMounted(() => {
   });
 });
 
-const updateChoice = (index, newValue) => {
-    const newChoices = [...props.element.choices]
-    newChoices[index] = newValue
-    updateChoices(newChoices)
-}
-
 const hoverIndex = ref(-1)
 
 const batchDialogVisible = ref(false)
@@ -107,15 +109,13 @@ const updateChoices = (newChoices) => {
 
 // 添加选项
 const addOption = () => {
-	const newChoices = [...props.element.choices]
-	newChoices.push(`选项${newChoices.length + 1}`)
+	const newChoices = addSimpleOption(props.element.choices)
 	updateChoices(newChoices)
 }
 
 // 删除选项
 const deleteOption = (index) => {
-	const newChoices = [...props.element.choices]
-	newChoices.splice(index, 1)
+	const newChoices = deleteSimpleOptionAtIndex(props.element.choices, index)
 	updateChoices(newChoices)
 }
 
@@ -128,17 +128,14 @@ const showBatchDialog = () => {
 
 // 确认批量添加
 const confirmBatchAdd = () => {
-	const newOptions = batchOptions.value
-		.split('\n')
-		.map(option => option.trim())
-		.filter(option => option !== '')
+	const newOptions = parseBatchInput(batchOptions.value)
 
 	if (newOptions.length === 0) {
 		ElMessage.warning('请输入有效的选项')
 		return
 	}
 
-	const newChoices = [...props.element.choices, ...newOptions]
+	const newChoices = addSimpleBatchOptions(props.element.choices, newOptions)
 	updateChoices(newChoices)
 
 	batchDialogVisible.value = false

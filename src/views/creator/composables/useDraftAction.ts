@@ -17,8 +17,20 @@ export function useDraftActions() {
     draft.applyOperation(cmd)
   }
 
+  function onChoiceValueChange(choiceIndex:number, elementId:string){
+      return (value:string) =>{
+            applyChoicePropChange({
+                questionId: elementId,
+                choiceIndex: choiceIndex,
+                key: "value",
+                value: value,
+            })
+      }
+   }
+
   return {
     applyElementPropChange,
-    applyChoicePropChange
+    applyChoicePropChange,
+    onChoiceValueChange,
   }
 }
