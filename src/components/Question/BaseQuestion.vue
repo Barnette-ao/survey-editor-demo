@@ -9,8 +9,13 @@
 						{{ number }}
 					</span>
 				</span>
-				<customEditor  :model-value="title" :targetObject="element" :targetKey="targetKeyValue" width="100%"
-					:editor-id="`title-${element.id}`" :isEditable="isEditable" @click="handleContainerClick" />
+				<customEditor  
+					:model-value="title" 
+					:editor-id="`title-${element.id}`" 
+					:isEditable="isEditable" 
+					@click="handleContainerClick"
+					@blur="changeElementTitle" 
+				/>
 			</div>
 
 			<slot name="header-actions">
@@ -56,8 +61,12 @@
 		</div>
 
 		<div class="subDescription" v-show="element.showSubDescription">
-			<customEditor :model-value="description" :targetObject="element" targetKey="description"
-				:editor-id="`description-${element.id}`" @click="handleContainerClick" width="100%" />
+			<customEditor 
+				:model-value="description" 
+				:editor-id="`description-${element.id}`" 
+				@click="handleContainerClick"
+				@blur="changeElementDescription"
+			/>
 		</div>
 
 		<!-- 选项列表 -->
@@ -79,6 +88,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
+import { useDraftAction } from "@/views/creator/composables/useDraftAction";
 
 const props = defineProps({
 	element: {
@@ -111,30 +121,12 @@ const props = defineProps({
 	}
 })
 
-const emit = defineEmits(['click', 'copy', 'delete', 'blur', 'setLogic'])
+const emit = defineEmits(['click', 'copy', 'delete', 'setLogic'])
 
 const isCollapsed = ref(false)
-
 const handleCollapse = () => {
   isCollapsed.value = !isCollapsed.value
 }
-
-const isSelectElement = computed(() => ['checkbox','dropdown','radiogroup','ranking'].includes(props.element.type))
-
-const content = computed(() => !isCollapsed.value ? '折叠' : '展开')
-
-const number = computed(() => props.element.number || 1)
-
-const description = computed({
-	get: () => props.element.description || "请输入题干说明",
-})
-
-const required = computed({
-	get: () => {
-		if (props.element.type === "html") return false;
-		else return props.element.isRequired
-	}
-})
 
 const title = computed(() =>
 	props.element.title !== undefined
@@ -143,14 +135,34 @@ const title = computed(() =>
 			? props.element.name
 			: "标题"
 )
+const isSelectElement = computed(() => ['checkbox','dropdown','radiogroup','ranking'].includes(props.element.type))
+const content = computed(() => !isCollapsed.value ? '折叠' : '展开')
+const number = computed(() => props.element.number || 1)
+const description = computed(() => props.element.description || "请输入题干说明")
+const required = computed(() => {
+	if (props.element.type === "html") return false;
+	else return props.element.isRequired
+})
 
-const targetKeyValue = computed(() => (props.element.title !== undefined) ? "title" : "name")
+const { applyElementPropChange } = useDraftActions()
+const changeElementDescription = (value) => {
+	applyElementPropChange({
+		questionId:element.id,
+		key: "description",
+		value
+	})
+}
 
-
+const changeElementTitle = (value) => {
+	applyElementPropChange({
+		questionId:props.element.id,
+		key: "title",
+		value
+	})
+}
 
 
 const handleCopy = () => {
-	console.log("BaseQuestion_copy,执行了")
 	emit('copy', props.element.id)
 }
 

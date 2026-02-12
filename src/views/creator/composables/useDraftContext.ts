@@ -1,11 +1,12 @@
 import { useSurveyId } from "@/views/creator/composables/useSurveyId";
 import { useDraftMapStore } from '@/stores/draftMapStore'
+import { DraftStorageService } from "../services/DraftStorageService";
 
 export function useDraftContext() {
   const { surveyId } = useSurveyId()
   const draftMapStore = useDraftMapStore()
   
-  const draft:any = draftMapStore.getDraft(surveyId) 
+  const draft:DraftStorageService = draftMapStore.getDraft(surveyId) 
   if(!draftMapStore.hasOpened()){
     draft.openWithRunningState()
   }
