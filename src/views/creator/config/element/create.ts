@@ -2,7 +2,8 @@ import { v4 as uuidv4 } from 'uuid'
 import { formattedNumber } from '@/views/creator/config/adapter'
 import { nextTick } from 'vue'
 import { getSelectedElementPosition } from '@/views/creator/config/element'
-import { questionTemplates } from '@/views/creator/config/registry'
+import { questionTemplates } from '@/views/creator/config/questionTemplate'
+
 
 type ExcludePropsMap = {
 	radiogroup: string[];

@@ -31,7 +31,7 @@
             <div class="surveyNameBox">
               <div class="surveyName">
                 <customEditor
-                  :model-value="questionSettings.title"
+                  :model-value="draftState.title"
                   width="400px"
                   editorId="surveyName"
                   @blur="changeSurveyPorp('title')"
@@ -39,7 +39,7 @@
               </div>
               <div class="description">
                 <customEditor
-                  :model-value="questionSettings.description"
+                  :model-value="draftState.description"
                   width="400px"
                   editorId="description"
                   @blur="changeSurveyPorp('description')"
@@ -61,12 +61,12 @@
                   :data-page-index="item.pageIndex"
                 >
                   <page
-                    v-if="questionSettings.pages.length > 1"
-                    :totalPages="questionSettings.pages.length"
+                    v-if="draftState.pages.length > 1"
+                    :totalPages="draftState.pages.length"
                     :currentPage="item.pageIndex + 1"
                     :selected="currentQuestionId === '' && pageIndex === item.pageIndex"
                     :questionList="getQuestionNameOf(item.page)"
-                    @delete="deletePage(questionSettings, item.page, item.pageIndex)"
+                    @delete="deletePage(draftState, item.page, item.pageIndex)"
                     @click="handlePageClick(item.pageIndex)"
                   />
                 </div>
@@ -100,7 +100,7 @@
               <div class="title">结束语</div>
               <div class="completeHtml">
                 <customEditor
-                  :model-value="questionSettings.completedHtml"
+                  :model-value="draftState.completedHtml"
                   width="400px"
                   editorId="completedHtml"
                   @blur="changeSurveyPorp('completedHtml')"
@@ -166,7 +166,7 @@
     </div>
     <logic-setting-dialog
       :visible="logicDialogVisible"
-      :question-settings="questionSettings"
+      :question-settings="draftState"
       :element="settedLogicElement"
       @saveLogicRules="handleLogicUpdate"
       @closeLogicDialog="closeLogicDialog"
@@ -179,13 +179,9 @@ import { defineAsyncComponent } from "vue"
 import instruction from "@/views/creator/components/instruction.vue";
 import { questionTypeList } from "@/views/creator/utils/questionTypeList";
 import page from "@/views/creator/components/page.vue";
-import {
-  settingComponentMap,
-} from "@/views/creator/config/registry";
-import {
-  deletePage,
-} from "@/views/creator/config/handleElementAndPage";
-import { initSortable } from "@/views/creator/config/dragElementOrPage";
+import { settingComponentMap } from "@/views/creator/config/registry";
+import { deletePage } from "@/views/creator/config/handleElementAndPage";
+// import { initSortable } from "@/views/creator/config/dragElementOrPage";
 import { destroyAllOptionSortables } from "@/views/creator/config/dragOption.js";
 import {
   handleLogicRulesUpdateWrapper as handleLogicRulesUpdate,
@@ -232,9 +228,9 @@ const changeSurveyPorp = (key: string) =>{
 //定义是否拖拽，拖拽则赋空值时不更新数据
 const istarg = ref(false);
 
-// 先初始化 questionSettings
-const { draftState } = useDraftContext()
-const questionSettings = draftState
+// 先初始化 draftState
+const { draftState, draft } = useDraftContext()
+console.log("draftState",draftState.value)
 
 const instructionElementId = ref("");
 const instructionElement = ref({});
@@ -244,12 +240,14 @@ const sentinelRef = ref(null)  // 直接在组件中创建
 const incrementalLoadingInstance = ref({})
 
 onMounted(async () => {
-  instructionElement.value = questionSettings.value.pages[0].elements[0];
-  instructionElementId.value = questionSettings.value.pages[0].elements[0].id;
+  draft.openWithRunningState()
+  
+  instructionElement.value = draftState.value.pages[0].elements[0];
+  instructionElementId.value = draftState.value.pages[0].elements[0].id;
   
   // 数据加载完成后，初始化增量加载
   incrementalLoadingInstance.value = useIncrementalLoading(
-    questionSettings, 
+    draftState, 
     sentinelRef, {
       initialCount: 10,
       batchSize: 5,
@@ -264,9 +262,11 @@ onMounted(async () => {
   if (sentinelRef.value) {
     incrementalLoadingInstance.value.initObserverManually();
   }
+
+  console.log("incrementalLoadingInstance",incrementalLoadingInstance.value)
   
   // 初始化拖拽功能
-  initSortable(questionSettings, instructionElementId.value, istarg);
+  // initSortable(draftState, instructionElementId.value, istarg);
 });
 // questionSettings是reactive，它不能支持动态添加的属性保持器响应式，
 // 但ref可以保持其响应式
@@ -331,20 +331,20 @@ const {
   showQuestionNumbers, 
   isShowNumber, 
   showNumberComputed
-} = useQuestionDisplay(questionSettings)
+} = useQuestionDisplay(draftState)
 
 const {
   oneQuestionPerPage,
   getQuestionNameOf
-} = usePageStructure(questionSettings)
+} = usePageStructure(draftState)
 
-const { getLogicRuleNum } = useLogicRules(questionSettings)
+const { getLogicRuleNum } = useLogicRules(draftState)
 
 const { 
   currentElement, 
   getCurrentElementType, 
   getCurrentElementTypeText
-} = useCurrentElement(questionSettings,currentQuestionId)
+} = useCurrentElement(draftState,currentQuestionId)
 
 const {
     updateElementField,
@@ -353,7 +353,7 @@ const {
     copyElement,
     deleteElement,
 } = useElementOperations(
-  questionSettings, 
+  draftState, 
   currentQuestionId, 
   currentElement,
   settingType,
@@ -363,21 +363,21 @@ const {
 const {
     handleQuestionTypeClick,
     handleStructrueChange
-} = useQuestionCreation(questionSettings, currentQuestionId, pageIndex, isCurrentQuestionAPage)
+} = useQuestionCreation(draftState, currentQuestionId, pageIndex, isCurrentQuestionAPage)
 
 // 当页面结构变化时重新初始化 Sortable
 watch(
-  () => questionSettings.value?.pages?.length || 0,
+  () => draftState.value?.pages?.length || 0,
   () => {
     nextTick(() => {
-      initSortable(questionSettings, instructionElementId.value, istarg);
+      initSortable(draftState, instructionElementId.value, istarg);
     });
   }
 );
 
 
 const handleLogicUpdate = (saveLogicObj) => {
-  handleLogicRulesUpdate(saveLogicObj, questionSettings);
+  handleLogicRulesUpdate(saveLogicObj, draftState);
 };
 
 </script>

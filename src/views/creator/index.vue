@@ -100,7 +100,7 @@ Serializer.addProperty("selectbase", {
       
 
       .menu {
-        width: 80%;
+        width: 70%;
         height: 100%;
         background-color:"skyblue";
 
@@ -123,7 +123,7 @@ Serializer.addProperty("selectbase", {
       }
 
       .exitBox {
-        width: 20%;
+        width: 30%;
         height: 100%;
         display: flex;
         align-items: center;

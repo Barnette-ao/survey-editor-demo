@@ -1,6 +1,6 @@
 import { computed, ComputedRef, Ref } from 'vue'
 import { questionTypeList } from '@/views/creator/utils/questionTypeList'
-import { ratingTypeMap } from '@/views/creator/config/registry'
+
 import type {
   QuestionSettings,
   QuestionElement,

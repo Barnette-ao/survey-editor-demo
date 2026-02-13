@@ -1,7 +1,7 @@
 import Sortable from "sortablejs";
 import { formattedNumber } from "@/views/creator/config/adapter";
 import { deletePage } from "@/views/creator/config/page";
-import { spliteOffOnePageIntoPages,addEmptyPageBeforePage } from "@/views/creator/config/page";
+import { spliteOffOnePageIntoPages,addEmptyPageAfterPage } from "@/views/creator/config/page";
 
 
 // 存储所有创建的 Sortable 实例
@@ -185,7 +185,7 @@ const dragPageToPage = (questionSettings, fromPageIndex, toPageIndex) => {
 		fromPageIndex
 	);
 	// 在落点页面之前插入一个空页面
-	addEmptyPageBeforePage(questionSettings, toPageIndex - 1)
+	addEmptyPageAfterPage(questionSettings, toPageIndex - 1)
 }
 
 

@@ -64,7 +64,7 @@ export const updateItemProp = <K extends keyof QuestionElement>(
     const element = findElementById(questionId, cloned)
     if (!element) return { cloned }
 
-    const item = element.items[itemIndex]
+    let item = element.items[itemIndex]
     if (!item) return { cloned }
     // 数据结构choices:[{name:"xxx",...},{name:"sss",...},...]
     ;(item as any)[key] = value
@@ -94,7 +94,7 @@ export const updateChoiceProp = <K extends keyof QuestionElement>(
     const element = findElementById(questionId, cloned)
     if (!element) return { cloned }
 
-    const choice = element.choices[choiceIndex]
+    let choice = element.choices[choiceIndex]
     if (!choice) return { cloned }
     // 数据结构choices:[{value:"xxx",...},{value:"sss",...},...]
     if (typeof choice === "object"){
