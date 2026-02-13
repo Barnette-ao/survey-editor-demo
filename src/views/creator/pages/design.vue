@@ -192,8 +192,6 @@
 
 <script setup lang="ts">
 import { defineAsyncComponent } from "vue"
-import { QuestionSettings } from "@/views/creator/types/questionnaire"
-
 import instruction from "@/views/creator/components/instruction.vue";
 import { questionTypeList } from "@/views/creator/utils/questionTypeList";
 import page from "@/views/creator/components/page.vue";

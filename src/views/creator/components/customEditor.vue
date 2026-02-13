@@ -26,8 +26,8 @@
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import TiipTapEditor from "@/components/Editor/TiipTapEditor.vue"; // 导入你封装的 wangEditor 组件
 import { useEditorStore } from "@/stores/editorStore";
-import { formatContent } from "@/views/creator/config/helpers";
 import { htmlToPlainText } from "@/views/creator/config/adapter";
+import { debounce } from "lodash-es";
 
 const props = defineProps({
   modelValue: {
@@ -51,16 +51,13 @@ const props = defineProps({
 const emit = defineEmits(['blur'])
 
 const editorStore = useEditorStore();
-
 // 计算属性：判断当前组件是否处于编辑状态
 const isEditing = computed(() => {
   return !props.isEditable && editorStore.activeEditorId === props.editorId;
 });
-
 const wangEditorValue = computed(() => {
   return props.modelValue || "";
 });
-
 // 显示在 div 中的文本
 const displayText = computed(() => {
   return props.modelValue || "请输入内容";
@@ -73,12 +70,10 @@ const handleFocus = () => {
 };
 
 // 当编辑器失去焦点时，切换回 div
-const handleBlur = (value) => {
-  const content = formatContent(props.targetKey, value);
-  // props.targetObject[props.targetKey] = content;
-  const formatted = htmlToPlainText(currentHtml)
+const handleBlur = debounce((value) => {
+  const formatted = htmlToPlainText(value)
   emit("blur", formatted)
-};
+}, 300);
 
 // 点击 wrapper 时激活编辑器
 const handleWrapperClick = () => {
