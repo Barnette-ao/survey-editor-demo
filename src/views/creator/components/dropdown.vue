@@ -16,7 +16,7 @@
 							:model-value="choice" 
 							:editor-id="`choice-${element.id}-${index}`" 
 							@click="$emit('click')"
-							@blur="onChoiceValueChange(index, element.id)"
+							@blur="changeChoiceValue(index, element.id)"
 						>
 							<template #choiceIcon>
 								<el-icon color="#606266">
@@ -73,7 +73,7 @@ import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
 import DragHandler from "@/views/creator/components/Icons/dragIcon.vue";
 import { initOptionsSortable } from '@/views/creator/config/dragOption';
-import { useDraftAction } from "@/views/creator/composables/useDraftAction";
+import { useDraftActions } from "@/views/creator/composables/useDraftAction";
 import { 
   addSimpleOption, 
   deleteSimpleOptionAtIndex, 
@@ -148,7 +148,7 @@ const confirmBatchAdd = () => {
 }
 
 const { onChoiceValueChange } = useDraftAction()
-const onChoiceValueChange = (choiceIndex, elementId) => {
+const changeChoiceValue = (choiceIndex, elementId) => {
 	onChoiceValueChange(choiceIndex, elementId)
 }
 </script>

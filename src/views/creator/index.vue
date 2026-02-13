@@ -26,7 +26,6 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { Serializer } from "survey-core";
-import { useSurveyId } from '@/views/creator/composables/useSurveyId'
 import { useDraftActions } from '@/views/creator/composables/useDraftAction'
 
 import { useRouter, useRoute } from 'vue-router'

@@ -17,7 +17,7 @@
 								:model-value="choice.value" 
 								:editor-id="`choice-${element.id}-${index}`" 
 								@click="emit('click')"
-								@blur="onChoiceValueChange(index, element.id)"
+								@blur="changeChoiceValue(index, element.id)"
 							>
 								<template #choiceIcon>
 									<div class="choiceIcon"></div>
@@ -83,7 +83,7 @@ import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
 import DragHandler from "@/views/creator/components/Icons/dragIcon.vue";
 import { initOptionsSortable } from '@/views/creator/config/dragOption';
-import { useDraftAction } from "@/views/creator/composables/useDraftAction";
+import { useDraftActions } from "@/views/creator/composables/useDraftAction";
 import { ref, nextTick, onMounted } from 'vue'
 import { 
   addSingleOption, 
@@ -181,7 +181,7 @@ const handleClick = () => {
 }
 
 const { onChoiceValueChange } = useDraftActions()
-const onChoiceValueChange = (choiceIndex, elementId) => {
+const changeChoiceValue = (choiceIndex, elementId) => {
 	onChoiceValueChange(choiceIndex, elementId)
 }
 

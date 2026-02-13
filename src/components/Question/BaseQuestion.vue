@@ -88,7 +88,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
-import { useDraftAction } from "@/views/creator/composables/useDraftAction";
+import { useDraftActions } from "@/views/creator/composables/useDraftAction";
 
 const props = defineProps({
 	element: {

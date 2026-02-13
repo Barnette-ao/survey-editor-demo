@@ -1,11 +1,7 @@
 <template>
-  <!-- 1 -->
   <div class="design">
-    <!-- 2 -->
     <div class="typeAndStyleBox">
-      <!-- 3 -->
       <div class="mainPart">
-        <!-- 4 -->
         <div class="questionTypeList">
           <div class="list" v-for="(categoryItem,index) in questionTypeList" :key="index">
             <div class="groupTitle">
@@ -31,7 +27,6 @@
           </div>
         </div>
         <div class="middlePart">
-          <!-- 5 -->
           <div class="creatorContent">
             <div class="surveyNameBox">
               <div class="surveyName">
@@ -51,9 +46,7 @@
                 />
               </div>
             </div>
-            <!-- 6 -->
             <div class="questionListContainer">
-              <!-- 7 -->
               <div class="firstElement">
                 <instruction
                   :element="instructionElement"
@@ -61,9 +54,7 @@
                   :isEditable="true"
                 />
               </div>
-              <!-- 7 -->
               <template v-for="item in incrementalLoadingInstance?.renderedItems" :key="item.id">
-                <!-- 页面组件 -->
                 <div 
                   v-if="item.type === 'page'"
                   class="page-container" 
@@ -79,7 +70,6 @@
                     @click="handlePageClick(item.pageIndex)"
                   />
                 </div>
-                <!-- 元素组件 -->
                 <component
                   v-else-if="item.type === 'element' && item.element.id !== instructionElementId"
                   :id="item.element.id"
@@ -99,7 +89,6 @@
             
               <!-- 哨兵元素 -->
               <div v-if="incrementalLoadingInstance.hasMore" ref="sentinelRef" class="loading-sentinel">
-                <!-- 8 -->
                 <div v-if="incrementalLoadingInstance.isLoading" class="loading-indicator"> 加载中...</div>
               </div>
               <!-- 加载完成提示 -->
@@ -122,10 +111,8 @@
         </div>
       </div>
     </div>
-    <!-- 2 -->
     <div class="propertyGridBox">
       <div class="titleBox"></div>
-      <!-- 3 -->
       <div class="propertyGrid">
         <div class="segment-container">
           <el-segmented
@@ -134,7 +121,6 @@
             style="margin-bottom: 1rem"
           />
         </div>
-        <!-- 4 -->
         <div class="segment-content">
           <div v-if="settingType === 'quickSetting'" class="quick-settings">
             <!-- 答题页 -->
@@ -155,12 +141,10 @@
               </div>
             </div>
           </div>
-          <!-- 5 -->
           <div v-else class="question-settings">
             <div class="questionType" v-if="currentQuestionId">
               {{ getCurrentElementTypeText }}
             </div>
-            <!-- 6 -->
             <component
               v-if="currentQuestionId"
               :is="settingComponentMap[getCurrentElementType]"
@@ -207,8 +191,7 @@ import {
   handleLogicRulesUpdateWrapper as handleLogicRulesUpdate,
 } from "@/views/creator/config/updateLogic";
 
-import { watch, nextTick, provide } from "vue";
-import { debounce } from "lodash-es";
+import { watch, nextTick } from "vue";
 import customEditor from "@/views/creator/components/customEditor.vue";
 import { useIncrementalLoading } from "@/views/creator/composables/useIncreamentalLoading"
 import { useQuestionDisplay } from "@/views/creator/composables/useQuestionNumberDisplay"

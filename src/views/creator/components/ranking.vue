@@ -12,18 +12,18 @@
 				>
 					<DragHandler :is-visible="hoverIndex === index"  @mousedown="$emit('click')"/>
 					<div class="optionItemBox">
-						<customEditor 、
+						<!--<customEditor 、
 							:model-value="choice"  
 							:editor-id="`choice-${element.id}-${index}`" 
 							@click="$emit('click')"
-							@blur="onChoiceValueChange(index, element.id)"
+							@blur="changeChoiceValue(index, element.id)"
 						>
 							<template #choiceIcon>
 								<el-icon color="#909399">
 									<Sort />
 								</el-icon>
 							</template>
-						</customEditor>
+						</customEditor>-->
 						<el-button class="delete-option" @click="deleteOption(index)">
 							<el-icon>
 								<Delete />
@@ -71,7 +71,7 @@ import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
 import DragHandler from "@/views/creator/components/Icons/dragIcon.vue";
 import { initOptionsSortable } from '@/views/creator/config/dragOption';
-import { useDraftAction } from "@/views/creator/composables/useDraftAction";
+import { useDraftActions } from "@/views/creator/composables/useDraftAction";
 import { 
   addSimpleOption, 
   deleteSimpleOptionAtIndex, 
@@ -145,7 +145,7 @@ const confirmBatchAdd = () => {
 }
 
 const { onChoiceValueChange } = useDraftActions()
-const onChoiceValueChange = (choiceIndex, elementId) => {
+const changeChoiceValue = (choiceIndex, elementId) => {
 	onChoiceValueChange(choiceIndex, elementId)
 }
 </script>

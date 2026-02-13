@@ -67,7 +67,7 @@ import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
 import DragHandler from "@/views/creator/components/Icons/dragIcon.vue";
 import { initOptionsSortable } from '@/views/creator/config/dragOption';
-import { useDraftAction } from "@/views/creator/composables/useDraftAction";
+import { useDraftActions } from "@/views/creator/composables/useDraftAction";
 
 const emit = defineEmits(['click', 'copy', 'delete', 'update'])
 
