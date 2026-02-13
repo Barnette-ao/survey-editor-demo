@@ -51,7 +51,8 @@ export function useDraftActions() {
 
   function applyAddElement(payload:any){
     const cmd = createAddQuestionCommand(payload)
-    draft.applyOperation(cmd)
+    const UIContext = draft.applyOperation(cmd)
+    return UIContext
   }
 
   function applyUndo(){
