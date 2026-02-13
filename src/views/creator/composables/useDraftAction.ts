@@ -2,7 +2,9 @@ import {
     createUpdateElementPropCommand,
     createUpdateChoicePropCommand,
     createUpdateItemPropCommand,
-    createUpdateSurveyPropCommand
+    createUpdateSurveyPropCommand,
+    createAddPageCommand,
+    createAddQuestionCommand
 } from "@/views/creator/commands";
 import { useDraftContext } from "@/views/creator/composables/useDraftContext";
 import { useRoute } from "vue-router";
@@ -42,6 +44,16 @@ export function useDraftActions() {
       }
   }
 
+  function applyAddPage(payload:any){
+    const cmd = createAddPageCommand(payload)
+    draft.applyOperation(cmd)
+  }
+
+  function applyAddElement(payload:any){
+    const cmd = createAddQuestionCommand(payload)
+    draft.applyOperation(cmd)
+  }
+
   function applyUndo(){
     if (route.name === 'editor-json') {
       draft.undoBaseSnapshot()
@@ -70,6 +82,8 @@ export function useDraftActions() {
     applySurveyPropChange,
     applyUndo,
     applyRedo,
-    applyCommit
+    applyCommit,
+    applyAddPage,
+    applyAddElement
   }
 }
