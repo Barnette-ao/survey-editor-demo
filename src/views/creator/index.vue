@@ -12,6 +12,8 @@
         </div>
       </div>
       <div class="exitBox">
+        <el-button @click="handleUndo">撤销</el-button>
+        <el-button @click="handleRedo">恢复</el-button>
         <el-button type="primary" @click="handleExit">退出编辑</el-button>
       </div>
     </div>
@@ -25,6 +27,7 @@
 import { ref, reactive } from 'vue'
 import { Serializer } from "survey-core";
 import { useSurveyId } from '@/views/creator/composables/useSurveyId'
+import { useDraftActions } from '@/views/creator/composables/useDraftAction'
 
 import { useRouter, useRoute } from 'vue-router'
 
@@ -43,11 +46,23 @@ const checkMenu = (index:number) => {
   });
 };
 
+const { 
+  applyUndo, 
+  applyRedo, 
+  applyCommit 
+} = useDraftActions()
+
 const handleExit = () => {
-  const surveyId:ComputedRef = useSurveyId()
-  // 提交保存，获取问卷实例，即得草稿状态数据
-  // 根据JSONEditor还是Design页面，调用不同的提交方法。
+  applyCommit()
   router.push('/')
+}
+
+const handleUndo = () => {
+  applyUndo()
+}
+
+const handleRedo = () => {
+  applyRedo()
 }
 
 // 给所有选择类型题目添加选项逻辑设置 属性

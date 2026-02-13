@@ -5,9 +5,11 @@ import {
     createUpdateSurveyPropCommand
 } from "@/views/creator/commands";
 import { useDraftContext } from "@/views/creator/composables/useDraftContext";
+import { useRoute } from "vue-router";
 
 export function useDraftActions() {
   const { draft } = useDraftContext()
+  const route = useRoute()  
 
   function applySurveyPropChange(payload:any) {
     const cmd = createUpdateSurveyPropCommand(payload)
@@ -40,11 +42,34 @@ export function useDraftActions() {
       }
   }
 
+  function applyUndo(){
+    if (route.name === 'editor-json') {
+      draft.undoBaseSnapshot()
+    } else {
+      draft.undoBaseOperation()
+    }
+  }
+
+  function applyRedo(){
+    if (route.name === 'editor-json') {
+      draft.redoBaseSnapshot()
+    } else {
+      draft.redoBaseOperation()
+    }
+  }
+
+  function applyCommit(){
+    draft.commitRuntime()
+  }
+
   return {
     applyElementPropChange,
     applyChoicePropChange,
     onChoiceValueChange,
     applyItemPropChange,
-    applySurveyPropChange
+    applySurveyPropChange,
+    applyUndo,
+    applyRedo,
+    applyCommit
   }
 }
