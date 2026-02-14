@@ -218,7 +218,7 @@ const { applySurveyPropChange } = useDraftActions()
 const changeSurveyPorp = (event:any, key: string) =>{
   applySurveyPropChange({
     key,
-    event
+    value:event
   })
 }
   

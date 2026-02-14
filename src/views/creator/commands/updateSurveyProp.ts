@@ -5,7 +5,7 @@ import { toRaw } from 'vue'
 
 export function createUpdateSurveyPropCommand<K extends keyof QuestionSettings>(payload: {
   key: K
-  value: QuestionSettings[K]
+  value: any
 }): Command {
   let oldValue: any = null
   
@@ -13,7 +13,7 @@ export function createUpdateSurveyPropCommand<K extends keyof QuestionSettings>(
     execute(state: any) {
       const rawState = toRaw(state)
       const frozenValue = structuredClone(payload.value)
-      
+
       // 保存旧值用于undo
       if (rawState) {
         oldValue = structuredClone((rawState as any)[payload.key])
@@ -25,6 +25,8 @@ export function createUpdateSurveyPropCommand<K extends keyof QuestionSettings>(
         payload.key,
         frozenValue
       )
+      console.log("result",result);
+      
       
       return result.cloned
     },

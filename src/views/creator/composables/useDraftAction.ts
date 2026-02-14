@@ -14,6 +14,8 @@ export function useDraftActions() {
   const route = useRoute()  
 
   function applySurveyPropChange(payload:any) {
+    console.log("SurveyProp payload",payload);
+     
     const cmd = createUpdateSurveyPropCommand(payload)
     draft.applyOperation(cmd)
   }
@@ -31,18 +33,6 @@ export function useDraftActions() {
   function applyItemPropChange(payload:any) {
     const cmd = createUpdateItemPropCommand(payload)
     draft.applyOperation(cmd)
-  }
-
-  function onChoiceValueChange(choiceIndex:number, elementId:string){
-      return (value:string) =>{
-            console.log("value",value)
-            applyChoicePropChange({
-                questionId: elementId,
-                choiceIndex: choiceIndex,
-                key: "value",
-                value: value,
-            })
-      }
   }
 
   function applyAddPage(payload:any){
@@ -83,7 +73,6 @@ export function useDraftActions() {
   return {
     applyElementPropChange,
     applyChoicePropChange,
-    onChoiceValueChange,
     applyItemPropChange,
     applySurveyPropChange,
     applyUndo,
