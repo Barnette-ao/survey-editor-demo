@@ -17,7 +17,7 @@
 								:model-value="choice.value" 
 								:editor-id="`choice-${element.id}-${index}`" 
 								@click="$emit('click')"
-								@blur="changeChoiceValue(index, element.id)"
+								@blur="changeChoiceValue($event, index, element.id)"
 							>
 								<template #choiceIcon>
 									<div class="choiceIcon"></div>
@@ -178,9 +178,14 @@ const handleClick = () => {
 }
 
 
-const { onChoiceValueChange } = useDraftActions()
-const changeChoiceValue = (choiceIndex, elementId) => {
-	onChoiceValueChange(choiceIndex, elementId)
+const { applyChoicePropChange } = useDraftActions()
+const changeChoiceValue = (event, choiceIndex, elementId) => {
+	applyChoicePropChange({
+		questionId: elementId,
+		choiceIndex: choiceIndex,
+		key: "value",
+		value: event,
+	})
 }
 
 </script>

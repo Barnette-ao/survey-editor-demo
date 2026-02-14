@@ -235,8 +235,7 @@ const incrementalLoadingInstance = ref({})
 
 
 // 先初始化 draftState
-const { draftState, draft } = useDraftContext()
-console.log("draftState",draftState.value)
+const { draftState } = useDraftContext()
 onMounted(async () => {
   instructionElement.value = draftState.value.pages[0].elements[0];
   instructionElementId.value = draftState.value.pages[0].elements[0].id;

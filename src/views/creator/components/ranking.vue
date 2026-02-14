@@ -12,18 +12,18 @@
 				>
 					<DragHandler :is-visible="hoverIndex === index"  @mousedown="$emit('click')"/>
 					<div class="optionItemBox">
-						<!--<customEditor 、
+						<customEditor 
 							:model-value="choice"  
 							:editor-id="`choice-${element.id}-${index}`" 
 							@click="$emit('click')"
-							@blur="changeChoiceValue(index, element.id)"
+							@blur="changeChoiceValue($event, index, element.id)"
 						>
 							<template #choiceIcon>
 								<el-icon color="#909399">
 									<Sort />
 								</el-icon>
 							</template>
-						</customEditor>-->
+						</customEditor>
 						<el-button class="delete-option" @click="deleteOption(index)">
 							<el-icon>
 								<Delete />
@@ -144,9 +144,14 @@ const confirmBatchAdd = () => {
 	ElMessage.success('批量添加成功')
 }
 
-const { onChoiceValueChange } = useDraftActions()
-const changeChoiceValue = (choiceIndex, elementId) => {
-	onChoiceValueChange(choiceIndex, elementId)
+const { applyChoicePropChange } = useDraftActions()
+const changeChoiceValue = (event, choiceIndex, elementId) => {
+	applyChoicePropChange({
+		questionId: elementId,
+		choiceIndex: choiceIndex,
+		key: "value",
+		value: event,
+	})
 }
 </script>
 
