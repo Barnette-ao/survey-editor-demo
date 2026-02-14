@@ -13,7 +13,7 @@
 								:model-value="textbox.name" 
 								:editor-id="`textbox-${element.id}-${index}`" 
 								@click="$emit('click')"
-								@blur="onItemNameChange(index,element.id)"
+								@blur="onItemNameChange($event, element.id)"
 							>
 							</customEditor>
 							<el-button class="delete-option" @click="deleteItem(index)">
@@ -139,15 +139,13 @@ const confirmBatchAdd = () => {
 }
 
 const { applyItemPropChange } = useDraftAction()
-const onChoiceValueChange = (itemIndex, elementId) => {
-	return (value) =>{
-		applyItemPropChange({
-			questionId: elementId,
-			itemIndex: itemIndex,
-			key: "name",
-			value: value,
-		})
-      }
+const onChoiceValueChange = (event, itemIndex, elementId) => {
+	applyItemPropChange({
+		questionId: elementId,
+		itemIndex: itemIndex,
+		key: "name",
+		value: event,
+	})
 }
 </script>
 
