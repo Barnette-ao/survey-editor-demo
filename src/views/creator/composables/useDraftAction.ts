@@ -35,6 +35,7 @@ export function useDraftActions() {
 
   function onChoiceValueChange(choiceIndex:number, elementId:string){
       return (value:string) =>{
+            console.log("value",value)
             applyChoicePropChange({
                 questionId: elementId,
                 choiceIndex: choiceIndex,

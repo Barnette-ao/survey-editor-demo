@@ -10,7 +10,7 @@
       </div>
       <TiipTapEditor
         v-if="isEditing"
-        :model-value="wangEditorValue"
+        v-model="content"
         class="editable active"
         @focus="handleFocus"
         @blur="handleBlur"  
@@ -55,13 +55,9 @@ const editorStore = useEditorStore();
 const isEditing = computed(() => {
   return !props.isEditable && editorStore.activeEditorId === props.editorId;
 });
-const wangEditorValue = computed(() => {
-  return props.modelValue || "";
-});
+const content = computed(() => props.modelValue || "")
 // 显示在 div 中的文本
-const displayText = computed(() => {
-  return props.modelValue || "请输入内容";
-});
+const displayText = computed(() => props.modelValue || "请输入内容")
 
 
 // 当 div 获取焦点时，切换到编辑器
@@ -71,7 +67,9 @@ const handleFocus = () => {
 
 // 当编辑器失去焦点时，切换回 div
 const handleBlur = debounce((value) => {
+  console.log("customEditor中的blur原始值",value)
   const formatted = htmlToPlainText(value)
+  console.log("formatted blur",formatted)
   emit("blur", formatted)
 }, 300);
 
