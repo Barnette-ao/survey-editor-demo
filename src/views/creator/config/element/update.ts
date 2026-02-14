@@ -3,6 +3,7 @@ import { deleteLogicRulesById } from '@/views/creator/config/logicRule'
 import { getSwitchTargetElement } from '@/views/creator/config/element'
 import { generateUUID } from '@/views/creator/config/shared'
 import type { QuestionElement } from '@/views/creator/types/questionnaire'
+import { toRaw } from 'vue'
 
 /**
  * 切换选择题类型

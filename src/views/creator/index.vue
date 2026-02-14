@@ -64,18 +64,18 @@ const handleRedo = () => {
   applyRedo()
 }
 
-// 给所有选择类型题目添加选项逻辑设置 属性
-Serializer.addProperty("selectbase", {
-  name: "choicesShowHide:text", // 属性名及类型
-  title: "choicesShowHide", // 属性的标题
-  category: "logic",
-  displayName: "选项逻辑设置", // 属性在 UI 中的显示名称
-  visible: true, // 是否在属性面板中显示
-  type: "text", // 属性类型，设置为 text 类型
-  isRequired: false, // 该属性非必填
-  default: "",
-  inputType: "textarea",
-});
+// // 给所有选择类型题目添加选项逻辑设置 属性
+// Serializer.addProperty("selectbase", {
+//   name: "choicesShowHide:text", // 属性名及类型
+//   title: "choicesShowHide", // 属性的标题
+//   category: "logic",
+//   displayName: "选项逻辑设置", // 属性在 UI 中的显示名称
+//   visible: true, // 是否在属性面板中显示
+//   type: "text", // 属性类型，设置为 text 类型
+//   isRequired: false, // 该属性非必填
+//   default: "",
+//   inputType: "textarea",
+// });
 
 </script>
 

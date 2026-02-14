@@ -1,6 +1,7 @@
 import type { Command } from "@/views/creator/services/DraftStorageService"
 import { updateSurveyProp } from "@/views/creator/config/survey"
 import type { QuestionSettings } from "@/views/creator/types/questionnaire"
+import { toRaw } from 'vue'
 
 export function createUpdateSurveyPropCommand<K extends keyof QuestionSettings>(payload: {
   key: K
@@ -10,16 +11,17 @@ export function createUpdateSurveyPropCommand<K extends keyof QuestionSettings>(
   
   return {
     execute(state: any) {
+      const rawState = toRaw(state)
       const frozenValue = structuredClone(payload.value)
       
       // 保存旧值用于undo
-      if (state) {
-        oldValue = structuredClone((state as any)[payload.key])
+      if (rawState) {
+        oldValue = structuredClone((rawState as any)[payload.key])
       }
 
       // 执行更新操作
       const result = updateSurveyProp(
-        state,
+        rawState,
         payload.key,
         frozenValue
       )
@@ -28,8 +30,9 @@ export function createUpdateSurveyPropCommand<K extends keyof QuestionSettings>(
     },
 
     undo(state: any) {
+      const rawState = toRaw(state)
       const result = updateSurveyProp(
-        state,
+        rawState,
         payload.key,
         oldValue
       )

@@ -4,6 +4,7 @@ import {
   addQuestionElement,
   deleteQuestion
 } from "@/views/creator/config/element"
+import { toRaw } from 'vue'
 
 export function createAddQuestionCommand(payload: {
   selectedQuestionId: string
@@ -13,8 +14,9 @@ export function createAddQuestionCommand(payload: {
   
   return {
     execute(state) {
+      const rawState = toRaw(state)
       const { id:newElementId, cloned } = addQuestionElement(
-        state, 
+        rawState, 
         payload.elemntType, 
         payload.selectedQuestionId
       )
@@ -22,9 +24,10 @@ export function createAddQuestionCommand(payload: {
       return cloned
     },
 
-    undo(state) { 
+    undo(state) {
+      const rawState = toRaw(state) 
       return deleteQuestion(
-        state,
+        rawState,
         addedElementId
       )
     },

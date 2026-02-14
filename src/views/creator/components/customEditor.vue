@@ -10,7 +10,7 @@
       </div>
       <TiipTapEditor
         v-if="isEditing"
-        v-model"wangEditorValue"
+        :model-value="wangEditorValue"
         class="editable active"
         @focus="handleFocus"
         @blur="handleBlur"  

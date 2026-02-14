@@ -5,6 +5,7 @@ import {
   deleteQuestion,
   getSelectedElementPosition
 } from "@/views/creator/config/element"
+import { toRaw } from 'vue'
 
 export function createDeleteQuestionCommand(payload: {
   elementId: string
@@ -26,26 +27,28 @@ export function createDeleteQuestionCommand(payload: {
   
   return {
     execute(state:any) {
-      const { elementIndex, pageIndex } = getSelectedElementPosition(state, payload.elementId)
+      const rawState = toRaw(state)
+      const { elementIndex, pageIndex } = getSelectedElementPosition(rawState, payload.elementId)
       if (elementIndex !== undefined && pageIndex !== undefined) {
         // 获取被删除元素的信息
-        const deletedElement = state.pages[pageIndex].elements[elementIndex]  
+        const deletedElement = rawState.pages[pageIndex].elements[elementIndex]  
         elementType = deletedElement.type === "rating" 
             ? deletedElement.type + deletedElement.rateType 
             : deletedElement.type
         
-        setAddParam(state, pageIndex, elementIndex)
+        setAddParam(rawState, pageIndex, elementIndex)
       }
       
       // 执行删除操作
-      const cloned = deleteQuestion(state, payload.elementId)
+      const cloned = deleteQuestion(rawState, payload.elementId)
       
       return cloned
     },
 
-    undo(state) { 
+    undo(state) {
+      const rawState = toRaw(state) 
       const { id, cloned } = addQuestionElement(
-        state, 
+        rawState, 
         elementType, 
         previousElementId,
         isSelectAPage,

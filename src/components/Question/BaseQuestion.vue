@@ -121,8 +121,6 @@ const props = defineProps({
 	}
 })
 
-console.log("props.element",props.element)
-
 const emit = defineEmits(['click', 'copy', 'delete', 'setLogic'])
 
 const isCollapsed = ref(false)

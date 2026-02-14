@@ -1,6 +1,8 @@
 import type { Command } from "@/views/creator/services/DraftStorageService"
 import { updateElementProp, updateChoiceProp, replaceChoiceByNewId, findElementById } from "@/views/creator/config/element"
 import type { QuestionElement } from "@/views/creator/types/questionnaire"
+import { toRaw } from 'vue'
+
 
 export function createUpdateElementPropCommand<K extends keyof QuestionElement>(payload: {
   questionId: string
@@ -17,10 +19,11 @@ export function createUpdateElementPropCommand<K extends keyof QuestionElement>(
       // 因为payload.value是个引用对象，所以value值会动态更新，但预期获得的值
       // 就是触发函数的那一刻的值,之后的值不再发生变化，所以对该值进行深拷贝
       // 以保存其值
+      const rawState = toRaw(state)
       const frozenValue = structuredClone(payload.value)
-      
+    
       // 保存旧值用于undo
-      const element = findElementById(payload.questionId, state)
+      const element = findElementById(payload.questionId, rawState)
       if (element) {
         oldValue = structuredClone((element as any)[payload.key])
         oldElementId = element.id
@@ -28,7 +31,7 @@ export function createUpdateElementPropCommand<K extends keyof QuestionElement>(
 
       // 执行更新操作
       const result = updateElementProp(
-        state,
+        rawState,
         payload.questionId,
         payload.key,
         frozenValue
@@ -38,8 +41,9 @@ export function createUpdateElementPropCommand<K extends keyof QuestionElement>(
     },
 
     undo(state: any) {
+      const rawState = toRaw(state)
       const result = updateElementProp(
-        state,
+        rawState,
         oldElementId,
         payload.key,
         oldValue
@@ -61,10 +65,11 @@ export function createUpdateItemPropCommand<K extends keyof QuestionElement>(pay
   
   return {
     execute(state: any) {
+      const rawState = toRaw(state)
       const frozenValue = structuredClone(payload.value)
       
       // 保存旧值用于undo
-      const element = findElementById(payload.questionId, state)
+      const element = findElementById(payload.questionId, rawState)
       if (element) {
         const item = element.items?.[payload.itemIndex]
         if (item) {
@@ -75,7 +80,7 @@ export function createUpdateItemPropCommand<K extends keyof QuestionElement>(pay
 
       // 执行更新操作
       const result = updateChoiceProp(
-        state,
+        rawState,
         payload.questionId,
         payload.itemIndex,
         payload.key,
@@ -86,8 +91,9 @@ export function createUpdateItemPropCommand<K extends keyof QuestionElement>(pay
     },
 
     undo(state: any) {
+      const rawState = toRaw(state)
       const result = updateChoiceProp(
-        state,
+        rawState,
         oldElementId,
         payload.itemIndex,
         payload.key,
@@ -110,10 +116,11 @@ export function createUpdateChoicePropCommand<K extends keyof QuestionElement>(p
   
   return {
     execute(state: any) {
+      const rawState = toRaw(state)
       const frozenValue = structuredClone(payload.value)
       
       // 保存旧值用于undo
-      const element = findElementById(payload.questionId, state)
+      const element = findElementById(payload.questionId, rawState)
       if (element) {
         const choice = element.choices?.[payload.choiceIndex]
         if (choice) {
@@ -128,7 +135,7 @@ export function createUpdateChoicePropCommand<K extends keyof QuestionElement>(p
 
       // 执行更新操作
       const result = updateChoiceProp(
-        state,
+        rawState,
         payload.questionId,
         payload.choiceIndex,
         payload.key,
@@ -139,8 +146,9 @@ export function createUpdateChoicePropCommand<K extends keyof QuestionElement>(p
     },
 
     undo(state: any) {
+      const rawState = toRaw(state)
       const result = updateChoiceProp(
-        state,
+        rawState,
         oldElementId,
         payload.choiceIndex,
         payload.key,
@@ -164,10 +172,11 @@ export function createDragChoiceCommand<K extends keyof QuestionElement>(payload
   
   return {
     execute(state: any) {
+      const rawState = toRaw(state)
       const frozenValue = structuredClone(payload.value)
       
       // 保存旧值用于undo
-      const element = findElementById(payload.questionId, state)
+      const element = findElementById(payload.questionId, rawState)
       if (element) {
         oldValue = structuredClone((element as any)[payload.key])
         oldElementId = element.id
@@ -175,7 +184,7 @@ export function createDragChoiceCommand<K extends keyof QuestionElement>(payload
 
       // 执行更新操作
       const result = replaceChoiceByNewId(
-        state,
+        rawState,
         payload.questionId,
         payload.key,
         frozenValue
@@ -189,8 +198,9 @@ export function createDragChoiceCommand<K extends keyof QuestionElement>(payload
     },
 
     undo(state: any) {
+      const rawState = toRaw(state)
       const result = replaceChoiceByNewId(
-        state,
+        rawState,
         newElementId || oldElementId,
         payload.key,
         oldValue

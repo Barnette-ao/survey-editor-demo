@@ -34,12 +34,13 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:modelValue', 'focus', 'blur'])
+const emit = defineEmits(['focus', 'blur'])
 
 const editor = ref(null)
 
 // 创建编辑器
 onMounted(() => {
+  console.log("props.modelValue",props.modelValue)
   editor.value = new Editor({
     extensions: [
       StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
@@ -53,7 +54,6 @@ onMounted(() => {
     },
     onUpdate: ({ editor }) => {
       const currentHtml = editor.getHTML()
-      emit('update:modelValue', currentHtml)
     },
     onFocus: ({ editor }) => emit('focus'),
     onBlur: ({ editor }) => {

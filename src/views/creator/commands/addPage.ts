@@ -1,6 +1,7 @@
 import type { Command } from "@/views/creator/services/DraftStorageService"
 import { addPage } from "@/views/creator/config/page"
 import { deletePage } from "@/views/creator/config/page"
+import { toRaw } from 'vue'
 
 export function createAddPageCommand(payload: {
   selectedQuestionId: string
@@ -12,12 +13,13 @@ export function createAddPageCommand(payload: {
   
   return {
     execute(state: any) {
+      const rawState = toRaw(state)
       // 记录添加前的页面数量，用于确定新页面的索引
-      const pageCountBefore = state.pages.length
+      const pageCountBefore = rawState.pages.length
       
       // 执行添加页面操作
       const cloned = addPage(
-        state,
+        rawState,
         payload.selectedQuestionId,
         payload.pageIndex,
         payload.isPageSelected
@@ -44,13 +46,14 @@ export function createAddPageCommand(payload: {
     },
 
     undo(state: any) {
+      const rawState = toRaw(state)
       // 删除添加的页面
-      if (addedPageIndex >= 0 && addedPageIndex < state.pages.length) {
-        deletedPage = state.pages[addedPageIndex]
-        const cloned = deletePage(state, deletedPage, addedPageIndex)
+      if (addedPageIndex >= 0 && addedPageIndex < rawState.pages.length) {
+        deletedPage = rawState.pages[addedPageIndex]
+        const cloned = deletePage(rawState, deletedPage, addedPageIndex)
         return cloned
       }
-      return state
+      return rawState
     }
   }
 }
