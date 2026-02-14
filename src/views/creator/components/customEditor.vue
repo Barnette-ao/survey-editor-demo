@@ -67,9 +67,7 @@ const handleFocus = () => {
 
 // 当编辑器失去焦点时，切换回 div
 const handleBlur = debounce((value) => {
-  console.log("customEditor中的blur原始值",value)
   const formatted = htmlToPlainText(value)
-  console.log("formatted blur",formatted)
   emit("blur", formatted)
 }, 300);
 
