@@ -139,7 +139,7 @@ const confirmBatchAdd = () => {
 }
 
 const { applyItemPropChange } = useDraftAction()
-const onChoiceValueChange = (event, itemIndex, elementId) => {
+const onItemNameChange = (event, itemIndex, elementId) => {
 	applyItemPropChange({
 		questionId: elementId,
 		itemIndex: itemIndex,

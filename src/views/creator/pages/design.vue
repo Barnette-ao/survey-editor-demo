@@ -34,7 +34,7 @@
                   :model-value="draftState.title"
                   width="400px"
                   editorId="surveyName"
-                  @blur="changeSurveyPorp('title')"
+                  @blur="changeSurveyPorp($event, 'title')"
                 />
               </div>
               <div class="description">
@@ -42,7 +42,7 @@
                   :model-value="draftState.description"
                   width="400px"
                   editorId="description"
-                  @blur="changeSurveyPorp('description')"
+                  @blur="changeSurveyPorp($event,'description')"
                 />
               </div>
             </div>
@@ -103,7 +103,7 @@
                   :model-value="draftState.completedHtml"
                   width="400px"
                   editorId="completedHtml"
-                  @blur="changeSurveyPorp('completedHtml')"
+                  @blur="changeSurveyPorp($event, 'completedHtml')"
                 />
               </div>
             </div>
@@ -215,13 +215,11 @@ const LogicSettingDialog = defineAsyncComponent({
 })
 
 const { applySurveyPropChange } = useDraftActions()
-const changeSurveyPorp = (key: string) =>{
-  return (value:string, ) => {
-    applySurveyPropChange({
-      key,
-      value
-    })
-  }
+const changeSurveyPorp = (event:any, key: string) =>{
+  applySurveyPropChange({
+    key,
+    event
+  })
 }
   
 
