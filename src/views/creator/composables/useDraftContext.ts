@@ -7,9 +7,7 @@ export function useDraftContext() {
   const draftMapStore = useDraftMapStore()
   
   const draft:DraftStorageService = draftMapStore.getDraft(surveyId) 
-  if(!draftMapStore.hasOpened()){
-    draft.openWithRunningState()
-  }
+  draft.openWithRunningState()
   
   const draftState = computed(() => draft.draftState.value);
 

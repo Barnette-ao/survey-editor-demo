@@ -227,21 +227,17 @@ const changeSurveyPorp = (key: string) =>{
 
 //定义是否拖拽，拖拽则赋空值时不更新数据
 const istarg = ref(false);
-
-// 先初始化 draftState
-const { draftState, draft } = useDraftContext()
-console.log("draftState",draftState.value)
-
 const instructionElementId = ref("");
 const instructionElement = ref({});
-
 const sentinelRef = ref(null)  // 直接在组件中创建
 // 增量加载相关状态 - 先定义默认值避免暂时性死区
 const incrementalLoadingInstance = ref({})
 
+
+// 先初始化 draftState
+const { draftState, draft } = useDraftContext()
+console.log("draftState",draftState.value)
 onMounted(async () => {
-  draft.openWithRunningState()
-  
   instructionElement.value = draftState.value.pages[0].elements[0];
   instructionElementId.value = draftState.value.pages[0].elements[0].id;
   
@@ -366,17 +362,17 @@ const {
 } = useQuestionCreation(draftState, currentQuestionId, pageIndex, isCurrentQuestionAPage)
 
 // 当页面结构变化时重新初始化 Sortable
-watch(
-  () => draftState.value?.pages?.length || 0,
-  () => {
-    nextTick(() => {
-      initSortable(draftState, instructionElementId.value, istarg);
-    });
-  }
-);
+// watch(
+//   () => draftState.value?.pages?.length || 0,
+//   () => {
+//     nextTick(() => {
+//       initSortable(draftState, instructionElementId.value, istarg);
+//     });
+//   }
+// );
 
 
-const handleLogicUpdate = (saveLogicObj) => {
+const handleLogicUpdate = (saveLogicObj:object) => {
   handleLogicRulesUpdate(saveLogicObj, draftState);
 };
 

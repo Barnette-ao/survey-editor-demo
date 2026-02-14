@@ -10,25 +10,16 @@ import { editorProps } from '@/views/creator/types/monacoEditorType'
 // props / emits
 const props = defineProps(editorProps)
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: string): void
-  (e: 'change', value: string): void
-  (e: 'editor-mounted', editor: monaco.editor.IStandaloneCodeEditor): void
+  (e: 'blur', value: string): void
 }>()
 
 const jsonEditBox = ref<HTMLElement | null>(null)
 let editor: monaco.editor.IStandaloneCodeEditor | null = null
 
 const init = () => {
-  monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-    noSemanticValidation: true,
-    noSyntaxValidation: false,
-  })
-
-  monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-    target: monaco.languages.typescript.ScriptTarget.ES2020,
-    allowNonTsExtensions: true,
-  })
-
+  // JSON validation is enabled by default when the JSON worker is loaded via vite-plugin-monaco-editor
+  // No need to configure diagnostics manually in Monaco 0.55+
+  
   editor = monaco.editor.create(jsonEditBox.value!, {
     value: props.modelValue,
     language: props.language,
@@ -36,14 +27,10 @@ const init = () => {
     ...props.options,
   })
 
-  editor.onDidChangeModelContent(() => {
+  editor.onDidBlurEditorText(() => {
     const value = editor!.getValue()
-    //update:modelValue只负责做通知实时的变化 
-    emit('update:modelValue', value)
-    emit('change', value)
-  })
-
-  emit('editor-mounted', editor)
+    emit('blur', value)
+  });
 }
 
 // modelValue -> editor

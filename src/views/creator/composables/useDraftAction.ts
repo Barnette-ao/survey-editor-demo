@@ -75,6 +75,10 @@ export function useDraftActions() {
     draft.commitRuntime()
   }
 
+  function replaceDraftState(snapshot:any){
+    draft.replaceState(snapshot)
+  }
+
   return {
     applyElementPropChange,
     applyChoicePropChange,
@@ -85,6 +89,7 @@ export function useDraftActions() {
     applyRedo,
     applyCommit,
     applyAddPage,
-    applyAddElement
+    applyAddElement,
+    replaceDraftState
   }
 }

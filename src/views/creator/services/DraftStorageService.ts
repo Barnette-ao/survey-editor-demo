@@ -54,7 +54,8 @@ export class DraftStorageService {
 
   // 草稿层一个很重要的状态就是当前的草稿状态
   private _draftState: Ref<DraftState> = ref(createEmptyDraftState())
-  
+  private isInistialized = false
+
   // UI 只能读
   get draftState() {
     return readonly(this._draftState)
@@ -74,10 +75,10 @@ export class DraftStorageService {
 
   openWithRunningState() {
     // 存储态 -> 运行态
+    if(this.isInistialized) return 
     const rawSettings = this.storage.open(this.surveyId.value)
     this._draftState.value = adapteStorageState(rawSettings)
-  
-    return this._draftState.value
+    this.isInistialized = true
   }
   
   /**
@@ -112,14 +113,12 @@ export class DraftStorageService {
     if (!this.undoStackBaseSnapshot.length) return
     this.redoStackBaseSnapshot.push(this._draftState.value)
     this._draftState.value = this.undoStackBaseSnapshot.pop() 
-    return this._draftState.value
   }
 
   redoBaseSnapshot() {
     if (!this.redoStackBaseSnapshot.length) return
     this.undoStackBaseSnapshot.push(this._draftState.value)
     this._draftState.value = this.redoStackBaseSnapshot.pop()
-    return this._draftState.value
   }
 
   
@@ -152,15 +151,14 @@ export class DraftStorageService {
     const undoCommand:Command = this.undoStackBaseOperation.pop()!
     this._draftState.value = undoCommand.undo(this._draftState.value)
     this.redoStackBaseOperation.push(undoCommand)
-    return this._draftState.value
   }
+
   // 这里必须存在一个时序耦合，即redo必须在undo之后执行
   redoBaseOperation(){
     if(!this.redoStackBaseOperation.length) return 
     const redoCommand:Command = this.redoStackBaseOperation.pop()!
     this._draftState.value = redoCommand.execute(this._draftState.value)  
     this.undoStackBaseOperation.push(redoCommand)
-    return this._draftState.value
   }
 
   commitRuntime() {

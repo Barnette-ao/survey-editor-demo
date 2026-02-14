@@ -3,10 +3,10 @@
     <div class="topblock"></div>
     <div class="jsonEditorBox">
         <customerJsonEditor 
-            :modelValue="jsonString" 
-            @update:modelValue="onJsonChange" 
+            :modelValue="jsonString"  
             :language="language"
-            @editor-mounted="editorMounted"
+            @blur="onJsonBlur"
+
         />
     </div>
     <SurveySchemaErrorPanel
@@ -22,30 +22,33 @@
 import SurveySchemaErrorPanel from '@/views/creator/components/SurveySchemaErrorPanel.vue'
 import customerJsonEditor from '@/views/creator/components/customerJsonEditor.vue'
 import { useDraftContext } from "@/views/creator/composables/useDraftContext";
-
 import { useSurveyValidation } from '@/views/creator/composables/useSurveyValidation'
-import { useSurveyId } from "@/views/creator/composables/useSurveyId";
+import { useDraftActions } from "@/views/creator/composables/useDraftAction";
 
-import * as monaco from 'monaco-editor'
-const { draftState } = useDraftContext()
-const surveyJSON = draftState 
-const jsonString = ref<string>(JSON.stringify(surveyJSON.value, null, 2))
+const jsonString = ref<string>("")
 const language = ref('json')
+let stateChangeFromJSON:boolean = false; // 是否在JSON编辑器页修改了draftState
+const { draftState } = useDraftContext()
+watch(
+  draftState,
+  (next) => {
+    if(stateChangeFromJSON) return 
+    jsonString.value = JSON.stringify(next, null, 2)
+  },
+  { immediate: true, deep: true }
+) 
 
-const editorMounted = (editor: monaco.editor.IStandaloneCodeEditor) => {
-  //  console.log('editor实例加载完成', editor)
-}
 
-// 先初始化 questionSettings
 const { validationState, validate } = useSurveyValidation()
-function onJsonChange(newValue: string) {
+const { replaceDraftState } = useDraftActions()
+function onJsonBlur(newValue: string) {
   try {
     const result = validate(newValue)
+    if (!result.ok) { return }
     
-    if (!result.ok) {
-        return
-    }
-
+    stateChangeFromJSON = true
+    const parsednNwValue = JSON.parse(newValue)
+    replaceDraftState(parsednNwValue)
   } catch {
     // JSON 错误时不更新 surveyJson
   }
