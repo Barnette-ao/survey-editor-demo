@@ -14,8 +14,6 @@ export function useDraftActions() {
   const route = useRoute()  
 
   function applySurveyPropChange(payload:any) {
-    console.log("SurveyProp payload",payload);
-     
     const cmd = createUpdateSurveyPropCommand(payload)
     draft.applyOperation(cmd)
   }
@@ -40,7 +38,7 @@ export function useDraftActions() {
     draft.applyOperation(cmd)
   }
 
-  function applyAddElement(payload:any){
+  function applyAddElement(payload:any){ 
     const cmd = createAddQuestionCommand(payload)
     const UIContext = draft.applyOperation(cmd)
     return UIContext

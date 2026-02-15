@@ -11,6 +11,8 @@ export function useQuestionCreation(
   const { applyAddPage, applyAddElement } = useDraftActions()
   
   const handleQuestionTypeClick = (elementType: string) => {
+    console.log("click elementType",elementType);
+    
     // 题目创建逻辑
     if (elementType === "page") {
       applyAddPage({
@@ -21,8 +23,8 @@ export function useQuestionCreation(
     } else {
       // 当前选中的题目改为新添加的题目
       const uiContext = applyAddElement({
-        elementType: elementType,
         selectedQuestionId: currentQuestionId.value,
+        elementType: elementType,
       })
       if (uiContext?.elementId) {
         currentQuestionId.value = uiContext.elementId

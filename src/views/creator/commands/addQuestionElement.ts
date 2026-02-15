@@ -8,7 +8,7 @@ import { toRaw } from 'vue'
 
 export function createAddQuestionCommand(payload: {
   selectedQuestionId: string
-  elemntType:string
+  elementType:string
 }): Command {
   let addedElementId:string 
   
@@ -17,7 +17,7 @@ export function createAddQuestionCommand(payload: {
       const rawState = toRaw(state)
       const { id:newElementId, cloned } = addQuestionElement(
         rawState, 
-        payload.elemntType, 
+        payload.elementType, 
         payload.selectedQuestionId
       )
       addedElementId = newElementId

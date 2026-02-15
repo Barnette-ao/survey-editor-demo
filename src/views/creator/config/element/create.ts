@@ -65,6 +65,7 @@ const createNewElement = (type: string, questionSettings: any) => {
 }
 
 const getElementTemplate = (type: string) => {
+    console.log("type", type)
     let elementTemplate
     if(['ratinglabel','ratingsmileys','ratingstars'].includes(type)){
         const rateType = type.replace(/^rating/, '');
@@ -89,6 +90,7 @@ const getMaxNumOfName = (questionSettings: any, element: any) => {
         .flatMap((page: any) => page.elements)
         .filter((element: any) => element.type !== "html" && element.type !== "panel")
         .map((element: any) => parseInt(element.name.substring(1)));
+    console.log("numOfNames",numOfNames)
     // 用Math.max(...numOfName)当数组有几万个元素时会报错。用reduce适应任何长度的元素
     return numOfNames.reduce((max: number, cur: number) => Math.max(max, cur), 0);
 }
