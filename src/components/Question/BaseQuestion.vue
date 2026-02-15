@@ -89,6 +89,7 @@
 import { computed, ref } from 'vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
 import { useDraftActions } from "@/views/creator/composables/useDraftAction";
+import { useEditorStore } from "@/stores/editorContextStore";
 
 const props = defineProps({
 	element: {
@@ -161,14 +162,16 @@ const changeElementTitle = (value) => {
 	})
 }
 
+
 const { applyAddElement } = useDraftActions()
+const editorStore = useEditorStore()
 const handleCopy = () => {
 	const uiContext = applyAddElement({
 		selectedQuestionId: props.element.id,
 		elementType: props.element.type,
 	})
 	if (uiContext?.elementId) {
-		currentQuestionId.value = uiContext.elementId
+		editorStore.setCurrentQuestion(uiContext.elementId)
 	}
 	emit('copy', props.element.id)
 }
