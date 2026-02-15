@@ -161,8 +161,15 @@ const changeElementTitle = (value) => {
 	})
 }
 
-
+const { applyAddElement } = useDraftActions()
 const handleCopy = () => {
+	const uiContext = applyAddElement({
+		selectedQuestionId: props.element.id,
+		elementType: props.element.type,
+	})
+	if (uiContext?.elementId) {
+		currentQuestionId.value = uiContext.elementId
+	}
 	emit('copy', props.element.id)
 }
 
