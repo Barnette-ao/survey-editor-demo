@@ -1,7 +1,5 @@
 <template>
-	<base-question :element="element" :show-question-number="showNumber" :logicRuleNum="logicRuleNum"
-		@click="$emit('click')" @copy="id => emit('copy', id)" @delete="id => emit('delete', id)"
-		@setLogic="element => emit('setLogic', element)">
+	<base-question :element="element" :show-question-number="showNumber">
 		<template #options>
 			<!-- 评分选项 -->
 			<div class="score-content">
@@ -53,7 +51,7 @@ import { ref, computed } from 'vue'
 import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 
 
-const emit = defineEmits(['click', 'copy', 'delete', 'update', 'setLogic'])
+const emit = defineEmits(['update'])
 
 const props = defineProps({
 	showNumber: {
@@ -63,10 +61,6 @@ const props = defineProps({
 	element: {
 		type: Object,
 		default: () => { }
-	},
-	logicRuleNum: {
-		type: Number,
-		default: 0
 	},
 })
 

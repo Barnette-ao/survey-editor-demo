@@ -1,6 +1,5 @@
 <template>
-	<base-question :element="element" :show-question-number="showNumber" @click="$emit('click')"
-		@copy="id => emit('copy', id)" @delete="id => emit('delete', id)">
+	<base-question :element="element" :show-question-number="showNumber">
 		<template #options>
 			<!-- 签名区域 -->
 			<div class="sign-container">
@@ -18,7 +17,7 @@
 import { computed } from 'vue'
 import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 
-const emit = defineEmits(['click', 'copy', 'delete', 'update'])
+const emit = defineEmits(['update'])
 
 const props = defineProps({
 	element: {

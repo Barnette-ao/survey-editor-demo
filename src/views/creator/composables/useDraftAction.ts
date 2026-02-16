@@ -4,7 +4,8 @@ import {
     createUpdateItemPropCommand,
     createUpdateSurveyPropCommand,
     createAddPageCommand,
-    createAddQuestionCommand
+    createAddQuestionCommand,
+    createDeleteQuestionCommand
 } from "@/views/creator/commands";
 import { useDraftContext } from "@/views/creator/composables/useDraftContext";
 import { useRoute } from "vue-router";
@@ -44,6 +45,12 @@ export function useDraftActions() {
     return UIContext
   }
 
+  function applyDeleteElement(payload:any){
+    const cmd = createDeleteQuestionCommand(payload)
+    const UIContext = draft.applyOperation(cmd)
+    return UIContext
+  }
+
   function applyUndo(){
     if (route.name === 'editor-json') {
       draft.undoBaseSnapshot()
@@ -78,6 +85,7 @@ export function useDraftActions() {
     applyCommit,
     applyAddPage,
     applyAddElement,
-    replaceDraftState
+    replaceDraftState,
+    applyDeleteElement,
   }
 }

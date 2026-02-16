@@ -47,7 +47,7 @@ export function createDeleteQuestionCommand(payload: {
 
     undo(state) {
       const rawState = toRaw(state) 
-      const { id, cloned } = addQuestionElement(
+      const { cloned } = addQuestionElement(
         rawState, 
         elementType, 
         previousElementId,

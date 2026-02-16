@@ -1,6 +1,5 @@
 <template>
-	<base-question :element="element" :hideLeftSection="true" @click="$emit('click')" @copy="id => emit('copy', id)"
-		@delete="id => emit('delete', id)">
+	<base-question :element="element" :hideLeftSection="true">
 		<template #options>
 			<!-- 面板内容 -->
 			<div class="panel-content">

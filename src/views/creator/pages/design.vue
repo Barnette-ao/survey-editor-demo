@@ -48,11 +48,8 @@
             </div>
             <div class="questionListContainer">
               <div class="firstElement">
-                <instruction
-                  :element="instructionElement"
-                  :isShowHeadAction="false"
-                  :isEditable="true"
-                />
+                <instruction 
+                  :element="instructionElement" />
               </div>
               <template v-for="item in incrementalLoadingInstance?.renderedItems" :key="item.id">
                 <div 
@@ -74,14 +71,8 @@
                   v-else-if="item.type === 'element' && item.element.id !== instructionElementId"
                   :id="item.element.id"
                   :is="componentIs(item.element)"
-                  :logicRuleNum="getLogicRuleNum(item.element.id)"
-                  :selected="currentQuestionId === item.element.id"
                   :show-number="isShowNumber(item.element)"
                   :element="item.element"
-                  @click="handleQuestionClick(item.element.id)"
-                  @copy="(id) => copyElement(id, item.element.type)"
-                  @delete="deleteElement(item.element.id)"
-                  @setLogic="openLogicDialog"
                   @optionSetting="handleOptionSettingUpdate"
                   @update="(key, value) => updateElementField(key, value)"
                 />

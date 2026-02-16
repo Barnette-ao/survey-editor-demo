@@ -1,7 +1,5 @@
 <template>
-	<base-question :element="element" :show-question-number="showNumber" :logicRuleNum="logicRuleNum"
-		@copy="id => emit('copy', id)" @delete="id => emit('delete', id)" @click="$emit('click')"
-		@setLogic="element => emit('setLogic', element)">
+	<base-question :element="element" :show-question-number="showNumber">
 		<template #options>
 			<!-- 图片上传区域 -->
 			<div class="options-container">
@@ -61,7 +59,7 @@ import { ref } from 'vue'
 import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 // import { UploadImages } from "@/api/common.js";
 
-const emit = defineEmits(['click', 'copy', 'delete', 'update', 'setLogic'])
+const emit = defineEmits([ 'update' ])
 
 
 const props = defineProps({
@@ -72,10 +70,6 @@ const props = defineProps({
 	showNumber: {
 		type: Boolean,
 		default: true
-	},
-	logicRuleNum: {
-		type: Number,
-		default: 0
 	},
 })
 

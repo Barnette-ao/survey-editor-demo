@@ -1,5 +1,7 @@
 import { computed, ComputedRef, Ref } from 'vue'
 import { questionTypeList } from '@/views/creator/utils/questionTypeList'
+import { useEditorStore } from '@/stores/editorContextStore'
+import { storeToRefs } from 'pinia'
 
 import type {
   QuestionSettings,
@@ -11,10 +13,13 @@ export function useCurrentElement(
   questionSettings: Ref<QuestionSettings | null>,
   currentQuestionId: Ref<string | null>
 ) {
+  const editorStore = useEditorStore()
+  const { currentQuestionId: storeCurrentQuestionId } = storeToRefs(editorStore)
+  
   /** 当前选中的元素 */
   const currentElement: ComputedRef<QuestionElement | null> = computed(() => {
     const pages = questionSettings.value?.pages
-    if (!pages || !currentQuestionId.value) {
+    if (!pages || !storeCurrentQuestionId.value) {
       return null
     }
 
@@ -22,7 +27,7 @@ export function useCurrentElement(
 
     return (
       allElements.find(
-        (element) => element.id === currentQuestionId.value
+        (element) => element.id === storeCurrentQuestionId.value
       ) ?? null
     )
   })

@@ -1,20 +1,16 @@
 <template>
-	<base-question :element="element" 
+	<base-question 
+		:element="element" 
 		:show-question-number="false" 
-		@click="$emit('click')"
-		@copy="id => emit('copy', id)" 
-		@delete="id => emit('delete', id)" 
-		:isShowHeadAction = "isShowHeadAction"
-		:isEditable="isEditable"
+		:isShowHeadAction = "false"
+		:isEditable="true"
 	>
 		<template #options>
-			<!-- 说明文字区域 -->
 			<div class="instruction-content">
 				<customEditor 
 					:model-value="element.html"  
 					width="600px"
 					:editor-id="`instruction-${element.id}`" 
-					@click="$emit('click')"
 					@blur="changeHtmlPorp" 
 				/>
 			</div>
@@ -28,21 +24,11 @@ import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
 import { useDraftActions } from "@/views/creator/composables/useDraftAction";
 
-const emit = defineEmits(['click', 'copy', 'delete', 'update'])
-
 const props = defineProps({
 	element: {
 		type: Object,
 		default: () => { }
 	},
-	isShowHeadAction: {
-		type: Boolean,
-		default: true
-	},
-	isEditable: {
-		type: Boolean,
-		default: false
-	}
 })
 
 const { applyElementPropChange } = useDraftActions()

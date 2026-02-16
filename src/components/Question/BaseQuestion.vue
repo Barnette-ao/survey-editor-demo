@@ -2,7 +2,7 @@
 	<div class="question-container" :class="{ 'is-selected': selected }" @click="handleContainerClick">
 		<!-- 题目头部 -->
 		<div class="question-header">
-			<div class="left-section" :class="{ 'hidden-section': hideLeftSection }">
+			<div class="left-section">
 				<span class="question-number">
 					<span class="starMark" v-show="required">*</span>
 					<span v-show="showQuestionNumber">
@@ -19,10 +19,16 @@
 			</div>
 
 			<slot name="header-actions">
-				<div class="operation-buttons" @click="emit('click')" v-show ="isShowHeadAction">
-					<el-tooltip :content="content" placement="top" v-if="isSelectElement">
+				<div class="operation-buttons" v-show ="isShowHeadAction">
+					<el-tooltip 
+						:content="content" 
+						placement="top" 
+						v-if="isSelectElement"
+					>
 						<el-button v-if="!isCollapsed" class="icon-button" @click.stop="handleCollapse">
-							<el-icon><Remove /></el-icon>
+							<el-icon>
+								<Remove />
+							</el-icon>
 						</el-button>
 						<el-button v-else class="icon-button" @click.stop="handleCollapse">
 							<el-icon><CirclePlus /></el-icon>
@@ -34,7 +40,11 @@
 						</el-button>
 					</el-tooltip>
 					<el-tooltip content="逻辑设置" placement="top">
-						<el-badge :hidden="logicRuleNum === 0" :value="logicRuleNum" class="item">
+						<el-badge 
+							:hidden="logicRuleNum === 0" 
+							:value="logicRuleNum" 
+							class="item"
+						>
 							<el-button class="icon-button" @click.stop="handleSetLogic">
 								<el-icon>
 									<Connection />
@@ -90,6 +100,8 @@ import { computed, ref } from 'vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
 import { useDraftActions } from "@/views/creator/composables/useDraftAction";
 import { useEditorStore } from "@/stores/editorContextStore";
+import { useDraftContext } from "@/views/creator/composables/useDraftContext";
+import { findLogicRulesByElementId } from '@/views/creator/config/logicRule'
 
 const props = defineProps({
 	element: {
@@ -99,18 +111,6 @@ const props = defineProps({
 	showQuestionNumber: {
 		type: Boolean,
 		default: true
-	},
-	hideLeftSection: {
-		type: Boolean,
-		default: false
-	},
-	selected: {
-		type: Boolean,
-		default: false
-	},
-	logicRuleNum: {
-		type: Number,
-		default: 0
 	},
 	isEditable: {
 		type: Boolean,
@@ -145,7 +145,12 @@ const required = computed(() => {
 	else return props.element.isRequired
 })
 
-const { applyElementPropChange } = useDraftActions()
+const { 
+	applyElementPropChange, 
+	applyAddElement,
+	applyDeleteElement, 
+} = useDraftActions()
+
 const changeElementDescription = (value) => {
 	applyElementPropChange({
 		questionId:element.id,
@@ -162,8 +167,6 @@ const changeElementTitle = (value) => {
 	})
 }
 
-
-const { applyAddElement } = useDraftActions()
 const editorStore = useEditorStore()
 const handleCopy = () => {
 	const uiContext = applyAddElement({
@@ -173,20 +176,49 @@ const handleCopy = () => {
 	if (uiContext?.elementId) {
 		editorStore.setCurrentQuestion(uiContext.elementId)
 	}
-	emit('copy', props.element.id)
+	ElMessage.success('复制成功')
 }
 
 const handleDelete = () => {
-	emit('delete', props.element.id)
+	ElMessageBox.confirm('确定要删除该题目吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }).then(() => {
+	  const uiContext = applyDeleteElement({
+		elementId: props.element.id,
+	  })
+      if (editorStore.isCurrentQuestion(uiContext.elementId)) {
+        editorStore.clearCurrentQuestion()
+		editorStore.setSettingType('quickSetting')
+      }
+
+      ElMessage.success('删除成功')
+    })
 }
 
 const handleContainerClick = () => {
-	emit('click')
+	editorStore.selectQuestion(props.element.id)
 }
 
 const handleSetLogic = () => {
-	emit('setLogic', props.element)
+	editorStore.openLogicDialog(props.element)
 }
+
+
+const selected = computed(() => editorStore.isCurrentQuestion(props.element.id))  
+
+const { draftState } = useDraftContext()
+const logicRuleNum= computed(() => {
+	const rules = findLogicRulesByElementId(
+		draftState.value?.logicRules ?? [],
+		props.element.id
+	)
+	return rules.length
+})
+
+
+
 
 </script>
 

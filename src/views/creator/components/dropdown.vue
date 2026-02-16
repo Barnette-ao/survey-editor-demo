@@ -1,7 +1,5 @@
 <template>
-	<base-question :element="element" :show-question-number="showNumber" :logicRuleNum="logicRuleNum"
-		@click="$emit('click')" @copy="id => emit('copy', id)" @delete="id => emit('delete', id)"
-		@setLogic="element => emit('setLogic', element)">
+	<base-question :element="element" :show-question-number="showNumber">
 		<!-- 选项列表 -->
 		<template #options="{ showAll }">
 			<div :class="`dropdown-option-list-${element.id}`">
@@ -81,7 +79,7 @@ import {
   parseBatchInput 
 } from '@/views/creator/composables/useChoiceOperations';
 
-const emit = defineEmits(['click', 'copy', 'delete', 'update', 'setLogic'])
+const emit = defineEmits(['update'])
 
 const props = defineProps({
 	element: {
@@ -91,10 +89,6 @@ const props = defineProps({
 	showNumber: {
 		type: Boolean,
 		default: true
-	},
-	logicRuleNum: {
-		type: Number,
-		default: 0
 	},
 })
 

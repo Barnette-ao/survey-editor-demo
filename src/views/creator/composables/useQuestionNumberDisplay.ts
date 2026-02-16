@@ -55,28 +55,9 @@ export function useQuestionDisplay(
   /**
    * 为「题目设置面板」创建 computed
    */
-  const createShowNumberComputed = (
-    currentElement: Ref<QuestionElement | null>
-  ): ComputedRef<boolean> => {
-    return computed<boolean>({
-      get: () => {
-        const element = currentElement.value
-        if (!element) return true
-        if (element.hideNumber === undefined) return true
-        return !element.hideNumber
-      },
-      set: (value: boolean) => {
-        if (!currentElement.value) return
-        if (!showQuestionNumbers.value) return
-
-        currentElement.value.hideNumber = !value
-      }
-    })
-  }
 
   return {
     showQuestionNumbers,
     isShowNumber,
-    createShowNumberComputed
   }
 }

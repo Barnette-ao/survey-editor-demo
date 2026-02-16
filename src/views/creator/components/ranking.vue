@@ -1,6 +1,5 @@
 <template>
-	<base-question :element="element" :show-question-number="showNumber" @click="$emit('click')"
-		@copy="id => emit('copy', id)" @delete="id => emit('delete', id)">
+	<base-question :element="element" :show-question-number="showNumber" >
 		<!-- 选项列表 -->
 		<template #options="{ showAll }">
 			<div :class="`ranking-option-list-${element.id}`">
@@ -79,7 +78,7 @@ import {
   parseBatchInput 
 } from '@/views/creator/composables/useChoiceOperations';
 
-const emit = defineEmits(['click', 'copy', 'delete', 'update'])
+const emit = defineEmits(['update'])
 
 const props = defineProps({
 	element: {

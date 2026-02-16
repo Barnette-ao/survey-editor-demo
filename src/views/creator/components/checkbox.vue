@@ -1,7 +1,9 @@
 <template>
-	<base-question :element="element" :show-question-number="showNumber" :logicRuleNum="logicRuleNum"
-		@click="handleClick" @copy="id => emit('copy', id)" @delete="id => emit('delete', id)"
-		@setLogic="element => emit('setLogic', element)">
+	<base-question 
+		:element="element" 
+		:show-question-number="showNumber" 
+		@click="handleClick" 
+	>	
 		<!-- 选项列表 -->
 		<template #options>
 			<div :class="`checkbox-option-list-${element.id}`">
@@ -91,7 +93,7 @@ import {
   parseBatchInput 
 } from '@/views/creator/composables/useChoiceOperations';
 
-const emit = defineEmits(['click', 'copy', 'delete', 'update', 'optionSetting', 'setLogic'])
+const emit = defineEmits(['update', 'optionSetting'])
 
 const props = defineProps({
 	element: {
@@ -101,10 +103,6 @@ const props = defineProps({
 	showNumber: {
 		type: Boolean,
 		default: true
-	},
-	logicRuleNum: {
-		type: Number,
-		default: 0
 	},
 })
 
@@ -174,7 +172,6 @@ const settingOption = (event, index) => {
 const handleClick = () => {
 	// 点击题目时，关闭选项设置模式
 	emit('optionSetting', { index: -1, isOpen: false })
-	emit('click')
 }
 
 

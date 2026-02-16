@@ -1,7 +1,9 @@
 <template>
-	<base-question :element="element" :show-question-number="showNumber" :logicRuleNum="logicRuleNum"
-		@click="handleClick" @copy="id => emit('copy', id)" @delete="id => emit('delete', id)"
-		@setLogic="element => emit('setLogic', element)">
+	<base-question 
+		:element="element" 
+		:show-question-number="showNumber" 
+		@click="handleClick" 
+		>
 		<!-- 选项列表 -->
 		<template #options ="{ showAll }">
 			<div :class="`radiogroup-option-list-${element.id}`" >
@@ -93,7 +95,7 @@ import {
   parseBatchInput 
 } from '@/views/creator/composables/useChoiceOperations';
 
-const emit = defineEmits(['click', 'copy', 'delete', 'update', 'optionSetting', 'setLogic'])
+const emit = defineEmits(['update', 'optionSetting'])
 
 const props = defineProps({
 	element: {

@@ -1,6 +1,5 @@
 <template>
-	<base-question :element="element" :show-question-number="showNumber" @click="$emit('click')"
-		@copy="id => emit('copy', id)" @delete="id => emit('delete', id)">
+	<base-question :element="element" :show-question-number="showNumber">
 		<!-- 选项列表 -->
 		<template #options>
 			<div :class="`textgroup-list-${element.id}`">
@@ -69,7 +68,7 @@ import DragHandler from "@/views/creator/components/Icons/dragIcon.vue";
 import { initOptionsSortable } from '@/views/creator/config/dragOption';
 import { useDraftActions } from "@/views/creator/composables/useDraftAction";
 
-const emit = defineEmits(['click', 'copy', 'delete', 'update'])
+const emit = defineEmits(['update'])
 
 const props = defineProps({
 	element: {
