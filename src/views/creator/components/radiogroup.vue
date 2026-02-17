@@ -120,6 +120,7 @@ const batchDialogVisible = ref(false)
 const batchOptions = ref('')
 
 const { applyChoicePropChange,applyUpdateChoices } = useDraftActions()
+// newChoices一定要是原始数据类型，也就是说其要去proxy化
 const updateChoices = (newChoices) => {
 	applyUpdateChoices({
 		questionId:props.element.id,

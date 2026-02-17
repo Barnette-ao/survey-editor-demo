@@ -166,34 +166,30 @@ export function createUpdateChoicesCommand<K extends keyof QuestionElement>(payl
   key: K
   value: QuestionElement[K]
 }): Command {
+  //structuredClone的参数不能是proxy类型，所以payload.value一定要是原始类型    
   let oldValue: any = null
-  let oldElementId: string = ""
-  let newElementId: string = ""
-  
+  let currentElementId = payload.questionId
+  const frozenValue = structuredClone(payload.value)
+  const key = payload.key 
+
   return {
     execute(state: any) {
       const rawState = toRaw(state)
-      const frozenValue = structuredClone(payload.value)
       
       // 保存旧值用于undo
       const element = findElementById(payload.questionId, rawState)
       if (element) {
         oldValue = structuredClone((element as any)[payload.key])
-        oldElementId = element.id
       }
 
       // 执行更新操作
       const result = replaceChoiceByNewId(
         rawState,
-        payload.questionId,
-        payload.key,
+        currentElementId,
+        key,
         frozenValue
       )
-      
-      if (result.id) {
-        newElementId = result.id
-      }
-      
+      if (result.id) currentElementId = result.id
       return result.cloned
     },
 
@@ -201,17 +197,17 @@ export function createUpdateChoicesCommand<K extends keyof QuestionElement>(payl
       const rawState = toRaw(state)
       const result = replaceChoiceByNewId(
         rawState,
-        newElementId || oldElementId,
-        payload.key,
+        currentElementId,
+        key,
         oldValue
       )
-      
+      if (result.id) currentElementId = result.id
       return result.cloned
     },
 
     getMeta() {
       return {
-        newElementId
+        elementId:currentElementId
       }
     }
   }
