@@ -161,7 +161,7 @@ export function createUpdateChoicePropCommand<K extends keyof QuestionElement>(p
 }
 
 // 在我重构拖拽时这个函数一定要改，现在只是摆在这里
-export function createDragChoiceCommand<K extends keyof QuestionElement>(payload: {
+export function createUpdateChoicesCommand<K extends keyof QuestionElement>(payload: {
   questionId: string
   key: K
   value: QuestionElement[K]

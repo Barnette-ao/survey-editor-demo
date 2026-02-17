@@ -105,11 +105,7 @@ const props = defineProps({
 	showNumber: {
 		type: Boolean,
 		default: true
-	},
-	logicRuleNum: {
-		type: Number,
-		default: 0
-	},
+	}
 })
 
 onMounted(() => {
@@ -123,8 +119,13 @@ const hoverIndex = ref(-1)
 const batchDialogVisible = ref(false)
 const batchOptions = ref('')
 
+const { applyChoicePropChange,applyUpdateChoices } = useDraftActions()
 const updateChoices = (newChoices) => {
-	emit('update', 'choices', newChoices)
+	applyUpdateChoices({
+		questionId:props.element.id,
+		key: 'choices',
+		value:newChoices
+	})
 }
 
 // 添加单个选项
@@ -179,10 +180,8 @@ const settingOption = (event, index) => {
 const handleClick = () => {
 	// 点击题目时，关闭选项设置模式
 	emit('optionSetting', { index: -1, isOpen: false })
-	emit('click')
 }
 
-const { applyChoicePropChange } = useDraftActions()
 const changeChoiceValue = (event, choiceIndex, elementId) => {
 	applyChoicePropChange({
 		questionId: elementId,

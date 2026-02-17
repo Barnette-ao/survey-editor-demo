@@ -185,10 +185,10 @@ const handleDelete = () => {
       cancelButtonText: '取消',
       type: 'warning',
     }).then(() => {
-	  const uiContext = applyDeleteElement({
+	  applyDeleteElement({
 		elementId: props.element.id,
 	  })
-      if (editorStore.isCurrentQuestion(uiContext.elementId)) {
+      if (editorStore.isCurrentQuestion(props.element.id)) {
         editorStore.clearCurrentQuestion()
 		editorStore.setSettingType('quickSetting')
       }

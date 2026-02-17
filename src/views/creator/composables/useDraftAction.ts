@@ -5,7 +5,8 @@ import {
     createUpdateSurveyPropCommand,
     createAddPageCommand,
     createAddQuestionCommand,
-    createDeleteQuestionCommand
+    createDeleteQuestionCommand,
+    createUpdateChoicesCommand,
 } from "@/views/creator/commands";
 import { useDraftContext } from "@/views/creator/composables/useDraftContext";
 import { useRoute } from "vue-router";
@@ -39,6 +40,11 @@ export function useDraftActions() {
     draft.applyOperation(cmd)
   }
 
+  function applyUpdateChoices(payload:any){
+    const cmd = createUpdateChoicesCommand(payload)
+    draft.applyOperation(cmd)
+  }
+
   function applyAddElement(payload:any){ 
     const cmd = createAddQuestionCommand(payload)
     const UIContext = draft.applyOperation(cmd)
@@ -47,8 +53,7 @@ export function useDraftActions() {
 
   function applyDeleteElement(payload:any){
     const cmd = createDeleteQuestionCommand(payload)
-    const UIContext = draft.applyOperation(cmd)
-    return UIContext
+    draft.applyOperation(cmd)
   }
 
   function applyUndo(){
@@ -75,6 +80,8 @@ export function useDraftActions() {
     draft.replaceState(snapshot)
   }
 
+  
+
   return {
     applyElementPropChange,
     applyChoicePropChange,
@@ -87,5 +94,6 @@ export function useDraftActions() {
     applyAddElement,
     replaceDraftState,
     applyDeleteElement,
+    applyUpdateChoices
   }
 }

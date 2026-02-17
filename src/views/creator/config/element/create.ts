@@ -165,3 +165,12 @@ const scrollToNewElement = (targetElement:any) => {
             newElementDom.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 }
+
+const insertElement = (
+    cloned:any, 
+    newElement:any, 
+    pageIndex:string, 
+    elementIndex:string) => {
+    cloned.pages[pageIndex].elements.splice(elementIndex + 1, 0, newElement)
+}
+删除操作的撤销操作弄错了，我决定用AI来弄它
