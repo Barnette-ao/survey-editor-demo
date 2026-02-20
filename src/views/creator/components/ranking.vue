@@ -48,12 +48,12 @@
 				<el-button @click.stop="addOption" text >
 					<el-icon>
 						<Plus />
-					</el-icon>添加选项
+					</el-icon> 添加选项
 				</el-button>
 				<el-button @click.stop="showBatchDialog" text>
 					<el-icon>
 						<Plus />
-					</el-icon>批量添加选项
+					</el-icon> 批量添加选项
 				</el-button>
 			</div>
 		</template>
@@ -74,11 +74,11 @@
 </template>
 
 <script setup>
-import { ref,nextTick, onMounted } from 'vue'
+import draggable from 'vuedraggable'
+import { ref, watch } from 'vue'
 import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
 import DragHandler from "@/views/creator/components/Icons/dragIcon.vue";
-import { initOptionsSortable } from '@/views/creator/config/dragOption';
 import { useDraftActions } from "@/views/creator/composables/useDraftAction";
 import { 
   addSimpleOption, 
@@ -86,6 +86,7 @@ import {
   addSimpleBatchOptions, 
   parseBatchInput 
 } from '@/views/creator/composables/useChoiceOperations';
+import { snapshot } from '@/views/creator/config/shared'
 
 const emit = defineEmits(['update'])
 
@@ -100,26 +101,35 @@ const props = defineProps({
 	}
 })
 
-
-onMounted(() => {
-  nextTick(() => {
-    initOptionsSortable('ranking-option-list', props.element, updateChoices);
-  });
-});
-
 const hoverIndex = ref(-1)
-
 const batchDialogVisible = ref(false)
 const batchOptions = ref('')
 
-const { applyChoicePropChange,applyUpdateChoices } = useDraftActions()
-// 更新选项列表
+const { applyChoicePropChange, applyUpdateChoices } = useDraftActions()
+
+// newChoices一定要是原始数据类型，也就是说其要去proxy化
 const updateChoices = (newChoices) => {
 	applyUpdateChoices({
-		questionId:props.element.id,
+		questionId: props.element.id,
 		key: 'choices',
-		value:newChoices
+		value: newChoices
 	})
+}
+
+// 🔑 关键：使用 localChoices 作为中间状态
+const localChoices = ref([])
+watch(
+	() => props.element.choices, 
+	(newValue) => {
+		localChoices.value = snapshot(newValue)
+	}, 
+	{ immediate: true }
+)
+
+// 🔑 拖拽结束处理
+const onDragEnd = () => {	
+  const newChoices = snapshot(localChoices.value)	
+  updateChoices(newChoices)
 }
 
 // 添加选项
@@ -133,7 +143,6 @@ const deleteOption = (index) => {
 	const newChoices = deleteSimpleOptionAtIndex(props.element.choices, index)
 	updateChoices(newChoices)
 }
-
 
 // 显示批量添加对话框
 const showBatchDialog = () => {
@@ -157,13 +166,11 @@ const confirmBatchAdd = () => {
 	ElMessage.success('批量添加成功')
 }
 
-const changeChoiceValue = (event, choiceIndex, elementId) => {
-	applyChoicePropChange({
-		questionId: elementId,
-		choiceIndex: choiceIndex,
-		key: "value",
-		value: event,
-	})
+// 🔑 关键：对于字符串数组，直接更新整个 choices 数组
+const changeChoiceValue = (newValue, choiceIndex, elementId) => {
+	const newChoices = [...props.element.choices]
+	newChoices[choiceIndex] = newValue
+	updateChoices(newChoices)
 }
 </script>
 
