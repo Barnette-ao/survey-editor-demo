@@ -208,18 +208,35 @@ export const replaceElement = (
 export function updateElementField(
   state: any,
   questionId: string,
-  key: keyof QuestionElement,
+  key: string,
   value: any
 ) {
   return {
     ...state,
-    pages:state.pages.map((page: any) => ({
+    pages: state.pages.map((page: any) => ({
         ...page,
-        elements: page.elements.map((el: QuestionElement) =>
-            el.id === questionId
-                ? { ...el, [key]: value }
-                : el
-            )
+        elements: page.elements.map((el: QuestionElement) => {
+            if (el.id !== questionId) {
+                return el
+            }
+            
+            // 如果是 choices 字段，需要特殊处理
+            if (key === 'choices') {
+                // 检查 value 是否是字符串数组
+                if (Array.isArray(value) && value.every(item => typeof item === 'string')) {
+                    // 直接赋值字符串数组
+                    return { ...el, [key]: value }
+                }
+                // 检查 value 是否是对象数组
+                if (Array.isArray(value) && value.every(item => typeof item === 'object')) {
+                    // 直接赋值对象数组
+                    return { ...el, [key]: value }
+                }
+            }
+            
+            // 其他情况直接赋值
+            return { ...el, [key]: value }
+        })
     }))
   }
 }
