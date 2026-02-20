@@ -5,57 +5,76 @@
 		@click="handleClick" 
 	>	
 		<!-- 选项列表 -->
-		<template #options>
-			<div :class="`checkbox-option-list-${element.id}`">
-				<div v-for="(choice, index) in element.choices" 
-					:key="index"
-					@mousemove="hoverIndex = index" 
-					@mouseleave="hoverIndex = -1"
-				>
-					<div class="option-item">
-						<DragHandler :is-visible="hoverIndex === index" @mousedown="emit('click')" />
-						<div class="optionItemBox">
-							<customEditor 
-								:model-value="choice.value" 
-								:editor-id="`choice-${element.id}-${index}`" 
-								@click="$emit('click')"
-								@blur="changeChoiceValue($event, index, element.id)"
-							>
-								<template #choiceIcon>
-									<div class="choiceIcon"></div>
-								</template>
-							</customEditor>
-							<el-button class="setting-option" @click="settingOption($event, index)">
-								<el-icon>
-									<Setting />
-								</el-icon>
-							</el-button>
-							<el-button class="delete-option" @click="deleteOption(index)">
-								<el-icon>
-									<Delete />
-								</el-icon>
-							</el-button>
+		<template #options="{ showAll }">
+			<draggable 
+				v-model="localChoices"
+				item-key="id"
+				handle=".dragHandler"
+				@change="onDragEnd"
+			>
+				<template #item="{ element: choice, index }">
+					<div
+						v-show="showAll || index < 8"
+						@mousemove="hoverIndex = index"
+						@mouseleave="hoverIndex = -1"
+					>
+						<div class="option-item">
+							<DragHandler
+								class="dragHandler"
+								:is-visible="hoverIndex === index"
+							/>
+
+							<div class="optionItemBox">
+								<customEditor
+									:model-value="choice.value"
+									:editor-id="`choice-${element.id}-${index}`"
+									@blur="changeChoiceValue($event, index, element.id)"
+								>
+									<template #choiceIcon>
+										<div class="choiceIcon"></div>
+									</template>
+								</customEditor>
+
+								<el-button
+									class="setting-option"
+									@click="settingOption($event, index)"
+								>
+									<el-icon>
+										<Setting />
+									</el-icon>
+								</el-button>
+
+								<el-button
+									class="delete-option"
+									@click="deleteOption(index)"
+								>
+									<el-icon>
+										<Delete />
+									</el-icon>
+								</el-button>
+							</div>
 						</div>
+
+						<div class="mark" v-show="choice.showText"></div>
 					</div>
-					<div class="mark" v-show="choice.showText"></div>
-				</div>
-			</div>
+				</template>
+			</draggable>
 		</template>
 
 		<!-- 底部操作按钮 -->
 		<template #bottom-actions>
 			<div class="action-buttons">
-				<el-button type="primary" text @click="addOption">
+				<el-button type="primary" text @click.stop="addOption">
 					<el-icon>
 						<Plus />
 					</el-icon>添加选项
 				</el-button>
-				<el-button type="primary" text @click="addOtherOption">
+				<el-button type="primary" text @click.stop="addOtherOption">
 					<el-icon>
 						<Plus />
 					</el-icon>添加其他项
 				</el-button>
-				<el-button type="primary" text @click="showBatchDialog">
+				<el-button type="primary" text @click.stop="showBatchDialog">
 					<el-icon>
 						<Plus />
 					</el-icon>批量添加选项
@@ -79,11 +98,11 @@
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted } from 'vue'
+import draggable from 'vuedraggable'
+import { ref, watch } from 'vue'
 import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
 import DragHandler from "@/views/creator/components/Icons/dragIcon.vue";
-import { initOptionsSortable } from '@/views/creator/config/dragOption';
 import { useDraftActions } from "@/views/creator/composables/useDraftAction";
 import { 
   addSingleOption, 
@@ -92,6 +111,7 @@ import {
   addBatchOptions, 
   parseBatchInput 
 } from '@/views/creator/composables/useChoiceOperations';
+import { snapshot } from '@/views/creator/config/shared'
 
 const emit = defineEmits(['update', 'optionSetting'])
 
@@ -106,24 +126,35 @@ const props = defineProps({
 	},
 })
 
-onMounted(() => {
-  nextTick(() => {
-    initOptionsSortable('checkbox-option-list', props.element, updateChoices);
-  });
-});
-
 const hoverIndex = ref(-1)
-
 const batchDialogVisible = ref(false)
 const batchOptions = ref('')
 
 const { applyChoicePropChange, applyUpdateChoices } = useDraftActions()
+
+// newChoices一定要是原始数据类型，也就是说其要去proxy化
 const updateChoices = (newChoices) => {
 	applyUpdateChoices({
-		questionId:props.element.id,
+		questionId: props.element.id,
 		key: 'choices',
-		value:newChoices
+		value: newChoices
 	})
+}
+
+// 🔑 关键：使用 localChoices 作为中间状态
+const localChoices = ref([])
+watch(
+	() => props.element.choices, 
+	(newValue) => {
+		localChoices.value = snapshot(newValue)
+	}, 
+	{ immediate: true }
+)
+
+// 🔑 拖拽结束处理
+const onDragEnd = () => {	
+  const newChoices = snapshot(localChoices.value)	
+  updateChoices(newChoices)
 }
 
 // 添加单个选项
@@ -196,16 +227,11 @@ const changeChoiceValue = (event, choiceIndex, elementId) => {
 .option-item {
 	display: flex;
 	align-items: center;
-	margin: 10px 0 10px 0;
+	margin: 10px 0;
 	gap: 10px;
 	width: 100%;
 
-	.choiceContainer{
-		width: 100%;
-		display: flex;
-		align-items: center;
-	}
-
+	// 当父元素 hover 时，控制子元素 editor-wrapper 的边框
 	&:hover {
 		:deep(.editor-wrapper) {
 			border: 1px dashed rgb(170, 170, 170);
@@ -227,7 +253,6 @@ const changeChoiceValue = (event, choiceIndex, elementId) => {
 		height: 18px;
 		background-color: rgb(239, 241, 247);
 	}
-
 }
 
 .option-item .delete-option {
@@ -276,7 +301,4 @@ const changeChoiceValue = (event, choiceIndex, elementId) => {
   height: 20px;
   background-color: rgb(240, 241, 248);
 }
-
-
-
 </style>

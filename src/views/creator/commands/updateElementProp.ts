@@ -175,6 +175,8 @@ export function createUpdateChoicesCommand<K extends keyof QuestionElement>(payl
   console.log("questionId",questionId)
   const key = payload.key
 
+  console.log("payload.value",payload.value);
+  
   // 新值固定
   const newValue = structuredClone(payload.value)
 
