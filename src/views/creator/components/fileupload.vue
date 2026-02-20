@@ -31,6 +31,8 @@ const props = defineProps({
 	}
 })
 
+// 文件上传这个题型不做了
+
 </script>
 
 <style scoped>

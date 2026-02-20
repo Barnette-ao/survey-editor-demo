@@ -223,7 +223,7 @@ const changeChoiceValue = (event, choiceIndex, elementId) => {
 </script>
 
 <style scoped lang="scss">
-@import '@/assets/styles/dragStyle.scss';
+
 .option-item {
 	
 	display: flex;

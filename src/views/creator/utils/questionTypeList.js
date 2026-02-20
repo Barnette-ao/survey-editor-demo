@@ -31,12 +31,6 @@ export const questionTypeList = [
                 hoveredPath: '/images/questionnaire/hoveredScale.png',
                 defaultPath: '/images/questionnaire/scale.png',
             },
-            {
-                type: 'imagepicker',
-                text: "选图片",
-                hoveredPath: '/images/questionnaire/hoveredPictrue.png',
-                defaultPath: '/images/questionnaire/pictrue.png',
-            },
         ]
     },
     {
@@ -111,12 +105,6 @@ export const questionTypeList = [
         category: "others",
         categoryName: "其他题型",
         list: [
-            {
-                type: "file",
-                text: "文件上传",
-                hoveredPath: '/images/questionnaire/hoveredFile.png',
-                defaultPath: '/images/questionnaire/file.png',
-            },
             {
                 type: 'signaturepad',
                 text: "签名",
