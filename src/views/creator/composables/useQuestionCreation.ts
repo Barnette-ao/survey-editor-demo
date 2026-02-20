@@ -11,8 +11,6 @@ export function useQuestionCreation(
   const { applyAddPage, applyAddElement } = useDraftActions()
   
   const handleQuestionTypeClick = (elementType: string) => {
-    console.log("click elementType",elementType);
-    
     // 题目创建逻辑
     if (elementType === "page") {
       applyAddPage({

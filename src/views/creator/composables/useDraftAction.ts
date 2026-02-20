@@ -6,7 +6,7 @@ import {
     createAddPageCommand,
     createAddQuestionCommand,
     createDeleteQuestionCommand,
-    createUpdateChoicesCommand,
+    createUpdateElementCommand,
 } from "@/views/creator/commands";
 import { useDraftContext } from "@/views/creator/composables/useDraftContext";
 import { useRoute } from "vue-router";
@@ -40,8 +40,8 @@ export function useDraftActions() {
     draft.applyOperation(cmd)
   }
 
-  function applyUpdateChoices(payload:any){
-    const cmd = createUpdateChoicesCommand(payload)
+  function applyUpdateElement(payload:any){
+    const cmd = createUpdateElementCommand(payload)
     draft.applyOperation(cmd)
   }
 
@@ -94,6 +94,6 @@ export function useDraftActions() {
     applyAddElement,
     replaceDraftState,
     applyDeleteElement,
-    applyUpdateChoices
+    applyUpdateElement
   }
 }

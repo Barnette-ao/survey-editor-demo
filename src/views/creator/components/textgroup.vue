@@ -1,50 +1,64 @@
 <template>
 	<base-question :element="element" :show-question-number="showNumber">
 		<!-- 选项列表 -->
-		<template #options>
-			<div :class="`textgroup-list-${element.id}`">
-				<div v-for="(textbox, index) in element.items" :key="index" @mousemove="hoverIndex = index" 
-				@mouseleave="hoverIndex = -1">
-					<div class="option-item">
-						<DragHandler :is-visible="hoverIndex === index" @mousedown="emit('click')" />
-						<div class="optionItemBox">
-							<customEditor 
-								:model-value="textbox.name" 
-								:editor-id="`textbox-${element.id}-${index}`" 
-								@click="$emit('click')"
-								@blur="onItemNameChange($event, element.id)"
-							>
-							</customEditor>
-							<el-button class="delete-option" @click="deleteItem(index)">
-								<el-icon>
-									<Delete />
-								</el-icon>
-							</el-button>
+		<template #options="{ showAll }">
+			<draggable 
+				v-model="localItems"
+				item-key="id"
+				handle=".dragHandler"
+				@change="onDragEnd"
+			>
+				<template #item="{ element: textbox, index }">
+					<div
+						v-show="showAll || index < 8"
+						@mousemove="hoverIndex = index" 
+						@mouseleave="hoverIndex = -1"
+					>
+						<div class="option-item">
+							<DragHandler
+								class="dragHandler"
+								:is-visible="hoverIndex === index"
+							/>
+							<div class="optionItemBox">
+								<customEditor 
+									:model-value="textbox.name" 
+									:editor-id="`textbox-${element.id}-${index}`" 
+									@blur="onItemNameChange($event, index, element.id)"
+								>
+								</customEditor>
+								<el-button class="delete-option" @click="deleteItem(index)">
+									<el-icon>
+										<Delete />
+									</el-icon>
+								</el-button>
+							</div>
+						</div>
+						<div class="input-preview">
+							<el-input disabled placeholder="填写者内容输入区" />
 						</div>
 					</div>
-					<div class="input-preview">
-						<el-input disabled placeholder="填写者内容输入区" />
-					</div>
-				</div>
-			</div>
+				</template>
+			</draggable>
+		</template>
 
-			<!-- 底部按钮 -->
-			<div class="bottom-actions">
-				<div class="action-buttons">
-					<el-button type="primary" text @click="addItem">
-						<el-icon>
-							<Plus />
-						</el-icon>添加选项
-					</el-button>
-					<el-button type="primary" text @click="showBatchDialog">
-						<el-icon>
-							<Plus />
-						</el-icon>批量添加选项
-					</el-button>
-				</div>
+		<!-- 底部按钮 -->
+		<template #bottom-actions>
+			<div class="action-buttons">
+				<el-button type="primary" text @click.stop="addItem">
+					<el-icon>
+						<Plus />
+					</el-icon>添加选项
+				</el-button>
+				<el-button type="primary" text @click.stop="showBatchDialog">
+					<el-icon>
+						<Plus />
+					</el-icon>批量添加选项
+				</el-button>
 			</div>
+		</template>
 
-			<!-- 批量添加对话框 -->
+		<!-- 批量添加对话框 -->
+		<template #dialogs>
 			<el-dialog v-model="batchDialogVisible" title="批量添加选项" width="500px">
 				<el-input v-model="batchItems" type="textarea" :rows="10" placeholder="请输入选项标题，每行一个" />
 				<template #footer>
@@ -59,14 +73,13 @@
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted } from 'vue'
-// 移除 ElMessage 导入，使用全局配置
-// 移除图标导入，使用全局注册
+import draggable from 'vuedraggable'
+import { ref, watch } from 'vue'
 import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
 import DragHandler from "@/views/creator/components/Icons/dragIcon.vue";
-import { initOptionsSortable } from '@/views/creator/config/dragOption';
 import { useDraftActions } from "@/views/creator/composables/useDraftAction";
+import { snapshot } from '@/views/creator/config/shared'
 
 const emit = defineEmits(['update'])
 
@@ -81,32 +94,48 @@ const props = defineProps({
 	}
 })
 
-onMounted(() => {
-  nextTick(() => {
-    initOptionsSortable('textgroup-list', props.element, updateItems);
-  });
-});
-
 const hoverIndex = ref(-1)
-
 const batchDialogVisible = ref(false)
 const batchItems = ref('')
 
-// 更新填空项列表
+const { applyUpdateElement, applyItemPropChange } = useDraftActions()
+
+// 🔑 关键：items 使用与 choices 相同的 command
+// newItems一定要是原始数据类型，也就是说其要去proxy化
 const updateItems = (newItems) => {
-	emit('update', 'items', newItems)
+	applyUpdateElement({
+		questionId: props.element.id,
+		key: 'items',
+		value: newItems
+	})
+}
+
+// 🔑 关键：使用 localItems 作为中间状态
+const localItems = ref([])
+watch(
+	() => props.element.items, 
+	(newValue) => {
+		localItems.value = snapshot(newValue)
+	}, 
+	{ immediate: true }
+)
+
+// 🔑 拖拽结束处理
+const onDragEnd = () => {	
+  const newItems = snapshot(localItems.value)	
+  updateItems(newItems)
 }
 
 // 添加填空项
 const addItem = () => {
-	const newItems = [...props.element.items]
+	const newItems = snapshot(props.element.items)
 	newItems.push({ name: `填空${newItems.length + 1}` })
 	updateItems(newItems)
 }
 
 // 删除填空项
 const deleteItem = (index) => {
-	const newItems = [...props.element.items]
+	const newItems = snapshot(props.element.items)
 	newItems.splice(index, 1)
 	updateItems(newItems)
 }
@@ -119,25 +148,25 @@ const showBatchDialog = () => {
 
 // 确认批量添加
 const confirmBatchAdd = () => {
-	const newItems = batchItems.value
+	const newItemsArray = batchItems.value
 		.split('\n')
 		.map(item => item.trim())
 		.filter(item => item !== '')
 		.map(item => ({ name: item }))
 
-	if (newItems.length === 0) {
-		this.$message.warning('请输入有效的填空项')
+	if (newItemsArray.length === 0) {
+		ElMessage.warning('请输入有效的填空项')
 		return
 	}
 
-	const updatedItems = [...props.element.items, ...newItems]
+	const updatedItems = snapshot([...props.element.items, ...newItemsArray])
 	updateItems(updatedItems)
 
 	batchDialogVisible.value = false
-	this.$message.success('批量添加成功')
+	ElMessage.success('批量添加成功')
 }
 
-const { applyItemPropChange } = useDraftAction()
+// 🔑 关键：编辑 item.name 时使用 applyItemPropChange
 const onItemNameChange = (event, itemIndex, elementId) => {
 	applyItemPropChange({
 		questionId: elementId,

@@ -220,8 +220,8 @@ export function updateElementField(
                 return el
             }
             
-            // 如果是 choices 字段，需要特殊处理
-            if (key === 'choices') {
+            // 如果是 choices 或 items 字段，需要特殊处理
+            if (key === 'choices' || key === 'items') {
                 // 检查 value 是否是字符串数组
                 if (Array.isArray(value) && value.every(item => typeof item === 'string')) {
                     // 直接赋值字符串数组

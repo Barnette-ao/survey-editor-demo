@@ -130,11 +130,11 @@ const hoverIndex = ref(-1)
 const batchDialogVisible = ref(false)
 const batchOptions = ref('')
 
-const { applyChoicePropChange, applyUpdateChoices } = useDraftActions()
+const { applyChoicePropChange, applyUpdateElement } = useDraftActions()
 
 // newChoices一定要是原始数据类型，也就是说其要去proxy化
 const updateChoices = (newChoices) => {
-	applyUpdateChoices({
+	applyUpdateElement({
 		questionId: props.element.id,
 		key: 'choices',
 		value: newChoices
@@ -222,8 +222,6 @@ const changeChoiceValue = (event, choiceIndex, elementId) => {
 </script>
 
 <style scoped lang="scss">
-@import '@/assets/styles/dragStyle.scss';
-
 .option-item {
 	display: flex;
 	align-items: center;

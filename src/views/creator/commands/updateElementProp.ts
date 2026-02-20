@@ -3,7 +3,8 @@ import {
   updateElementProp, 
   updateChoiceProp, 
   updateElementField,
-  findElementById 
+  findElementById,
+  updateItemProp 
 } from "@/views/creator/config/element"
 import type { QuestionElement } from "@/views/creator/types/questionnaire"
 import { snapshot } from '@/views/creator/config/shared'
@@ -84,7 +85,7 @@ export function createUpdateItemPropCommand<K extends keyof QuestionElement>(pay
       }
 
       // 执行更新操作
-      const result = updateChoiceProp(
+      const result = updateItemProp(
         rawState,
         payload.questionId,
         payload.itemIndex,
@@ -97,7 +98,7 @@ export function createUpdateItemPropCommand<K extends keyof QuestionElement>(pay
 
     undo(state: any) {
       const rawState = snapshot(state)
-      const result = updateChoiceProp(
+      const result = updateItemProp(
         rawState,
         oldElementId,
         payload.itemIndex,
@@ -166,17 +167,14 @@ export function createUpdateChoicePropCommand<K extends keyof QuestionElement>(p
 }
 
 // 在我重构拖拽时这个函数一定要改，现在只是摆在这里
-export function createUpdateChoicesCommand<K extends keyof QuestionElement>(payload: {
+export function createUpdateElementCommand<K extends keyof QuestionElement>(payload: {
   questionId: string
   key: K
   value: QuestionElement[K]
 }): Command {
   const questionId = payload.questionId
-  console.log("questionId",questionId)
   const key = payload.key
 
-  console.log("payload.value",payload.value);
-  
   // 新值固定
   const newValue = structuredClone(payload.value)
 
