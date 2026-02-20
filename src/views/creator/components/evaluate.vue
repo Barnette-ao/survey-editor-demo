@@ -20,9 +20,6 @@
 <script setup>
 import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 
-
-const emit = defineEmits(['update'])
-
 const props = defineProps({
 	showNumber: {
 		type: Boolean,
@@ -34,10 +31,6 @@ const props = defineProps({
 	}
 })
 
-
-const handleTitleChange = (newvalue) => {
-	emit('update', 'title', newvalue)
-}
 </script>
 
 <style scoped>
