@@ -1,6 +1,6 @@
 import type { Command } from "@/views/creator/services/DraftStorageService"
 import { switchChoiceQuestion, findElementById } from "@/views/creator/config/element"
-import { toRaw } from 'vue'
+import { snapshot } from '@/views/creator/config/shared'
 
 export function createSwitchChoiceElementCommand(payload: {
   sourceElementId: string
@@ -11,7 +11,7 @@ export function createSwitchChoiceElementCommand(payload: {
   
   return {
     execute(state) {
-      const rawState = toRaw(state)
+      const rawState = snapshot(state)
       // 保存旧元素用于undo，同时作为switchChoiceQuestion的参数
       sourceElement = findElementById(payload.sourceElementId, rawState)
       if (sourceElement) {
@@ -29,7 +29,7 @@ export function createSwitchChoiceElementCommand(payload: {
     },
 
     undo(state) {
-      const rawState = toRaw(state)
+      const rawState = snapshot(state)
       // 切换回原来的类型
       if (sourceElement) {
         const { cloned } = switchChoiceQuestion(

@@ -1,6 +1,6 @@
 import type { Command } from "@/views/creator/services/DraftStorageService"
 import { deletePage } from "@/views/creator/config/page/delete"
-import { toRaw } from 'vue'
+import { snapshot } from '@/views/creator/config/shared'
 
 export function createDeletePageCommand(payload: {
   pageIndex: number
@@ -10,7 +10,7 @@ export function createDeletePageCommand(payload: {
   
   return {
     execute(state: any) {
-      const rawState = toRaw(state)
+      const rawState = snapshot(state)
       // 保存被删除页面的信息用于undo
       if (payload.pageIndex >= 0 && payload.pageIndex < rawState.pages.length) {
         deletedPage = structuredClone(rawState.pages[payload.pageIndex])
@@ -29,7 +29,7 @@ export function createDeletePageCommand(payload: {
 
     undo(state: any) {
       // 在原位置插入被删除的页面
-      const rawState = toRaw(state)
+      const rawState = snapshot(state)
       if (deletedPage) {
         rawState.pages.splice(
           payload.pageIndex, 

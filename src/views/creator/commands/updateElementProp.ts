@@ -1,7 +1,12 @@
 import type { Command } from "@/views/creator/services/DraftStorageService"
-import { updateElementProp, updateChoiceProp, replaceChoiceByNewId, findElementById } from "@/views/creator/config/element"
+import { 
+  updateElementProp, 
+  updateChoiceProp, 
+  updateElementField,
+  findElementById 
+} from "@/views/creator/config/element"
 import type { QuestionElement } from "@/views/creator/types/questionnaire"
-import { toRaw } from 'vue'
+import { snapshot } from '@/views/creator/config/shared'
 
 
 export function createUpdateElementPropCommand<K extends keyof QuestionElement>(payload: {
@@ -19,7 +24,7 @@ export function createUpdateElementPropCommand<K extends keyof QuestionElement>(
       // 因为payload.value是个引用对象，所以value值会动态更新，但预期获得的值
       // 就是触发函数的那一刻的值,之后的值不再发生变化，所以对该值进行深拷贝
       // 以保存其值
-      const rawState = toRaw(state)
+      const rawState = snapshot(state)
       const frozenValue = structuredClone(payload.value)
     
       // 保存旧值用于undo
@@ -41,7 +46,7 @@ export function createUpdateElementPropCommand<K extends keyof QuestionElement>(
     },
 
     undo(state: any) {
-      const rawState = toRaw(state)
+      const rawState = snapshot(state)
       const result = updateElementProp(
         rawState,
         oldElementId,
@@ -65,7 +70,7 @@ export function createUpdateItemPropCommand<K extends keyof QuestionElement>(pay
   
   return {
     execute(state: any) {
-      const rawState = toRaw(state)
+      const rawState = snapshot(state)
       const frozenValue = structuredClone(payload.value)
       
       // 保存旧值用于undo
@@ -91,7 +96,7 @@ export function createUpdateItemPropCommand<K extends keyof QuestionElement>(pay
     },
 
     undo(state: any) {
-      const rawState = toRaw(state)
+      const rawState = snapshot(state)
       const result = updateChoiceProp(
         rawState,
         oldElementId,
@@ -116,7 +121,7 @@ export function createUpdateChoicePropCommand<K extends keyof QuestionElement>(p
   
   return {
     execute(state: any) {
-      const rawState = toRaw(state)
+      const rawState = snapshot(state)
       const frozenValue = structuredClone(payload.value)
       
       // 保存旧值用于undo
@@ -146,7 +151,7 @@ export function createUpdateChoicePropCommand<K extends keyof QuestionElement>(p
     },
 
     undo(state: any) {
-      const rawState = toRaw(state)
+      const rawState = snapshot(state)
       const result = updateChoiceProp(
         rawState,
         oldElementId,
@@ -166,49 +171,51 @@ export function createUpdateChoicesCommand<K extends keyof QuestionElement>(payl
   key: K
   value: QuestionElement[K]
 }): Command {
-  //structuredClone的参数不能是proxy类型，所以payload.value一定要是原始类型    
-  let oldValue: any = null
-  let currentElementId = payload.questionId
-  const frozenValue = structuredClone(payload.value)
-  const key = payload.key 
+  const questionId = payload.questionId
+  console.log("questionId",questionId)
+  const key = payload.key
+
+  // 新值固定
+  const newValue = structuredClone(payload.value)
+
+  // 旧值在第一次 execute 时确定
+  let oldValue: QuestionElement[K] | null = null
+  let hasCapturedOldValue = false
 
   return {
     execute(state: any) {
-      const rawState = toRaw(state)
-      
-      // 保存旧值用于undo
-      const element = findElementById(payload.questionId, rawState)
-      if (element) {
-        oldValue = structuredClone((element as any)[payload.key])
+      const rawState = snapshot(state)
+
+      const element = findElementById(questionId, rawState)
+      if (!element) return rawState
+
+      // 只在第一次执行时保存旧值
+      if (!hasCapturedOldValue) {
+        oldValue = structuredClone((element as any)[key])
+        hasCapturedOldValue = true
       }
 
-      // 执行更新操作
-      const result = replaceChoiceByNewId(
+      // 返回新的 state（不改变 id）
+      return updateElementField(
         rawState,
-        currentElementId,
+        questionId,
         key,
-        frozenValue
+        newValue
       )
-      if (result.id) currentElementId = result.id
-      return result.cloned
     },
 
     undo(state: any) {
-      const rawState = toRaw(state)
-      const result = replaceChoiceByNewId(
+      if (!oldValue) return state
+
+      const rawState = snapshot(state)
+
+      return updateElementField(
         rawState,
-        currentElementId,
+        questionId,
         key,
         oldValue
       )
-      if (result.id) currentElementId = result.id
-      return result.cloned
-    },
-
-    getMeta() {
-      return {
-        elementId:currentElementId
-      }
     }
   }
 }
+

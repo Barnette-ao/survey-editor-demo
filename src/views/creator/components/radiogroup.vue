@@ -5,44 +5,62 @@
 		@click="handleClick" 
 		>
 		<!-- 选项列表 -->
-		<template #options ="{ showAll }">
-			<div :class="`radiogroup-option-list-${element.id}`" >
-				<div v-for="(choice, index) in element.choices" 
-					v-show="showAll || index < 8"
-					@mousemove="hoverIndex = index" 
-					@mouseleave="hoverIndex = -1"
-				>
-					 <div class="option-item">
-						<DragHandler :is-visible="hoverIndex === index" @mousedown="emit('click')"/>
-						<div class="optionItemBox"  >
-							<customEditor 
-								:model-value="choice.value" 
-								:editor-id="`choice-${element.id}-${index}`" 
-								@click="emit('click')"
-								@blur="changeChoiceValue($event, index, element.id)"
-							>
-								<template #choiceIcon>
-									<div class="choiceIcon"></div>
-								</template>
-							</customEditor>
-							<el-button class="setting-option" @click="settingOption($event, index)">
-								<el-icon>
-									<Setting />
-								</el-icon>
-							</el-button>
-							<el-button class="delete-option" @click="deleteOption(index)">
-								<el-icon>
-									<Delete />
-								</el-icon>
-							</el-button>
+		<template #options="{ showAll }">
+			<draggable 
+				v-model="localChoices"
+				item-key="id"
+				handle=".dragHandler"
+				@change="onDragEnd"
+			>
+				<template #item="{ element: choice, index }">
+					<div
+						v-show="showAll || index < 8"
+						@mousemove="hoverIndex = index"
+						@mouseleave="hoverIndex = -1"
+					>
+						<div class="option-item">
+							<DragHandler
+								class="dragHandler"
+								:is-visible="hoverIndex === index"
+							/>
+
+							<div class="optionItemBox">
+								<customEditor
+									:model-value="choice.value"
+									:editor-id="`choice-${element.id}-${index}`"
+									@blur="changeChoiceValue($event, index, element.id)"
+								>
+									<template #choiceIcon>
+										<div class="choiceIcon"></div>
+									</template>
+								</customEditor>
+
+								<el-button
+									class="setting-option"
+									@click="settingOption($event, index)"
+								>
+									<el-icon>
+										<Setting />
+									</el-icon>
+								</el-button>
+
+								<el-button
+									class="delete-option"
+									@click="deleteOption(index)"
+								>
+									<el-icon>
+										<Delete />
+									</el-icon>
+								</el-button>
+							</div>
 						</div>
-					 </div>
-					
-					 <div class="mark" v-show="choice.showText"></div>
-				</div>
-			</div>
-			
+
+						<div class="mark" v-show="choice.showText"></div>
+					</div>
+				</template>
+			</draggable>
 		</template>
+
 
 		<!-- 底部操作按钮 -->
 		<template #bottom-actions>
@@ -81,19 +99,20 @@
 </template>
 
 <script setup>
+import draggable from 'vuedraggable'
 import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
 import DragHandler from "@/views/creator/components/Icons/dragIcon.vue";
-import { initOptionsSortable } from '@/views/creator/config/dragOption';
 import { useDraftActions } from "@/views/creator/composables/useDraftAction";
-import { ref, nextTick, onMounted } from 'vue'
+import { ref, nextTick, onMounted, computed } from 'vue'
 import { 
   addSingleOption, 
   addOtherOption as addOtherOptionUtil, 
   deleteOptionAtIndex, 
   addBatchOptions, 
-  parseBatchInput 
+  parseBatchInput, 
 } from '@/views/creator/composables/useChoiceOperations';
+import { snapshot } from '@/views/creator/config/shared'
 
 const emit = defineEmits(['update', 'optionSetting'])
 
@@ -108,14 +127,8 @@ const props = defineProps({
 	}
 })
 
-onMounted(() => {
-  nextTick(() => {
-    initOptionsSortable('radiogroup-option-list', props.element, updateChoices);
-  });
-});
 
 const hoverIndex = ref(-1)
-
 const batchDialogVisible = ref(false)
 const batchOptions = ref('')
 
@@ -129,6 +142,22 @@ const updateChoices = (newChoices) => {
 	})
 }
 
+const localChoices = ref([])
+watch(
+	()=> props.element.choices, 
+	(newValue)=>{
+		localChoices.value = snapshot(newValue)
+	}, 
+	{immediate:true}
+)
+
+
+const onDragEnd = () => {	
+  const newChoices = snapshot(localChoices.value)	
+  updateChoices(newChoices)
+}
+
+
 // 添加单个选项
 const addOption = () => {
 	const newChoices = addSingleOption(props.element.choices)
@@ -140,7 +169,6 @@ const addOtherOption = () => {
 	const newChoices = addOtherOptionUtil(props.element.choices)
 	updateChoices(newChoices)
 }
-
 
 // 删除选项
 const deleteOption = (index) => {

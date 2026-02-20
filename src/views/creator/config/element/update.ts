@@ -3,7 +3,6 @@ import { deleteLogicRulesById } from '@/views/creator/config/logicRule'
 import { getSwitchTargetElement } from '@/views/creator/config/element'
 import { generateUUID } from '@/views/creator/config/shared'
 import type { QuestionElement } from '@/views/creator/types/questionnaire'
-import { toRaw } from 'vue'
 
 /**
  * 切换选择题类型
@@ -204,5 +203,24 @@ export const replaceElement = (
             newElement
         )
     }
+}
+
+export function updateElementField(
+  state: any,
+  questionId: string,
+  key: keyof QuestionElement,
+  value: any
+) {
+  return {
+    ...state,
+    pages:state.pages.map((page: any) => ({
+        ...page,
+        elements: page.elements.map((el: QuestionElement) =>
+            el.id === questionId
+                ? { ...el, [key]: value }
+                : el
+            )
+    }))
+  }
 }
 

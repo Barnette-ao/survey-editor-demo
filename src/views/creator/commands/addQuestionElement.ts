@@ -4,7 +4,7 @@ import {
   addQuestionElement,
   deleteQuestion
 } from "@/views/creator/config/element"
-import { toRaw } from 'vue'
+import { snapshot } from '@/views/creator/config/shared'
 
 export function createAddQuestionCommand(payload: {
   selectedQuestionId: string
@@ -14,7 +14,7 @@ export function createAddQuestionCommand(payload: {
   
   return {
     execute(state) {
-      const rawState = toRaw(state)
+      const rawState = snapshot(state)
       const { id:newElementId, cloned } = addQuestionElement(
         rawState, 
         payload.elementType, 
@@ -25,7 +25,7 @@ export function createAddQuestionCommand(payload: {
     },
 
     undo(state) {
-      const rawState = toRaw(state) 
+      const rawState = snapshot(state) 
       return deleteQuestion(
         rawState,
         addedElementId

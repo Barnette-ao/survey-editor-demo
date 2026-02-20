@@ -1,7 +1,7 @@
 import type { Command } from "@/views/creator/services/DraftStorageService"
 import { updateSurveyProp } from "@/views/creator/config/survey"
 import type { QuestionSettings } from "@/views/creator/types/questionnaire"
-import { toRaw } from 'vue'
+import { snapshot } from '@/views/creator/config/shared'
 
 export function createUpdateSurveyPropCommand<K extends keyof QuestionSettings>(payload: {
   key: K
@@ -11,7 +11,7 @@ export function createUpdateSurveyPropCommand<K extends keyof QuestionSettings>(
   
   return {
     execute(state: any) {
-      const rawState = toRaw(state)
+      const rawState = snapshot(state)
       const frozenValue = structuredClone(payload.value)
 
       // 保存旧值用于undo
@@ -32,7 +32,7 @@ export function createUpdateSurveyPropCommand<K extends keyof QuestionSettings>(
     },
 
     undo(state: any) {
-      const rawState = toRaw(state)
+      const rawState = snapshot(state)
       const result = updateSurveyProp(
         rawState,
         payload.key,

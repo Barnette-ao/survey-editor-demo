@@ -73,6 +73,10 @@
                   :is="componentIs(item.element)"
                   :show-number="isShowNumber(item.element)"
                   :element="item.element"
+                  @click="handleQuestionClick(item.element.id)"
+                  @copy="(id) => copyElement(id, item.element.type)"
+                  @delete="deleteElement(item.element.id)"
+                  @setLogic="openLogicDialog"
                   @optionSetting="handleOptionSettingUpdate"
                   @update="(key, value) => updateElementField(key, value)"
                 />

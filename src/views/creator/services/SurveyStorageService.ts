@@ -48,10 +48,10 @@ export const createQuestionnaireTemplate = (count: number, surveyId: string) => 
 			isRequired: true,
 			hideNumber: false,
 			choices: [
-				{ value: `选项A-${i}`, showText: false, textType: 'text', required: true },
-				{ value: `选项B-${i}`, showText: false, textType: 'text', required: true },
-				{ value: `选项C-${i}`, showText: false, textType: 'text', required: true },
-				{ value: `选项D-${i}`, showText: false, textType: 'text', required: true }
+				{ id: generateUUID(), value: `选项A-${i}`, showText: false, textType: 'text', required: true },
+				{ id: generateUUID(), value: `选项B-${i}`, showText: false, textType: 'text', required: true },
+				{ id: generateUUID(), value: `选项C-${i}`, showText: false, textType: 'text', required: true },
+				{ id: generateUUID(), value: `选项D-${i}`, showText: false, textType: 'text', required: true }
 			]
 		} as any)
 	}

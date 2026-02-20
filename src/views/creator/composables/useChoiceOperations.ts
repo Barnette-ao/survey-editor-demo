@@ -1,38 +1,15 @@
+import { snapshot } from '@/views/creator/config/shared'
+
 /**
  * 选项操作相关的纯函数
  * 用于处理选择题（checkbox、radiogroup等）的选项增删改操作
  */
-
-import { toRaw } from 'vue'
 
 interface ChoiceItem {
   value: string
   showText: boolean
   textType: string
   required: boolean
-}
-
-/**
- * 递归地将 Proxy 对象转换为原始对象
- */
-const deepToRaw = <T>(obj: T): T => {
-  const raw = toRaw(obj)
-  
-  if (Array.isArray(raw)) {
-    return raw.map(item => deepToRaw(item)) as T
-  }
-  
-  if (raw !== null && typeof raw === 'object') {
-    const result: any = {}
-    for (const key in raw) {
-      if (Object.prototype.hasOwnProperty.call(raw, key)) {
-        result[key] = deepToRaw((raw as any)[key])
-      }
-    }
-    return result as T
-  }
-  
-  return raw
 }
 
 /**
@@ -60,8 +37,7 @@ const findOtherOptionIndex = (choices: ChoiceItem[]): number => {
 
 
 export const addSingleOption = (choices: ChoiceItem[]): ChoiceItem[] => {
-  const rawChoices = deepToRaw(choices)
-  const newChoices = [...rawChoices]
+  const newChoices = snapshot(choices) //深拷贝原始数据
   const otherOptionIndex = findOtherOptionIndex(newChoices)
   const index = otherOptionIndex === -1 ? newChoices.length + 1 : newChoices.length
   const newChoiceItem = createChoiceItem(`选项${index}`)
@@ -79,8 +55,7 @@ export const addSingleOption = (choices: ChoiceItem[]): ChoiceItem[] => {
  * 添加"其他"选项
  */
 export const addOtherOption = (choices: ChoiceItem[]): ChoiceItem[] => {
-  const rawChoices = deepToRaw(choices)
-  const newChoices = [...rawChoices]
+  const newChoices = snapshot(choices) //深拷贝原始数据
   const otherChoiceItem = createChoiceItem('其他', true)
   newChoices.push(otherChoiceItem)
   return newChoices
@@ -90,8 +65,7 @@ export const addOtherOption = (choices: ChoiceItem[]): ChoiceItem[] => {
  * 删除指定索引的选项
  */
 export const deleteOptionAtIndex = (choices: ChoiceItem[], index: number): ChoiceItem[] => {
-  const rawChoices = deepToRaw(choices)
-  const newChoices = [...rawChoices]
+  const newChoices = snapshot(choices) //深拷贝原始数据
   newChoices.splice(index, 1)
   return newChoices
 }
@@ -107,8 +81,7 @@ const formatNewOptions = (options: string[]): ChoiceItem[] => {
  * 批量添加选项
  */
 export const addBatchOptions = (choices: ChoiceItem[], newOptions: string[]): ChoiceItem[] => {
-  const rawChoices = deepToRaw(choices)
-  const newChoices = [...rawChoices]
+  const newChoices = snapshot(choices) //深拷贝原始数据
   const otherOptionIndex = findOtherOptionIndex(newChoices)
   const formattedOptions = formatNewOptions(newOptions)
 
@@ -137,8 +110,7 @@ export const parseBatchInput = (input: string): string[] => {
  * 添加单个选项 (字符串格式)
  */
 export const addSimpleOption = (choices: string[]): string[] => {
-  const rawChoices = deepToRaw(choices)
-  const newChoices = [...rawChoices]
+  const newChoices = snapshot(choices) //深拷贝原始数据
   newChoices.push(`选项${newChoices.length + 1}`)
   return newChoices
 }
@@ -147,8 +119,7 @@ export const addSimpleOption = (choices: string[]): string[] => {
  * 删除指定索引的选项 (字符串格式)
  */
 export const deleteSimpleOptionAtIndex = (choices: string[], index: number): string[] => {
-  const rawChoices = deepToRaw(choices)
-  const newChoices = [...rawChoices]
+  const newChoices = snapshot(choices) //深拷贝原始数据
   newChoices.splice(index, 1)
   return newChoices
 }
@@ -157,6 +128,6 @@ export const deleteSimpleOptionAtIndex = (choices: string[], index: number): str
  * 批量添加选项 (字符串格式)
  */
 export const addSimpleBatchOptions = (choices: string[], newOptions: string[]): string[] => {
-  const rawChoices = deepToRaw([...choices, ...newOptions])
-  return rawChoices
+  const rawChoices = snapshot([...choices, ...newOptions])
+  return rawChoices 
 }

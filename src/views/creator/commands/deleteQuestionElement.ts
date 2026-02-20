@@ -1,11 +1,10 @@
 import type { Command } from "@/views/creator/services/DraftStorageService"
-
 import {
   insertElement,
   deleteQuestion,
   getSelectedElementPosition
 } from "@/views/creator/config/element"
-import { toRaw } from 'vue'
+import { snapshot } from '@/views/creator/config/shared'
 
 export function createDeleteQuestionCommand(payload: {
   elementId: string
@@ -16,7 +15,7 @@ export function createDeleteQuestionCommand(payload: {
 
   return {
     execute(state:any) {
-      const rawState = toRaw(state)
+      const rawState = snapshot(state)
       const { elementIndex, pageIndex } = getSelectedElementPosition(rawState, payload.elementId)
       if (elementIndex !== undefined && pageIndex !== undefined) {
         // 获取被删除元素的信息
@@ -32,7 +31,7 @@ export function createDeleteQuestionCommand(payload: {
     },
 
     undo(state) {
-      const rawState = toRaw(state) 
+      const rawState = snapshot(state) 
       const cloned = insertElement(
         rawState,
         deletedElement,

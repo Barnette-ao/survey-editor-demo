@@ -94,6 +94,8 @@ onMounted(() => {
 
 .list {
   margin-top: 20px;
+  height: 200px;
+  overflow-y: auto;
 }
 
 .list-item {
