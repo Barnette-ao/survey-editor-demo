@@ -2,46 +2,55 @@
 	<base-question :element="element" :show-question-number="showNumber" >
 		<!-- 选项列表 -->
 		<template #options="{ showAll }">
-			<div :class="`ranking-option-list-${element.id}`">
-				<div v-for="(choice, index) in element.choices"
-					 v-show="showAll || index < 8" 
-					 class="option-item"
-					 @mousemove="hoverIndex = index" 
-					 @mouseleave="hoverIndex = -1"
-				>
-					<DragHandler :is-visible="hoverIndex === index"  @mousedown="$emit('click')"/>
-					<div class="optionItemBox">
-						<customEditor 
-							:model-value="choice"  
-							:editor-id="`choice-${element.id}-${index}`" 
-							@click="$emit('click')"
-							@blur="changeChoiceValue($event, index, element.id)"
-						>
-							<template #choiceIcon>
-								<el-icon color="#909399">
-									<Sort />
+			<draggable 
+				v-model="localChoices"
+				item-key="id"
+				handle=".dragHandler"
+				@change="onDragEnd"
+			>
+				<template #item="{ element: choice, index }">
+					<div
+						v-show="showAll || index < 8"
+						class="option-item"
+						@mousemove="hoverIndex = index" 
+						@mouseleave="hoverIndex = -1"
+					>
+						<DragHandler
+							class="dragHandler"
+							:is-visible="hoverIndex === index"
+						/>
+						<div class="optionItemBox">
+							<customEditor 
+								:model-value="choice"  
+								:editor-id="`choice-${element.id}-${index}`" 
+								@blur="changeChoiceValue($event, index, element.id)"
+							>
+								<template #choiceIcon>
+									<el-icon color="#909399">
+										<Sort />
+									</el-icon>
+								</template>
+							</customEditor>
+							<el-button class="delete-option" @click="deleteOption(index)">
+								<el-icon>
+									<Delete />
 								</el-icon>
-							</template>
-						</customEditor>
-						<el-button class="delete-option" @click="deleteOption(index)">
-							<el-icon>
-								<Delete />
-							</el-icon>
-						</el-button>
+							</el-button>
+						</div>
 					</div>
-				</div>
-			</div>
+				</template>
+			</draggable>
 		</template>
 
 		<!-- 底部操作按钮 -->
 		<template #bottom-actions>
 			<div class="action-buttons">
-				<el-button @click="addOption" text >
+				<el-button @click.stop="addOption" text >
 					<el-icon>
 						<Plus />
 					</el-icon>添加选项
 				</el-button>
-				<el-button  @click="showBatchDialog" text>
+				<el-button @click.stop="showBatchDialog" text>
 					<el-icon>
 						<Plus />
 					</el-icon>批量添加选项

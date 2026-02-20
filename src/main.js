@@ -34,7 +34,8 @@ import {
   RefreshRight,
   Rank,
   QuestionFilled,
-  CircleCloseFilled
+  CircleCloseFilled,
+  CaretBottom
 } from '@element-plus/icons-vue'
 
 // Element Plus 样式按需引入
@@ -79,6 +80,7 @@ app.component('Rank', Rank)
 app.component('QuestionFilled', QuestionFilled)
 app.component('Setting', Setting)
 app.component('CircleCloseFilled', CircleCloseFilled)
+app.component('CaretBottom', CaretBottom)
 
 // 全局配置 ElMessage 和 ElMessageBox
 app.config.globalProperties.$message = ElMessage
