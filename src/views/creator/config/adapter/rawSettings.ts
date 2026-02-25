@@ -53,7 +53,7 @@ export const afterGetInitialSettings = (settings: any) => {
 
 	if (!copy.hasOwnProperty("pages")) {
 		copy.pages = []
-		copy.pages.push({ name: "page1", elements: copy.elements })
+		copy.pages.push({ id:uuidv4(), name: "page1", elements: copy.elements })
 	}
 
 	// 用pipe实现函数式组合

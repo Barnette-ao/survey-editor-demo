@@ -40,8 +40,6 @@ export const initSortable = (questionSettings, instructionElementId, istarg) => 
 				// toPageIndex:拖拽元素，拖拽后，所属页面在页面数组中的索引
 				const fromPageIndex = parseInt(from.dataset.pageIndex);
 				const toPageIndex = parseInt(to.dataset.pageIndex);
-				console.log("fromPageIndex", fromPageIndex)
-				console.log("toPageIndex", toPageIndex)
 
 				// 只有一页的情况下，不会插入页码元素，所以视图上索引为0的元素是第一页的
 				// 第一个题目元素，不是页码元素。

@@ -1,5 +1,10 @@
 import { cloneDeep } from 'lodash-es'
 
+const deletePageId = (page: any) => {
+	delete page.id
+	return page
+}
+
 /**
  * 重置页面名称
  */
@@ -45,6 +50,7 @@ export const beforeSaveToDatabase = (settings: any) => {
 	}
 
 	copy.pages = copy.pages
+		.map(deletePageId)
 		.map(resetPageName)
 		.map(checkTypeProp)
 

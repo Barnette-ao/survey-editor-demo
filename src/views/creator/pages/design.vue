@@ -176,12 +176,12 @@ import { questionTypeList } from "@/views/creator/utils/questionTypeList";
 import page from "@/views/creator/components/page.vue";
 import { settingComponentMap } from "@/views/creator/config/registry";
 import { deletePage } from "@/views/creator/config/handleElementAndPage";
-// import { initSortable } from "@/views/creator/config/dragElementOrPage";
+
 import { destroyAllOptionSortables } from "@/views/creator/config/dragOption.js";
 import {
   handleLogicRulesUpdateWrapper as handleLogicRulesUpdate,
 } from "@/views/creator/config/updateLogic";
-
+import draggable from "vuedraggable"
 import { watch, nextTick } from "vue";
 import customEditor from "@/views/creator/components/customEditor.vue";
 import { useIncrementalLoading } from "@/views/creator/composables/useIncreamentalLoading"
@@ -220,37 +220,36 @@ const changeSurveyPorp = (event:any, key: string) =>{
 
 //定义是否拖拽，拖拽则赋空值时不更新数据
 const istarg = ref(false);
-const instructionElementId = ref("");
-const instructionElement = ref({});
-const sentinelRef = ref(null)  // 直接在组件中创建
-// 增量加载相关状态 - 先定义默认值避免暂时性死区
-const incrementalLoadingInstance = ref({})
 
+const sentinelRef = ref(null)  // 直接在组件中创建
 
 // 先初始化 draftState
 const { draftState } = useDraftContext()
-onMounted(async () => {
-  instructionElement.value = draftState.value.pages[0].elements[0];
-  instructionElementId.value = draftState.value.pages[0].elements[0].id;
-  
-  // 数据加载完成后，初始化增量加载
-  incrementalLoadingInstance.value = useIncrementalLoading(
-    draftState, 
-    sentinelRef, {
-      initialCount: 10,
-      batchSize: 5,
-      threshold: 200
-    }
-  );
-  // 初始化数据
-  incrementalLoadingInstance.value.init();
-  
+
+const instructionElementId = draftState.value.pages[0].elements[0].id;
+const instructionElement = draftState.value.pages[0].elements[0];
+// 增量加载相关状态 - 先定义默认值避免暂时性死区
+const incrementalLoadingInstance = ref({})
+
+// 数据加载完成后，初始化增量加载
+incrementalLoadingInstance.value = useIncrementalLoading(
+  draftState, 
+  sentinelRef, {
+    initialCount: 10,
+    batchSize: 5,
+    threshold: 200
+  }
+);
+
+// 初始化数据
+incrementalLoadingInstance.value.init();
+
+onMounted(async () => {   
   // 等待 DOM 渲染完成后初始化 Observer
   await nextTick();
   if (sentinelRef.value) {
     incrementalLoadingInstance.value.initObserverManually();
   }
-
   console.log("incrementalLoadingInstance",incrementalLoadingInstance.value)
   
   // 初始化拖拽功能

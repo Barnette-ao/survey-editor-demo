@@ -1,4 +1,6 @@
 import { getSelectedElementPosition } from '@/views/creator/config/element'
+import { generateUUID } from '@/views/creator/config/shared'
+
 import type { QuestionSettings } from '@/views/creator/types/questionnaire'
 
 /**
@@ -60,6 +62,7 @@ const isNotSelectAnyQuestion = (selectedQuestionId: string, isPageSelected: bool
  */
 const addEmptyPageAtLast = (questionSettings: QuestionSettings): void => {
     questionSettings.pages.push({
+        id:generateUUID(),
         name: `page${questionSettings.pages.length + 1}`,
         elements: [],
     } as any)
@@ -94,6 +97,7 @@ const addEmptyPageAfterPage = (
 ): void => {
     if (isSelectAPage){
         questionSettings.pages.splice(pageIndex, 0, {
+            id:generateUUID(),
             name: `page${pageIndex}`,
             elements: [],
         } as any)
@@ -101,6 +105,7 @@ const addEmptyPageAfterPage = (
         const { pageIndex } = getSelectedElementPosition(questionSettings, selectedQuestionId)
         if (pageIndex !== undefined) {
             questionSettings.pages.splice(pageIndex + 1, 0, {
+                id:generateUUID(),
                 name: `page${pageIndex + 1}`,
                 elements: [],
             } as any)
@@ -130,6 +135,7 @@ const addPageBySpliteOffOnePage = (questionSettings: QuestionSettings, selectedQ
 export const spliteOffOnePageIntoPages = (questionSettings: QuestionSettings, elementIndex: number, pageIndex: number): void => {
     const newPgaeElements = questionSettings.pages[pageIndex].elements.splice(elementIndex + 1)
     questionSettings.pages.splice(pageIndex + 1, 0, {
+        id:generateUUID(),
         name: `page${pageIndex + 1}`,
         elements: newPgaeElements,
     } as any)

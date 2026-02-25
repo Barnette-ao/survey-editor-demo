@@ -31,6 +31,7 @@
 				</el-button>
 			</div>
 		</template>
+
 		<!-- 批量添加对话框 -->
 		<template #dialogs>
 			<el-dialog v-model="batchDialogVisible" title="批量添加" width="500px">
@@ -49,7 +50,10 @@
 <script setup>
 import { ref, computed } from 'vue'
 import BaseQuestion from '@/components/Question/BaseQuestion.vue'
+import { snapshot } from '@/views/creator/config/shared'
+import { useDraftActions } from "@/views/creator/composables/useDraftAction";
 
+const { applyUpdateElement } = useDraftActions()
 
 const emit = defineEmits(['update'])
 
@@ -76,8 +80,15 @@ const starCount = computed(() => {
 const batchDialogVisible = ref(false)
 const batchInput = ref('')
 
+console.log("props.element.rateMax",props.element.rateMax);
+
+
 const handleAddOption = () => {
-	starCount.value++
+	applyUpdateElement({
+		questionId: props.element.id,
+		key: 'rateMax',
+		value: snapshot(props.element.rateMax) + 1
+	})
 }
 
 const handleBatchAdd = () => {
@@ -86,7 +97,13 @@ const handleBatchAdd = () => {
 
 const handleBatchConfirm = () => {
 	const lines = batchInput.value.split('\n').filter(line => line.trim())
-	starCount.value = lines.length || 1
+
+	applyUpdateElement({
+		questionId: props.element.id,
+		key: 'rateMax',
+		value: snapshot(lines.length || 1)
+	})
+	
 	batchDialogVisible.value = false
 	batchInput.value = ''
 }

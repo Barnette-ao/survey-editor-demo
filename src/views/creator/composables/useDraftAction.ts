@@ -41,6 +41,7 @@ export function useDraftActions() {
   }
 
   function applyUpdateElement(payload:any){
+    console.log("payload",payload)
     const cmd = createUpdateElementCommand(payload)
     draft.applyOperation(cmd)
   }

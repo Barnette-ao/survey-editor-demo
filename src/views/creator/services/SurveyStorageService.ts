@@ -27,6 +27,7 @@ export const createQuestionnaireTemplate = (count: number, surveyId: string) => 
 		title: `测试问卷${getTestQuestionnaireNumber()}`,
 		description: '用于测试长列表渲染性能',
 		pages: [{
+      id: generateUUID(),
 			name: 'page1',
 			elements: [{
 				html: "<h3>欢迎参与问卷调查</h3><p>请认真填写以下问题。</p>",
@@ -40,7 +41,7 @@ export const createQuestionnaireTemplate = (count: number, surveyId: string) => 
 
   for (let i = 1; i <= count; i++) {
 		baseQuestion.pages[0].elements.push({
-			id: `test-question-${i}`,
+			id: generateUUID(),
 			name: `Q${i}`,
 			type: 'radiogroup',
 			title: `测试题目 ${i}：这是第 ${i} 个测试题目，用于性能测试`,
