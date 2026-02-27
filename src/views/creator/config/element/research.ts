@@ -1,4 +1,6 @@
-export const getSelectedElementPosition = (questionSettings: any, selectedQuestionId: string) => {
+import { findPageIndexById } from "@/views/creator/config/page"
+
+export const findElementPosition = (questionSettings: any, selectedQuestionId: string) => {
     let elementIndex, pageIndex;
     const page = questionSettings.pages.find((page: any) =>
         page.elements.some((el: any) => el && el.id === selectedQuestionId)
@@ -13,14 +15,22 @@ export const getSelectedElementPosition = (questionSettings: any, selectedQuesti
 };
 
 export const findElementById = (elementId:string, questionSettings:any) => {
-    const { elementIndex, pageIndex } = getSelectedElementPosition(questionSettings, elementId);
+    const { elementIndex, pageIndex } = findElementPosition(questionSettings, elementId);
     if (elementIndex !== undefined && pageIndex !== undefined) {
         return questionSettings.pages[pageIndex].elements[elementIndex];
     }
 }
 
-export const findPageIndexById = (state: any, pageId: string): number => {
-  return state.pages.findIndex((p: any) => p.id === pageId)
+export const findTargetPosition = (state:any, targetId:string) => {
+  const pageIndex = findPageIndexById(state, targetId)
+  if (pageIndex !== -1) {
+    return {
+      elementIndex: 0, // element → page 语义  
+      pageIndex: pageIndex,
+    }
+  }
+
+  return findElementPosition(state, targetId)
 }
 
 export const resolveTargetPageIndex = (state: any, targetId: string): number => {

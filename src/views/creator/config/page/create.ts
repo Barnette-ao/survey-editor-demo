@@ -1,4 +1,4 @@
-import { getSelectedElementPosition } from '@/views/creator/config/element'
+import { findElementPosition } from '@/views/creator/config/element'
 import { generateUUID } from '@/views/creator/config/shared'
 
 import type { QuestionSettings } from '@/views/creator/types/questionnaire'
@@ -18,14 +18,15 @@ export const addPage = (
     isPageSelected: boolean
 ) => {
     const cloned = structuredClone(questionSettings)
-    
+    let newPageId
+
     // 未选中任何题目和页面，在页数组最后添加一个空页
     if (isNotSelectAnyQuestion(selectedQuestionId, isPageSelected)) {
-        addEmptyPageAtLast(cloned)
+        newPageId = addEmptyPageAtLast(cloned)
     }
-    // 如果选中的题目是某一页面最后一道题目，那么在该页面后添加新的空页面
-    else if (isLastElementOfAnyPageSelected(cloned, selectedQuestionId)) {
-        addEmptyPageAfterPage(
+    // 如果选中的题目
+    else if (isSelectElement(selectedQuestionId)) {
+        newPageId = addEmptyPageAfterPage(
             cloned, 
             selectedQuestionId,
             isPageSelected = false, 
@@ -34,20 +35,15 @@ export const addPage = (
     }
     // 如果点击的是页面块，点击添加页面，是在该页之后添加一个空页
     else if (isPageSelected) {
-        addEmptyPageAfterPage(
+        newPageId = addEmptyPageAfterPage(
             cloned,
             selectedQuestionId="", 
             isPageSelected, 
             pageIndex
         )
     }
-    // 如果选中的题目不是某一页的最后一道题目，那么在该页面后添加一个新页面，并且
-    // 将该页面该题目之后的所有的题目都加入新的页面。
-    else {
-        addPageBySpliteOffOnePage(cloned, selectedQuestionId)
-    }
     
-    return cloned
+    return {cloned,newPageId}
 }
 
 /**
@@ -57,34 +53,24 @@ const isNotSelectAnyQuestion = (selectedQuestionId: string, isPageSelected: bool
     return selectedQuestionId === "" && !isPageSelected
 }
 
+const isSelectElement =(selectedQuestionId: string) => {
+    return selectedQuestionId !== ""
+}
+
 /**
  * 在页数组最后添加一个空页
  */
-const addEmptyPageAtLast = (questionSettings: QuestionSettings): void => {
+const addEmptyPageAtLast = (questionSettings: QuestionSettings): string => {
+    const newPageId = generateUUID()
     questionSettings.pages.push({
-        id:generateUUID(),
+        id:newPageId,
         name: `page${questionSettings.pages.length + 1}`,
         elements: [],
     } as any)
+    
+    return newPageId
 }
 
-/**
- * 判断选中的题目是否是某一页面的最后一道题目
- */
-const isLastElementOfAnyPageSelected = (questionSettings: QuestionSettings, selectedQuestionId: string): boolean => {
-    const getLastElementOfPage = (page: any) => {
-        if (page.elements.length > 0) {
-            return page.elements[page.elements.length - 1]
-        }
-        return null
-    }
-
-    const index = questionSettings.pages
-        .map(getLastElementOfPage)
-        .findIndex((el: any) => el && el.id == selectedQuestionId)
-
-    return index !== -1
-}
 
 /**
  * 在指定页面后添加一个空页
@@ -94,36 +80,26 @@ const addEmptyPageAfterPage = (
     selectedQuestionId: string,
     isSelectAPage:boolean,
     pageIndex: number
-): void => {
+): string => {
+    const newPageId = generateUUID()
+    const emptyPage = {
+        id:newPageId,
+        name: `page${pageIndex + 1}`,
+        elements: [],
+    } as any
+
     if (isSelectAPage){
-        questionSettings.pages.splice(pageIndex, 0, {
-            id:generateUUID(),
-            name: `page${pageIndex}`,
-            elements: [],
-        } as any)
+        questionSettings.pages.splice(pageIndex, 0, emptyPage)
     }else{
-        const { pageIndex } = getSelectedElementPosition(questionSettings, selectedQuestionId)
+        const { pageIndex } = findElementPosition(questionSettings, selectedQuestionId)
         if (pageIndex !== undefined) {
-            questionSettings.pages.splice(pageIndex + 1, 0, {
-                id:generateUUID(),
-                name: `page${pageIndex + 1}`,
-                elements: [],
-            } as any)
+            questionSettings.pages.splice(pageIndex + 1, 0, emptyPage)
         }
-    } 
-}
-
-
-
-/**
- * 通过分割一页来添加页面
- */
-const addPageBySpliteOffOnePage = (questionSettings: QuestionSettings, selectedQuestionId: string): void => {
-    const { elementIndex, pageIndex } = getSelectedElementPosition(questionSettings, selectedQuestionId)
-    if (pageIndex !== undefined && elementIndex !== undefined) {
-        spliteOffOnePageIntoPages(questionSettings, elementIndex, pageIndex)
     }
+
+    return newPageId
 }
+
 
 /**
  * 将一页分成两页

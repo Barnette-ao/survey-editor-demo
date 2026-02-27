@@ -18,8 +18,6 @@
 import { computed } from 'vue'
 import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 
-const emit = defineEmits(['update'])
-
 const props = defineProps({
 	element: {
 		type: Object,

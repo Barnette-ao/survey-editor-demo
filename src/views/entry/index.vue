@@ -52,6 +52,7 @@ function loadSurveyList() {
 
 function handleCreate() {
   const newId = appService.create()
+  console.log("newId",newId)
   router.push(`/editor/${newId}`)
 }
 

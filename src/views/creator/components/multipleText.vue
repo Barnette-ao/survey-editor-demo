@@ -13,8 +13,6 @@
 import { ref, computed } from 'vue'
 import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 
-const emit = defineEmits(['update'])
-
 const props = defineProps({
 	element: {
 		type: Object,
@@ -31,9 +29,7 @@ const placeholder = computed(() => props.element.placeholder || '请输入')
 
 const inputValue = ref('')
 
-const handleQuestionTitleChange = (newValue) => {
-	emit("update", "title", newValue)
-}
+
 </script>
 
 <style scoped>

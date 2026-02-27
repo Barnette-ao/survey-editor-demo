@@ -50,7 +50,7 @@ export function useIncrementalLoading(
           type: 'page',
           pageIndex,
           page,
-          id: `page-${pageIndex}`
+          id: page.id
         })
       }
       
@@ -65,7 +65,7 @@ export function useIncrementalLoading(
         })
       })
     })
-
+    
     return items
   })
 

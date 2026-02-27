@@ -11,6 +11,7 @@ export function createMoveCommand(payload: {
 }): Command {
 
   const { sourceId, targetId, sourceType } = payload
+  console.log("sourceId, targetId, sourceType",sourceId, targetId, sourceType)
  
   // 防御性编程，避免移到自己
   if (sourceId === targetId) {

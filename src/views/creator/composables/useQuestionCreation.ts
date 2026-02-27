@@ -1,9 +1,7 @@
 import type { Ref } from "vue"
-import type { QuestionSettings } from "@/views/creator/types/questionnaire"
 import { useDraftActions } from "@/views/creator/composables/useDraftAction"
 
 export function useQuestionCreation(
-  questionSettings: Ref<QuestionSettings>,
   currentQuestionId: Ref<string>,
   pageIndex: Ref<number>,
   isCurrentQuestionAPage: Ref<boolean>
@@ -23,6 +21,8 @@ export function useQuestionCreation(
       const uiContext = applyAddElement({
         selectedQuestionId: currentQuestionId.value,
         elementType: elementType,
+        isCurrentQuestionAPage:isCurrentQuestionAPage,
+        selectedPageIndex:pageIndex.value
       })
       if (uiContext?.elementId) {
         currentQuestionId.value = uiContext.elementId
@@ -30,14 +30,7 @@ export function useQuestionCreation(
     }
   }
 
-  const handleStructrueChange = (isStructrueChanged: boolean) => {
-    questionSettings.value.questionsOnPageMode = isStructrueChanged
-      ? "questionPerPage"
-      : "standard"
-  }
-
   return {
     handleQuestionTypeClick,
-    handleStructrueChange
   }
 }

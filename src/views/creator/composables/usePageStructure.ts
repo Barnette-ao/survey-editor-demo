@@ -1,16 +1,25 @@
 import { computed, ComputedRef, Ref } from 'vue'
-
 import type {
   QuestionSettings,
   QuestionPage,
 } from '@/views/creator/types/questionnaire' // 路径按你项目实际调整
+import { useDraftActions } from "@/views/creator/composables/useDraftAction"
 
 export function usePageStructure(
-  questionSettings: Ref<QuestionSettings>
+  draftState: Ref<QuestionSettings>
 ) {
+  const { applySurveyPropChange } = useDraftActions()
+
   /** 一页一题模式 */
-  const oneQuestionPerPage: ComputedRef<boolean> = computed(() => {
-    return questionSettings.value.questionsOnPageMode === 'questionPerPage'
+  const oneQuestionPerPage: ComputedRef<boolean> = computed({
+    get: () => draftState.value.questionsOnPageMode === 'questionPerPage',
+    set: (value:boolean) => {
+      const mode = value? "questionPerPage": "standard"
+      applySurveyPropChange({
+        key:"questionsOnPageMode",
+        value:mode
+      })  
+    }
   })
 
   /**

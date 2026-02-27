@@ -9,7 +9,6 @@ export const updateSurveyProp = <K extends keyof QuestionSettings>(
 ) => {
     const cloned = structuredClone(questionSettings)
     if (!cloned) return { cloned }
-    console.log("title value",value);
     
     ;(cloned as any)[key] = value
     return { cloned }

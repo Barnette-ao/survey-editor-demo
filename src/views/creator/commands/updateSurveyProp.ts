@@ -8,26 +8,24 @@ export function createUpdateSurveyPropCommand<K extends keyof QuestionSettings>(
   value: any
 }): Command {
   let oldValue: any = null
-  
+  let hasCapturedOldValue = false
+
   return {
     execute(state: any) {
       const rawState = snapshot(state)
       const frozenValue = structuredClone(payload.value)
 
       // 保存旧值用于undo
-      if (rawState) {
+      if (rawState && !hasCapturedOldValue) {
         oldValue = structuredClone((rawState as any)[payload.key])
+        hasCapturedOldValue = true
       }
-
       // 执行更新操作
       const result = updateSurveyProp(
         rawState,
         payload.key,
         frozenValue
       )
-      console.log("result",result);
-      
-      
       return result.cloned
     },
 

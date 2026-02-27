@@ -3,7 +3,6 @@ import type { QuestionSettings, QuestionElement } from '@/views/creator/types/qu
 
 import { useElementMutation } from './useElementMutation'
 import { useElementTypeSwitch } from './useElementTypeSwitch'
-import { useElementCommands } from './useElementCommands'
 import { useSettingUpdateDispatcher } from './useSettingUpdateDispatcher'
 
 type SettingType = 'quickSetting' | 'questionSetting'
@@ -25,12 +24,6 @@ export function useElementOperations(
       questionSettings,
       currentQuestionId,
       currentElement
-    ),
-
-    ...useElementCommands(
-      questionSettings,
-      currentQuestionId,
-      settingType
     ),
 
     ...useSettingUpdateDispatcher(

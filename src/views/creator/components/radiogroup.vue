@@ -114,7 +114,7 @@ import {
 } from '@/views/creator/composables/useChoiceOperations';
 import { snapshot } from '@/views/creator/config/shared'
 
-const emit = defineEmits(['update', 'optionSetting'])
+const emit = defineEmits(['optionSetting'])
 
 const props = defineProps({
 	element: {

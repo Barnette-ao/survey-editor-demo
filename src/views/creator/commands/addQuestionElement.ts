@@ -9,6 +9,8 @@ import { snapshot } from '@/views/creator/config/shared'
 export function createAddQuestionCommand(payload: {
   selectedQuestionId: string
   elementType:string
+  isCurrentQuestionAPage:boolean
+  selectedPageIndex:number
 }): Command {
   let addedElementId:string 
   
@@ -18,7 +20,9 @@ export function createAddQuestionCommand(payload: {
       const { id:newElementId, cloned } = addQuestionElement(
         rawState, 
         payload.elementType, 
-        payload.selectedQuestionId
+        payload.selectedQuestionId,
+        payload.isCurrentQuestionAPage,
+        payload.selectedPageIndex
       )
       addedElementId = newElementId
       return cloned

@@ -88,8 +88,6 @@ import {
 } from '@/views/creator/composables/useChoiceOperations';
 import { snapshot } from '@/views/creator/config/shared'
 
-const emit = defineEmits(['update'])
-
 const props = defineProps({
 	element: {
 		type: Object,

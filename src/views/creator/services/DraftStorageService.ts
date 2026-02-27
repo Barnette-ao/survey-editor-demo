@@ -7,7 +7,7 @@ import {
 import {
   isEqual
 } from "@/views/creator/config/logicRule";
-
+import {createCompositeCommand} from "@/views/creator/commands"
 
 type DraftState = unknown
 
@@ -144,6 +144,11 @@ export class DraftStorageService {
     this.undoStackBaseOperation.push(cmd)
     this.redoStackBaseOperation = []
     return cmd.getMeta?.()
+  }
+
+  applyBatch(cmds:Command[]) {
+    const compositeCmd = createCompositeCommand(cmds)
+    this.applyOperation(compositeCmd)
   }
 
   undoBaseOperation(){

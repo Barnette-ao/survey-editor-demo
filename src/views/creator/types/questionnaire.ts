@@ -213,6 +213,7 @@ export type CanSetLogicElement =
 
 // 页面类型
 export interface QuestionPage {
+  id: string
   name: string
   elements: QuestionElement[]
 }

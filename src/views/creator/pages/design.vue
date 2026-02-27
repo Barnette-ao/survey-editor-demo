@@ -51,37 +51,44 @@
                 <instruction 
                   :element="instructionElement" />
               </div>
-              <template v-for="item in incrementalLoadingInstance?.renderedItems" :key="item.id">
-                <div 
-                  v-if="item.type === 'page'"
-                  class="page-container" 
-                  :data-page-index="item.pageIndex"
-                >
-                  <page
-                    v-if="draftState.pages.length > 1"
-                    :totalPages="draftState.pages.length"
-                    :currentPage="item.pageIndex + 1"
-                    :selected="currentQuestionId === '' && pageIndex === item.pageIndex"
-                    :questionList="getQuestionNameOf(item.page)"
-                    @delete="deletePage(draftState, item.page, item.pageIndex)"
-                    @click="handlePageClick(item.pageIndex)"
-                  />
-                </div>
-                <component
-                  v-else-if="item.type === 'element' && item.element.id !== instructionElementId"
-                  :id="item.element.id"
-                  :is="componentIs(item.element)"
-                  :show-number="isShowNumber(item.element)"
-                  :element="item.element"
-                  @click="handleQuestionClick(item.element.id)"
-                  @copy="(id) => copyElement(id, item.element.type)"
-                  @delete="deleteElement(item.element.id)"
-                  @setLogic="openLogicDialog"
-                  @optionSetting="handleOptionSettingUpdate"
-                  @update="(key, value) => updateElementField(key, value)"
-                />
-              </template>
-            
+              <draggable
+                :model-value="incrementalLoadingInstance?.renderedItems"
+                item-key="id"
+                handle=".drag-handle"
+                @change="handleDragChange"
+              >
+                <template #item="{ element: item }">
+                  <div className="vue-draggable-next">
+                    <!-- Page 渲染 -->
+                    <div
+                      v-if="item.type === 'page'"
+                      class="page-container"
+                      :data-page-index="item.pageIndex"
+                    >
+                      <page
+                        v-if="draftState.pages.length > 1"
+                        :id = "item.id"
+                        :totalPages="draftState.pages.length"
+                        :currentPage="item.pageIndex + 1"
+                        :selected="currentQuestionId === '' && pageIndex === item.pageIndex"
+                        :questionList="getQuestionNameOf(item.page)"
+                        @click = "selectPage(item.pageIndex)"
+                      />
+                    </div>
+                    <!-- Element 渲染 -->
+                    <component
+                      v-else-if="item.type === 'element' && item.element.id !== instructionElementId"
+                      :id="item.element.id"
+                      :is="componentIs(item.element)"
+                      :show-number="isShowNumber(item.element)"
+                      :element="item.element"
+                      @setLogic="openLogicDialog"
+                      @optionSetting="handleOptionSettingUpdate"
+                      @update="(key, value) => updateElementField(key, value)"
+                    />
+                  </div>
+                </template>
+              </draggable>
               <!-- 哨兵元素 -->
               <div v-if="incrementalLoadingInstance.hasMore" ref="sentinelRef" class="loading-sentinel">
                 <div v-if="incrementalLoadingInstance.isLoading" class="loading-indicator"> 加载中...</div>
@@ -128,10 +135,7 @@
                 </div>
                 <div class="setting-item">
                   <span>一页一题</span>
-                  <el-switch
-                    v-model="oneQuestionPerPage"
-                    @change="handleStructrueChange"
-                  />
+                  <el-switch v-model="oneQuestionPerPage"/>
                 </div>
               </div>
             </div>
@@ -175,14 +179,12 @@ import instruction from "@/views/creator/components/instruction.vue";
 import { questionTypeList } from "@/views/creator/utils/questionTypeList";
 import page from "@/views/creator/components/page.vue";
 import { settingComponentMap } from "@/views/creator/config/registry";
-import { deletePage } from "@/views/creator/config/handleElementAndPage";
 
-import { destroyAllOptionSortables } from "@/views/creator/config/dragOption.js";
 import {
   handleLogicRulesUpdateWrapper as handleLogicRulesUpdate,
 } from "@/views/creator/config/updateLogic";
 import draggable from "vuedraggable"
-import { watch, nextTick } from "vue";
+import { nextTick } from "vue";
 import customEditor from "@/views/creator/components/customEditor.vue";
 import { useIncrementalLoading } from "@/views/creator/composables/useIncreamentalLoading"
 import { useQuestionDisplay } from "@/views/creator/composables/useQuestionNumberDisplay"
@@ -199,7 +201,7 @@ import { useOptionEditingState } from '@/views/creator/composables/useOptionEdit
 import { useSelectionState } from '@/views/creator/composables/useSelectionState'
 import { useDraftContext } from "@/views/creator/composables/useDraftContext";
 import { useDraftActions } from "@/views/creator/composables/useDraftAction";
-
+import { snapshot } from '@/views/creator/config/shared'
 
 const LogicSettingDialog = defineAsyncComponent({
   loader: () => import("@/views/creator/components/LogicSettingDialog.vue"),
@@ -209,17 +211,15 @@ const LogicSettingDialog = defineAsyncComponent({
   timeout: 3000
 })
 
-const { applySurveyPropChange } = useDraftActions()
+const { applySurveyPropChange, applyMove } = useDraftActions()
 const changeSurveyPorp = (event:any, key: string) =>{
   applySurveyPropChange({
     key,
     value:event
   })
 }
-  
 
-//定义是否拖拽，拖拽则赋空值时不更新数据
-const istarg = ref(false);
+
 
 const sentinelRef = ref(null)  // 直接在组件中创建
 
@@ -250,20 +250,32 @@ onMounted(async () => {
   if (sentinelRef.value) {
     incrementalLoadingInstance.value.initObserverManually();
   }
-  console.log("incrementalLoadingInstance",incrementalLoadingInstance.value)
-  
-  // 初始化拖拽功能
-  // initSortable(draftState, instructionElementId.value, istarg);
 });
+
+const handleDragChange = (evt: any)  => {
+  const { moved:{oldIndex, newIndex} } = evt
+  if (
+    oldIndex == null ||
+    newIndex == null ||
+    oldIndex === evt.newIndex
+  ) return
+  
+  const source = incrementalLoadingInstance.value?.renderedItems?.[oldIndex]
+  const target = incrementalLoadingInstance.value?.renderedItems?.[newIndex]
+  if (!source || !target) return
+  
+  const rawSource = snapshot(source)
+  const rawTarget = snapshot(target)
+  applyMove({
+    sourceId: rawSource.id,
+    targetId: rawTarget.id,
+    sourceType: rawSource.type
+  })
+}
+
+
 // questionSettings是reactive，它不能支持动态添加的属性保持器响应式，
 // 但ref可以保持其响应式
-
-
-// 在组件卸载前清理所有实例
-onBeforeUnmount(() => {
-  destroyAllOptionSortables();
-});
-
 const currentQuestionId = ref("");
 const { hoveredQuestionType } = useHoverState()
 const { settingType, settingTypeOptions } = useSettingPanelState()
@@ -292,7 +304,6 @@ const {
   isCurrentQuestionAPage,
   pageIndex,
   selectPage,
-  selectQuestion
 } = useSelectionState({
   onSelectPage: () => {
     settingType.value = 'quickSetting'
@@ -303,15 +314,6 @@ const {
   }
 })
 
-// 页面点击
-const handlePageClick = (index: number) => {
-  selectPage(index)
-}
-
-// 题目点击
-const handleQuestionClick = (id: string) => {
-  currentQuestionId.value = selectQuestion(id)
-}
 
 const { componentIs } = useComponentMapping()
 const { 
@@ -337,8 +339,6 @@ const {
     updateElementField,
     handleSettingUpdate,
     switchQuestionType,
-    copyElement,
-    deleteElement,
 } = useElementOperations(
   draftState, 
   currentQuestionId, 
@@ -349,23 +349,12 @@ const {
 
 const {
     handleQuestionTypeClick,
-    handleStructrueChange
-} = useQuestionCreation(draftState, currentQuestionId, pageIndex, isCurrentQuestionAPage)
-
-// 当页面结构变化时重新初始化 Sortable
-// watch(
-//   () => draftState.value?.pages?.length || 0,
-//   () => {
-//     nextTick(() => {
-//       initSortable(draftState, instructionElementId.value, istarg);
-//     });
-//   }
-// );
-
+} = useQuestionCreation(currentQuestionId, pageIndex, isCurrentQuestionAPage)
 
 const handleLogicUpdate = (saveLogicObj:object) => {
   handleLogicRulesUpdate(saveLogicObj, draftState);
 };
+
 
 </script>
 

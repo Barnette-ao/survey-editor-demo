@@ -1,5 +1,6 @@
 <template>
-	<div class="question-container page-item" :class="{ 'is-selected': selected }" @click="$emit('click')">
+	<div class="question-container page-item" :class="{ 'is-selected': selected }" 
+		@click="$emit('click')">
 		<div class="left-section">
 			<div class="page-info">
 				页码: {{ currentPage }}/{{ totalPages }}
@@ -28,8 +29,13 @@
 </template>
 
 <script setup>
+import { useDraftActions } from "@/views/creator/composables/useDraftAction";
 
 const props = defineProps({
+	id: {
+		type: String,
+		required: true
+	},
 	currentPage: {
 		type: Number,
 		required: true
@@ -45,13 +51,15 @@ const props = defineProps({
 	selected: {
 		type: Boolean,
 		default: false
-	}
+	},
 })
 
-const emit = defineEmits(['delete', 'click'])
 
+const { applyDeletePage } = useDraftActions()
 const handleDelete = () => {
-	emit('delete')
+	applyDeletePage({
+		pageId: props.id
+	})
 }
 </script>
 

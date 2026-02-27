@@ -81,8 +81,6 @@ import DragHandler from "@/views/creator/components/Icons/dragIcon.vue";
 import { useDraftActions } from "@/views/creator/composables/useDraftAction";
 import { snapshot } from '@/views/creator/config/shared'
 
-const emit = defineEmits(['update'])
-
 const props = defineProps({
 	element: {
 		type: Object,
@@ -178,8 +176,6 @@ const onItemNameChange = (event, itemIndex, elementId) => {
 </script>
 
 <style scoped lang="scss">
-@import '@/assets/styles/dragStyle.scss';
-
 .option-item {
 	display: flex;
 	align-items: center;

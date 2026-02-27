@@ -1,8 +1,9 @@
-import { getSelectedElementPosition, findElementById } from '@/views/creator/config/element'
+import { findElementPosition, findElementById } from '@/views/creator/config/element'
 import { deleteLogicRulesById } from '@/views/creator/config/logicRule'
 import { getSwitchTargetElement } from '@/views/creator/config/element'
 import { generateUUID } from '@/views/creator/config/shared'
 import type { QuestionElement } from '@/views/creator/types/questionnaire'
+
 
 /**
  * 切换选择题类型
@@ -193,7 +194,7 @@ export const replaceElement = (
     const { 
         pageIndex, 
         elementIndex 
-    } = getSelectedElementPosition( questionSettings, questionId)
+    } = findElementPosition( questionSettings, questionId)
 
     if (pageIndex !== undefined && elementIndex !== undefined){
         deleteLogicRulesById(questionSettings, questionId)

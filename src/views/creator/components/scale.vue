@@ -29,8 +29,6 @@
 import { computed } from 'vue'
 import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 
-const emit = defineEmits(['update', 'setLogic'])
-
 const props = defineProps({
 	showNumber: {
 		type: Boolean,

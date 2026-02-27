@@ -8,12 +8,12 @@ import type { QuestionSettings } from '@/views/creator/types/questionnaire'
  * @param index - 页面索引
  * @returns 克隆后的问卷设置
  */
-export const deletePage = (questionSettings: QuestionSettings, page: any, index: number) => {
+export const deletePage = (questionSettings: QuestionSettings, index: number) => {
     const cloned = structuredClone(questionSettings)
-    
+    const deletedPage = cloned.pages[index] 
     // 该页不为空页
-    if (page.elements.length > 0) {
-        cloned.pages[index - 1].elements.push(...page.elements)
+    if (deletedPage.elements.length > 0) {
+        cloned.pages[index - 1].elements.push(...deletedPage.elements)
     }
     // 空页或者非空页都删除掉
     cloned.pages.splice(index, 1)

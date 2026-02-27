@@ -5,3 +5,6 @@ export * from "./deleteQuestionElement"
 export * from "./switchChoiceElement"
 export * from "./updateElementProp"
 export * from "./updateSurveyProp"
+export * from "./move"
+export * from "./compositeCommand"
+ 

@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid'
 import { formattedNumber } from '@/views/creator/config/adapter'
 import { nextTick } from 'vue'
-import { getSelectedElementPosition } from '@/views/creator/config/element'
+import { findElementPosition } from '@/views/creator/config/element'
 import { questionTemplates } from '@/views/creator/config/questionTemplate'
 
 
@@ -17,8 +17,8 @@ export const addQuestionElement = (
     state: any, 
     elemntType: string, 
     selectedQuestionId: string,
-    isCurrentQuestionAPage:boolean = false,
-    selectedPageIndex:number = -1,
+    isCurrentQuestionAPage:boolean,
+    selectedPageIndex:number,
 ) => {
     const cloned = structuredClone(state)
     const newElement = createNewElement(elemntType, cloned);
@@ -120,7 +120,7 @@ const addNewElement = (
         cloned.pages[selectedPageIndex].elements.push(newElement)
     }else {
         const { elementIndex, pageIndex } =
-            getSelectedElementPosition(cloned, selectedQuestionId);
+            findElementPosition(cloned, selectedQuestionId);
 
         if (elementIndex === undefined) {
             cloned.pages[cloned.pages.length - 1].elements.push(newElement);

@@ -1,42 +1,28 @@
 // 管理题目序号显示相关的所有计算逻辑
 import { computed, ComputedRef, Ref } from 'vue'
 import type { QuestionElement,QuestionSettings } from '@/views/creator/types/questionnaire'
+import { useDraftActions } from "@/views/creator/composables/useDraftAction";
 
 /**
  * 题目序号显示逻辑
  */
 export function useQuestionDisplay(
-  questionSettings: Ref<QuestionSettings>
+  draftState: Ref<QuestionSettings>
 ) {
+  const {applyUpdateShowNumbers} = useDraftActions()
+
   /** 全局显示序号设置 */
   const showQuestionNumbers = computed<boolean>({
-    get: () => questionSettings.value.showQuestionNumbers,
+    get: () => draftState.value.showQuestionNumbers,
     set: (value: boolean) => {
-      questionSettings.value.showQuestionNumbers = value
-
-      if (!value) {
-        // 全局关闭：移除 hideNumber
-        questionSettings.value.pages = questionSettings.value.pages.map(
-          (page) => {
-            page.elements = page.elements.map((element) => {
-              const { hideNumber, ...rest } = element
-              return rest as QuestionElement
-            })
-            return page
-          }
-        )
-      } else {
-        // 全局开启：确保每个题目都有 hideNumber
-        questionSettings.value.pages = questionSettings.value.pages.map(
-          (page) => {
-            page.elements = page.elements.map((element) => {
-              element.hideNumber = false
-              return element
-            })
-            return page
-          }
-        )
-      }
+      const hidNumberValue = !value ? true : false
+      applyUpdateShowNumbers({
+        key:"showQuestionNumbers",
+        value
+      },{
+        key:"hideNumber",
+        value:hidNumberValue
+      })
     }
   })
 

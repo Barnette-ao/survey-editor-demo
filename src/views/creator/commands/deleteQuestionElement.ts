@@ -2,7 +2,7 @@ import type { Command } from "@/views/creator/services/DraftStorageService"
 import {
   insertElement,
   deleteQuestion,
-  getSelectedElementPosition
+  findElementPosition
 } from "@/views/creator/config/element"
 import { snapshot } from '@/views/creator/config/shared'
 
@@ -16,7 +16,7 @@ export function createDeleteQuestionCommand(payload: {
   return {
     execute(state:any) {
       const rawState = snapshot(state)
-      const { elementIndex, pageIndex } = getSelectedElementPosition(rawState, payload.elementId)
+      const { elementIndex, pageIndex } = findElementPosition(rawState, payload.elementId)
       if (elementIndex !== undefined && pageIndex !== undefined) {
         // 获取被删除元素的信息
         deletedElement = rawState.pages[pageIndex].elements[elementIndex]  

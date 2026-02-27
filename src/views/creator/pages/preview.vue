@@ -28,9 +28,6 @@ import markdownit from "markdown-it";
 
 import { useSurveyId } from "@/views/creator/composables/useSurveyId";
 
-
-
-
 const zhcn = editorLocalization.getLocale("zh-cn");
 zhcn.ed.testSurvey = " ";
 
@@ -205,24 +202,21 @@ Cookies.set("islogic", "0");
 creator.survey.onTextMarkdown.add(applyHtml);
 creator.survey.autoAdvanceAllowComplete = false;
 
-const questionSettings = ref({})
+// const questionSettings = ref({})
 
-const { loadRunningState } = useSurveyId() 
-questionSettings.value = loadRunningState()
+// const { loadRunningState } = useSurveyId() 
+// questionSettings.value = loadRunningState()
 
 questionSettings.value.locale = "zh-cn";
 // 使用 for...of 而不是 forEach，因为在回调函数中 
 // continue 只能跳出当前回调，不能跳到下一次循环
 for(const page of questionSettings.value.pages) {
   setChoiceVisibleIf(page.elements)
-}  
-console.log("questionSettings.pages", questionSettings.value.pages)  
+}   
 
 creator.JSON = questionSettings.value.questionsOnPageMode == "questionPerPage"
     ? redistributeElementsToSingleQuestionPages(questionSettings.value)
-    : questionSettings.value;
-
-console.log("creator.JSON", creator.JSON); 
+    : questionSettings.value; 
 
 creator.locale = "zh-cn";
 creator.survey.locale = "zh-cn";

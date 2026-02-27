@@ -166,7 +166,7 @@ export function createUpdateChoicePropCommand<K extends keyof QuestionElement>(p
   }
 }
 
-// 在我重构拖拽时这个函数一定要改，现在只是摆在这里
+
 export function createUpdateElementCommand<K extends keyof QuestionElement>(payload: {
   questionId: string
   key: K
@@ -189,7 +189,8 @@ export function createUpdateElementCommand<K extends keyof QuestionElement>(payl
       const element = findElementById(questionId, rawState)
       if (!element) return rawState
 
-      // 只在第一次执行时保存旧值
+      // 只在第一次执行时保存旧值,因为该函数一般会执行两次，第一次是在用户例行操作的时候
+      // 第二次是在用户撤销之后，点击恢复操作时，而点击恢复操作时不需要记录旧值
       if (!hasCapturedOldValue) {
         oldValue = structuredClone((element as any)[key])
         hasCapturedOldValue = true
@@ -219,3 +220,70 @@ export function createUpdateElementCommand<K extends keyof QuestionElement>(payl
   }
 }
 
+
+/**
+ * 创建更新所有元素特定属性的可逆命令
+ * @param payload - 包含要更新的属性键和值
+ * @returns Command 对象，支持 execute 和 undo 操作
+ */
+export function createUpdateAllElementCommand<K extends keyof QuestionElement>(payload: {
+  key: K
+  value: QuestionElement[K]
+}): Command {
+  const key = payload.key
+
+  // 新值固定
+  const newValue = structuredClone(payload.value)
+
+  // 旧值映射：存储每个元素的旧值 { elementId: oldValue }
+  let oldValuesMap: Map<string, QuestionElement[K]> = new Map()
+  let hasCapturedOldValues = false
+
+  return {
+    execute(state: any) {
+      const rawState = snapshot(state)
+
+      // 只在第一次执行时保存所有元素的旧值
+      if (!hasCapturedOldValues) {
+        rawState.pages.forEach((page: any) => {
+          page.elements.forEach((element: any) => {
+            if (element && element.type !== 'html' && element.id) {
+              oldValuesMap.set(element.id, structuredClone(element[key]))
+            }
+          })
+        })
+        hasCapturedOldValues = true
+      }
+
+      // 更新所有元素的指定属性
+      return {
+        ...rawState,
+        pages: rawState.pages.map((page: any) => ({
+          ...page,
+          elements: page.elements.map((el: QuestionElement) => ({
+            ...el,
+            [key]: newValue
+          }))
+        }))
+      }
+    },
+
+    undo(state: any) {
+      const rawState = snapshot(state)
+
+      // 恢复所有元素的旧值
+      return {
+        ...rawState,
+        pages: rawState.pages.map((page: any) => ({
+          ...page,
+          elements: page.elements.map((el: QuestionElement) => {
+            const oldValue = oldValuesMap.get(el.id)
+            return oldValue !== undefined
+              ? { ...el, [key]: oldValue }
+              : el
+          })
+        }))
+      }
+    }
+  }
+}
