@@ -14,7 +14,7 @@ interface ScoreOption {
 type ChoiceValue = string | { value: string, [key: string]: any }
 
 export function useLogicRuleElements(
-  allIfElement: { value: CanSetLogicElement[] },
+  allIfElement: CanSetLogicElement[],
   getDisplayRuleIfElementProp: (ruleIndex: number, conditionIndex: number, prop: keyof IfCondition) => any,
   isDisplayRuleEmpty: () => boolean
 ) { 
@@ -25,7 +25,7 @@ export function useLogicRuleElements(
         return null
       }
     
-      const filterElement = allIfElement.value.find((element) => 
+      const filterElement = allIfElement.find((element) => 
         element.id === getDisplayRuleIfElementProp(ruleIndex, index, 'elementId')
       )
       

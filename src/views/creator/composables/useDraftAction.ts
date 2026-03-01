@@ -54,6 +54,12 @@ export function useDraftActions() {
     draft.applyBatch([cmd1, cmd2])
   }
 
+  function applySetSubDescriptionFalse(payload1:any,payload2:any){
+    const cmd1 = createUpdateElementPropCommand(payload1)
+    const cmd2 = createUpdateElementPropCommand(payload2)
+    draft.applyBatch([cmd1, cmd2])
+  }
+
   function applyAddElement(payload:any){ 
     const cmd = createAddQuestionCommand(payload)
     const UIContext = draft.applyOperation(cmd)
@@ -116,6 +122,7 @@ export function useDraftActions() {
     applyUpdateElement,
     applyMove,
     applyDeletePage,
-    applyUpdateShowNumbers
+    applyUpdateShowNumbers,
+    applySetSubDescriptionFalse
   }
 }

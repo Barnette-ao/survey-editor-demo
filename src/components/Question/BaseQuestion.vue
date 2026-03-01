@@ -122,8 +122,6 @@ const props = defineProps({
 	}
 })
 
-const emit = defineEmits(['click', 'copy', 'delete', 'setLogic'])
-
 const isCollapsed = ref(false)
 const handleCollapse = () => {
   isCollapsed.value = !isCollapsed.value
@@ -168,27 +166,34 @@ const changeElementTitle = (value) => {
 }
 
 const editorStore = useEditorStore()
+const setCurrentElementId = () => {
+	const currentElementId = props.element.id
+	editorStore.setCurrentQuestionId(currentElementId)
+}
+
 const handleCopy = () => {
+	setCurrentElementId()
 	const uiContext = applyAddElement({
-		selectedQuestionId: props.element.id,
+		selectedQuestionId: currentElementId,
 		elementType: props.element.type,
 	})
 	if (uiContext?.elementId) {
-		editorStore.setCurrentQuestion(uiContext.elementId)
+		editorStore.setCurrentQuestionId(uiContext.elementId)
 	}
 	ElMessage.success('复制成功')
 }
 
 const handleDelete = () => {
+	setCurrentElementId()
 	ElMessageBox.confirm('确定要删除该题目吗？', '提示', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning',
     }).then(() => {
 	  applyDeleteElement({
-		elementId: props.element.id,
+		elementId: currentElementId,
 	  })
-      if (editorStore.isCurrentQuestion(props.element.id)) {
+      if (editorStore.isCurrentQuestion(currentElementId)) {
         editorStore.clearCurrentQuestion()
 		editorStore.setSettingType('quickSetting')
       }
@@ -198,11 +203,16 @@ const handleDelete = () => {
 }
 
 const handleContainerClick = () => {
-	editorStore.selectQuestion(props.element.id)
+	editorStore.selectOptionSetting({ 
+		index: -1, 
+		isOpen: false,
+		id:props.element.id  
+	})
 }
 
 const handleSetLogic = () => {
-	editorStore.openLogicDialog(props.element)
+	setCurrentElementId()
+	editorStore.openLogicDialog()
 }
 
 

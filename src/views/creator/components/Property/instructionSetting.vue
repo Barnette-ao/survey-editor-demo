@@ -3,9 +3,7 @@
 		<base-question-setting
 			:element-id="element.id" 
 			:showIsRequired = "false"
-			:showSubDescription="false"
-			:showNumberItem="false"
-			@setLogic="emit('setLogic', element)" 
+			:showSubDescription="false" 
 		/>
 	</div>
 </template>

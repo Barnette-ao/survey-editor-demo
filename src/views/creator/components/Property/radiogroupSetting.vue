@@ -1,15 +1,6 @@
 <template>
 	<div class="radiogroup-setting">
-		<base-question-setting
-			:element-id="element.id" 
-			v-model:required="requiredValue" 
-			v-model:showNumber="showNumberValue"
-			:show-number-item="showNumberItem" 
-			v-model:isAddSubDescription="isAddSubDescriptionValue"
-			:isOptionSetting="isOptionSetting"
-			@setLogic="emit('setLogic', element)"
-			v-model:advancedLogicText="choiceShowHideValue" 	
-		>
+		<base-question-setting>
 			<template #before-basic>
 				<div class="section-content">
 					<QuestionTypeSwitcher :quesitonTypeText="quesitonTypeText" 
@@ -20,7 +11,7 @@
 		</base-question-setting>
 
 		<!-- 选项设置 -->
-		<div class="setting-section" v-show='!isOptionSetting'>
+		<div class="setting-section" v-show='!editorStore.isOptionSetting'>
 			<div class="section-title">选项设置</div>
 			<div class="section-content">
 				<div class="setting-item">
@@ -30,7 +21,7 @@
 			</div>
 		</div>
 		<!-- 单独选项设置 -->
-		<div class="setting-section" v-show='isOptionSetting'>
+		<div class="setting-section" v-show='editorStore.isOptionSetting'>
 			<div class="section-title">选项设置</div>
 			<div class="section-content">
 				<div class="setting-item">
@@ -59,7 +50,10 @@
 import { ref, computed } from 'vue'
 import BaseQuestionSetting from '@/components/Question/BaseQuestionSetting.vue'
 import QuestionTypeSwitcher from '@/views/creator/components/Property/QuestionTypeSwitcher.vue'
-import { useCommonComputed } from '@/views/creator/utils/commonComputed'
+import { useCurrentElement } from "@/views/creator/composables/useCurrentElement"
+import { useDraftActions } from "@/views/creator/composables/useDraftAction";
+import { useEditorStore } from "@/stores/editorContextStore";
+import { useDraftContext } from "@/views/creator/composables/useDraftContext";
 
 
 const props = defineProps({
@@ -67,95 +61,80 @@ const props = defineProps({
 		type: Object,
 		required: true
 	},
-	showNumber: {
-		type: Boolean,
-		default: true
-	},
-	showNumberItem: {
-		type: Boolean,
-		required: true
-	},
 	quesitonTypeText: {
 		type: String,
 		default: ""
 	},
-	isOptionSetting: {
-		type: Boolean,
-		default: false
-	},
-	selectedOptionIndex: {
-		type: Number,
-		default: -1
-	}
 })
 
 const emit = defineEmits([
-	'update:required',
-	'update:showNumber',
 	'setting-update',
 	'update:questionType',
-	'setLogic'
 ])
 
-const { choiceShowHideValue } = useCommonComputed(props, emit)
-
-const requiredValue = computed({
-	get: () => props.element.isRequired,
-	set: (value) => emit('update:required', value)
-})
-
-const showNumberValue = computed({
-	get: () => props.showNumber,
-	set: (value) => emit('update:showNumber', value)
-})
+const editorStore = useEditorStore()
+const { draftState } = useDraftContext()
+const { currentElement } = useCurrentElement(draftState)
+const { applyElementPropChange,applyChoicePropChange } = useDraftActions()
 
 const randomOrder = computed({
-	get: () => (props.element.choicesOrder && props.element.choicesOrder == "random") || false,
-	set: (value) => emit('setting-update', "choicesOrder", value)
-})
-
-const isAddSubDescriptionValue = computed({
-	get: () => {
-		return props.element.showSubDescription || false
-	},
+	get: () => (currentElement.value.choicesOrder === "random") || false,
 	set: (value) => {
-		emit('setting-update', 'showSubDescription', value)
-		if (!value) {
-			emit('setting-update', 'description', '')
-		}
+		const choicesOrderValue = value ? 'random' : 'none'
+		applyElementPropChange({
+			questionId:editorStore.currentQuestionId,
+			key: "choicesOrder",
+			value : choicesOrderValue
+		}) 
 	}
 })
 
+
 const addInputAfterChoice = computed({
 	get: () => {
-		if (props.selectedOptionIndex === -1) return
-		return props.element.choices[props.selectedOptionIndex].showText || false
+		if (editorStore.selectedOptionIndex === -1) return
+		return props.element.choices[editorStore.selectedOptionIndex].showText || false
 	},
 	set: (value) => {
-		emit('setting-update', 'choices', { showText: value })
+		applyChoicePropChange({
+			questionId: editorStore.currentQuestionId,
+			choiceIndex: editorStore.selectedOptionIndex,
+			key: "showText",
+			value,
+		})
 	}
 })
 
 const isRequiredChoice = computed({
 	get: () => {
-		if (props.selectedOptionIndex === -1) return
-		return props.element.choices[props.selectedOptionIndex].required || false
+		if (editorStore.selectedOptionIndex === -1) return
+		return props.element.choices[editorStore.selectedOptionIndex].required || false
 	},
 	set: (value) => {
-		emit('setting-update', 'choices', { required: value })
+		applyChoicePropChange({
+			questionId: editorStore.currentQuestionId,
+			choiceIndex: editorStore.selectedOptionIndex,
+			key: "required",
+			value,
+		})
 	}
 })
 
 const textOrTextareaList = ['单行文本', '多行文本']
 
 const textboxType = computed(() => {
-	if (props.selectedOptionIndex === -1) return
-	return props.element.choices[props.selectedOptionIndex].textType === "text" ? 0 : 1
+	if (editorStore.selectedOptionIndex === -1) return
+	return props.element.choices[editorStore.selectedOptionIndex].textType === "text" ? 0 : 1
 })
 
 const handleTextboxTypeChange = (textboxTypeIndex) => {
 	const textTypeValue = textboxTypeIndex === 1 ? "area" : "text"
-	emit('setting-update', 'choices', { textType: textTypeValue })
+	applyChoicePropChange({
+		questionId: editorStore.currentQuestionId,
+		choiceIndex: editorStore.selectedOptionIndex,
+		key: "textType",
+		value:textTypeValue,
+	})
 };
 
 

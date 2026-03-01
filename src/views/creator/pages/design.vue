@@ -70,9 +70,9 @@
                         :id = "item.id"
                         :totalPages="draftState.pages.length"
                         :currentPage="item.pageIndex + 1"
-                        :selected="currentQuestionId === '' && pageIndex === item.pageIndex"
+                        :selected="editorStore.isPageSelected(item.pageIndex)"
                         :questionList="getQuestionNameOf(item.page)"
-                        @click = "selectPage(item.pageIndex)"
+                        @click = "editorStore.selectPage(item.pageIndex)"
                       />
                     </div>
                     <!-- Element 渲染 -->
@@ -82,9 +82,6 @@
                       :is="componentIs(item.element)"
                       :show-number="isShowNumber(item.element)"
                       :element="item.element"
-                      @setLogic="openLogicDialog"
-                      @optionSetting="handleOptionSettingUpdate"
-                      @update="(key, value) => updateElementField(key, value)"
                     />
                   </div>
                 </template>
@@ -118,13 +115,13 @@
       <div class="propertyGrid">
         <div class="segment-container">
           <el-segmented
-            v-model="settingType"
+            v-model="editorStore.settingType"
             :options="settingTypeOptions"
             style="margin-bottom: 1rem"
           />
         </div>
         <div class="segment-content">
-          <div v-if="settingType === 'quickSetting'" class="quick-settings">
+          <div v-if="editorStore.settingType === 'quickSetting'" class="quick-settings">
             <!-- 答题页 -->
             <div class="setting-section">
               <div class="section-title">问卷设置</div>
@@ -141,22 +138,16 @@
             </div>
           </div>
           <div v-else class="question-settings">
-            <div class="questionType" v-if="currentQuestionId">
+            <div class="questionType" v-if="editorStore.currentQuestionId">
               {{ getCurrentElementTypeText }}
             </div>
             <component
-              v-if="currentQuestionId"
+              v-if="editorStore.currentQuestionId"
               :is="settingComponentMap[getCurrentElementType]"
-              v-model:required="currentElement.isRequired"
-              v-model:showNumber="showNumberComputed"
               :element="currentElement"
               :quesitonTypeText="getCurrentElementTypeText"
-              :isOptionSetting="isOptionSetting"
-              :selectedOptionIndex="selectedOptionIndex"
               @setting-update="(key, value) => handleSettingUpdate(key, value)"
               @update:questionType="switchQuestionType"
-              @setLogic="openLogicDialog"
-              :showNumberItem="currentElement.hideNumber !== undefined"
             />
             <div v-else>未选中任何题目</div>
           </div>
@@ -164,11 +155,10 @@
       </div>
     </div>
     <logic-setting-dialog
-      :visible="logicDialogVisible"
-      :question-settings="draftState"
-      :element="settedLogicElement"
+      :visible="editorStore.logicDialogVisible"
+      :element="currentElement"
       @saveLogicRules="handleLogicUpdate"
-      @closeLogicDialog="closeLogicDialog"
+      @closeLogicDialog="editorStore.closeLogicDialog"
     />
   </div>
 </template>
@@ -195,13 +185,10 @@ import { useLogicRules } from '@/views/creator/composables/useLogicRules'
 import { useElementOperations } from '@/views/creator/composables/useElementOperations'
 import { useQuestionCreation } from '@/views/creator/composables/useQuestionCreation'
 import { useHoverState } from '@/views/creator/composables/useHoverState'
-import { useSettingPanelState } from '@/views/creator/composables/useSettingPanelState'
-import { useLogicDialogState } from '@/views/creator/composables/useLogicDialogState'
-import { useOptionEditingState } from '@/views/creator/composables/useOptionEditingState'
-import { useSelectionState } from '@/views/creator/composables/useSelectionState'
 import { useDraftContext } from "@/views/creator/composables/useDraftContext";
 import { useDraftActions } from "@/views/creator/composables/useDraftAction";
 import { snapshot } from '@/views/creator/config/shared'
+import { useEditorStore } from "@/stores/editorContextStore";
 
 const LogicSettingDialog = defineAsyncComponent({
   loader: () => import("@/views/creator/components/LogicSettingDialog.vue"),
@@ -211,6 +198,12 @@ const LogicSettingDialog = defineAsyncComponent({
   timeout: 3000
 })
 
+const editorStore = useEditorStore()
+const settingTypeOptions = [
+    { label: '快捷设置', value: 'quickSetting' },
+    { label: '题目设置', value: 'questionSetting' }
+]
+
 const { applySurveyPropChange, applyMove } = useDraftActions()
 const changeSurveyPorp = (event:any, key: string) =>{
   applySurveyPropChange({
@@ -219,13 +212,10 @@ const changeSurveyPorp = (event:any, key: string) =>{
   })
 }
 
-
-
 const sentinelRef = ref(null)  // 直接在组件中创建
 
 // 先初始化 draftState
 const { draftState } = useDraftContext()
-
 const instructionElementId = draftState.value.pages[0].elements[0].id;
 const instructionElement = draftState.value.pages[0].elements[0];
 // 增量加载相关状态 - 先定义默认值避免暂时性死区
@@ -273,53 +263,11 @@ const handleDragChange = (evt: any)  => {
   })
 }
 
-
-// questionSettings是reactive，它不能支持动态添加的属性保持器响应式，
-// 但ref可以保持其响应式
-const currentQuestionId = ref("");
 const { hoveredQuestionType } = useHoverState()
-const { settingType, settingTypeOptions } = useSettingPanelState()
-const {
-  logicDialogVisible,
-  settedLogicElement,
-  openLogicDialog,
-  closeLogicDialog
-} = useLogicDialogState()
-
-
-const {
-  isOptionSetting,
-  selectedOptionIndex,
-  handleOptionSettingUpdate
-} = useOptionEditingState({
-  onQuestionChange: (id) => {
-    currentQuestionId.value = id
-  },
-  onOpenSettingPanel: () => {
-    settingType.value = 'questionSetting'
-  }
-})
-
-const {
-  isCurrentQuestionAPage,
-  pageIndex,
-  selectPage,
-} = useSelectionState({
-  onSelectPage: () => {
-    settingType.value = 'quickSetting'
-    currentQuestionId.value = ''
-  },
-  onSelectQuestion: () => {
-    settingType.value = 'questionSetting'
-  }
-})
-
-
 const { componentIs } = useComponentMapping()
 const { 
   showQuestionNumbers, 
   isShowNumber, 
-  showNumberComputed
 } = useQuestionDisplay(draftState)
 
 const {
@@ -333,28 +281,24 @@ const {
   currentElement, 
   getCurrentElementType, 
   getCurrentElementTypeText
-} = useCurrentElement(draftState,currentQuestionId)
+} = useCurrentElement(draftState)
 
 const {
-    updateElementField,
     handleSettingUpdate,
     switchQuestionType,
 } = useElementOperations(
   draftState, 
-  currentQuestionId, 
+  editorStore.currentQuestionId, 
   currentElement,
-  settingType,
-  selectedOptionIndex
+  editorStore.settingType,
+  editorStore.selectedOptionIndex
 )
 
-const {
-    handleQuestionTypeClick,
-} = useQuestionCreation(currentQuestionId, pageIndex, isCurrentQuestionAPage)
+const { handleQuestionTypeClick } = useQuestionCreation()
 
 const handleLogicUpdate = (saveLogicObj:object) => {
   handleLogicRulesUpdate(saveLogicObj, draftState);
 };
-
 
 </script>
 

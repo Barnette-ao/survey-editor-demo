@@ -1,7 +1,7 @@
 <template>
 	<div class="question-setting">
 		<!-- 整题设置部分 -->
-		<div class="setting-section" v-show="!isOptionSetting">
+		<div class="setting-section" v-show="!editorStore.isOptionSetting">
 			<div class="section-title">整题设置</div>
 			<div class="section-content">
 				<!-- 基础设置插槽 - 放在最前面的设置项 -->
@@ -29,20 +29,6 @@
 					</div>
 					<div class="setting-link" @click="handleLogicSetting">设置</div>
 				</div>
-
-				<div class="advanceLogicSetting">
-					<div class="itemText">
-						<span>高级逻辑设置</span>
-					</div>
-					<el-input
-						v-model="localAdvancedLogicText"
-						style="width: 100%"
-						:rows="3"
-						type="textarea"
-						@blur="handleAdvancedLogicBlur"
-					/>
-				</div>
-
 				<div class="setting-item" v-show="showSubDescription">
 					<div class="item-with-icon">
 						<span>题干说明</span>
@@ -58,24 +44,12 @@
 
 <script setup>
 import { computed } from "vue";
+import { useCurrentElement } from "@/views/creator/composables/useCurrentElement"
+import { useDraftActions } from "@/views/creator/composables/useDraftAction";
+import { useEditorStore } from "@/stores/editorContextStore";
+import { useDraftContext } from "@/views/creator/composables/useDraftContext";
 
 const props = defineProps({
-	required: {
-		type: Boolean,
-		default: true,
-	},
-	showNumber: {
-		type: Boolean,
-		default: true,
-	},
-	showNumberItem: {
-		type: Boolean,
-		default: true,
-	},
-	isAddSubDescription: {
-		type: Boolean,
-		default: false,
-	},
 	showSubDescription: {
 		type: Boolean,
 		default: true,
@@ -84,60 +58,67 @@ const props = defineProps({
 		type: Boolean,
 		default: true,
 	},
-	isOptionSetting: {
-		type: Boolean,
-		default: false,
-	},
-	elementId: {  
-		type: String,
-		required: true
-	},
-	advancedLogicText: {
-		type: String,
-		default: ''
+});
+
+const editorStore = useEditorStore()
+const { draftState } = useDraftContext()
+const { currentElement } = useCurrentElement(draftState)
+const { 
+	applyElementPropChange,
+	applySetSubDescriptionFalse 
+} = useDraftActions()
+
+const showNumberItem = computed(() => currentElement.hideNumber !== undefined)
+
+const required = computed({
+	get: () => currentElement.value.isRequired,
+	set: (value) => {
+		applyElementPropChange({
+			questionId:editorStore.currentQuestionId,
+			key: "isRequired",
+			value
+		})
 	}
 });
 
-const emit = defineEmits([
-	"update:required",
-	"update:showNumber",
-	"update:isAddSubDescription",
-	"setLogic",
-	"update:advancedLogicText"      
-]);
-
-const required = computed({
-	get: () => props.required,
-	set: (value) => emit("update:required", value),
-});
-
 const showQuestionNumber = computed({
-	get: () => props.showNumber,
+	get: () => currentElement.value.showNumber,
 	set: (value) => {
-		emit("update:showNumber", value);
+		applyElementPropChange({
+			questionId:editorStore.currentQuestionId,
+			key: "showNumber",
+			value
+		})
 	},
 });
 
 const isAddSubDescription = computed({
-	get: () => props.isAddSubDescription,
-	set: (value) => emit("update:isAddSubDescription", value),
-});
-
-
+	get: () => {
+		return currentElement.value.showSubDescription || false
+	},
+	set: (value) => {
+		applyElementPropChange({
+			questionId:editorStore.currentQuestionId,
+			key: "showSubDescription",
+			value
+		})
+		if (!value) {
+			applySetSubDescriptionFalse({
+				questionId:editorStore.currentQuestionId,
+				key: "showSubDescription",
+				value
+			},{
+				questionId:editorStore.currentQuestionId,
+				key: "description",
+				value:''
+			})
+		}
+	}
+})
 
 const handleLogicSetting = () => {
-	emit('setLogic')
+	editorStore.openLogicDialog()
 };
-
-const localAdvancedLogicText = ref('')
-
-watch(() => props.advancedLogicText, (newVal) => {
-  localAdvancedLogicText.value = newVal || ''
-}, { immediate: true })
-
-const handleAdvancedLogicBlur = () => {
-  emit("update:advancedLogicText", localAdvancedLogicText.value)
-}
 
 </script>
 

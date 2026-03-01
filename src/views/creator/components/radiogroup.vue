@@ -1,9 +1,8 @@
 <template>
 	<base-question 
 		:element="element" 
-		:show-question-number="showNumber" 
-		@click="handleClick" 
-		>
+		:show-question-number="showNumber"  
+	>
 		<!-- 选项列表 -->
 		<template #options="{ showAll }">
 			<draggable 
@@ -113,8 +112,7 @@ import {
   parseBatchInput, 
 } from '@/views/creator/composables/useChoiceOperations';
 import { snapshot } from '@/views/creator/config/shared'
-
-const emit = defineEmits(['optionSetting'])
+import { useEditorStore } from "@/stores/editorContextStore";
 
 const props = defineProps({
 	element: {
@@ -127,6 +125,7 @@ const props = defineProps({
 	}
 })
 
+const editorStore = useEditorStore()
 
 const hoverIndex = ref(-1)
 const batchDialogVisible = ref(false)
@@ -200,15 +199,21 @@ const confirmBatchAdd = () => {
 
 const settingOption = (event, index) => {
 	// 发送选项设置事件，并传递选项索引
-	emit('optionSetting', { index: index, isOpen: true, id: props.element.id })
+	editorStore.selectOptionSetting({ 
+		index, 
+		isOpen: true, 
+		id: props.element.id 
+	})
 	// 阻止事件冒泡，防止触发题目的点击事件
 	event.stopPropagation()
 }
 
 // 添加点击事件处理
 const handleClick = () => {
-	// 点击题目时，关闭选项设置模式
-	emit('optionSetting', { index: -1, isOpen: false })
+	editorStore.selectOptionSetting({ 
+		index: -1, 
+		isOpen: false,  
+	})
 }
 
 const changeChoiceValue = (event, choiceIndex, elementId) => {

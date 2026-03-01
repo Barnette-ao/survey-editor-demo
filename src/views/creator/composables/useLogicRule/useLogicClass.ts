@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 import type { QuestionElement, LogicRule } from '@/views/creator/types/questionnaire.ts'
 
 export function useLogicClass(
-  props: { element: QuestionElement }, 
+  props: any, 
   TEXT_TYPES: readonly string[]
 ) {
   // 私有版本

@@ -1,42 +1,30 @@
 import { computed, ComputedRef, Ref } from 'vue'
 import { questionTypeList } from '@/views/creator/utils/questionTypeList'
 import { useEditorStore } from '@/stores/editorContextStore'
-import { storeToRefs } from 'pinia'
 
 import type {
-  QuestionSettings,
   QuestionElement,
-  RatingElement
 } from '@/views/creator/types/questionnaire' // 路径按你实际项目调整
+import { snapshot } from '@/views/creator/config/shared'
+import { findElementById } from '@/views/creator/config/element'
 
 export function useCurrentElement(
-  questionSettings: Ref<QuestionSettings | null>,
-  currentQuestionId: Ref<string | null>
+  draftState: Ref<any>,
 ) {
-  const editorStore = useEditorStore()
-  const { currentQuestionId: storeCurrentQuestionId } = storeToRefs(editorStore)
+  const editorStore = useEditorStore() 
   
   /** 当前选中的元素 */
   const currentElement: ComputedRef<QuestionElement | null> = computed(() => {
-    const pages = questionSettings.value?.pages
-    if (!pages || !storeCurrentQuestionId.value) {
-      return null
-    }
-
-    const allElements = pages.flatMap((page) => page.elements)
-
-    return (
-      allElements.find(
-        (element) => element.id === storeCurrentQuestionId.value
-      ) ?? null
-    )
+    const rawSettings = snapshot(draftState.value) 
+    if (!editorStore.currentQuestionId) { return null}  
+    const element = findElementById(editorStore.currentQuestionId,rawSettings) 
+    return element
   })
 
   /** 当前元素的类型（内部 type，用于匹配配置） */
   const getCurrentElementType: ComputedRef<string> = computed(() => {
-    const element = currentElement.value
-    if (!element) return ''
-    return element.type
+    if (!currentElement.value) return ''
+    return currentElement.value?.type
   })
 
   /** 当前元素类型对应的文本（用于 UI 展示） */

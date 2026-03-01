@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { Ref } from 'vue'
 import type { 
   QuestionElement, LogicRule, IfCondition
 } from '@/views/creator/types/questionnaire.ts'
@@ -6,18 +6,20 @@ import type {
 
 export function useDisplayLogicRules(
   allElements: { value: QuestionElement[] },
-  getDefaultRule: () => LogicRule
+  displayedLogicRules:Ref<LogicRule[]> 
 ) {  
   // displayedLogicRules是依赖于filteredRules的
-  const displayedLogicRules = ref<LogicRule[]>([])
+  
   
   // 提取初始化逻辑为函数
-  const initializeDisplayedLogicRules = (element:QuestionElement, logicRules: LogicRule[] | undefined, logicClass: 'skipLogic' | 'visibleLogic'): void => {
-    if (!element || !logicRules) {
-      return
-    }
+  const initializeDisplayedLogicRules = (element:QuestionElement, logicRules: LogicRule[] | undefined, logicClass: 'skipLogic' | 'visibleLogic'): any => {
+    console.log("logicRules",logicRules)
+    
+    if (!element) return
+    let validRules
+    if (!logicRules?.length) validRules = [] 
 
-    const validRules = logicRules
+    validRules = logicRules!
       // 深拷贝logicRules,避免修改validRules污染logicRules
       .map(rule => JSON.parse(JSON.stringify(rule)) as LogicRule)
       // 过滤目标题目不存在（被删除）的逻辑规则
@@ -36,16 +38,7 @@ export function useDisplayLogicRules(
                  rule.thenCondition.targetElementId === element.id
         }
       }) 
-
-    // 已有逻辑规则中没有符合要求的，则显示一条默认逻辑规则单元
-    if (validRules.length === 0) {
-      const defaultRule = getDefaultRule()
-      displayedLogicRules.value = [defaultRule]
-    }
-    // 反之，则显示这些逻辑规则 
-    else {
-      displayedLogicRules.value = validRules
-    }
+    return validRules
   }
 
   const getDisplayRuleProp = (ruleIndex: number, prop: keyof LogicRule): any => {
@@ -111,7 +104,6 @@ export function useDisplayLogicRules(
   }
 
   return {
-    displayedLogicRules,
     initializeDisplayedLogicRules,
     getDisplayRuleProp,
     getDeletedDisplayRule,

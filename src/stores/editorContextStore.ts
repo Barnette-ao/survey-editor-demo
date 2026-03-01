@@ -3,81 +3,100 @@ import type { QuestionElement } from '@/views/creator/types/questionnaire'
 
 type SettingType = 'quickSetting' | 'questionSetting'
 
-interface EditorState {
-	activeEditorId: string | null
-	currentQuestionId: string 
-	settingType: SettingType
-	isCurrentQuestionAPage: boolean
-	pageIndex: number
-	logicDialogVisible: boolean
-	settedLogicElement: QuestionElement | null
-}
 
 export const useEditorStore = defineStore('editor', {
-	state: (): EditorState => ({
+	state: (): any => ({
 		activeEditorId: null, // 当前激活的编辑器ID
 		currentQuestionId: '', // 当前选中的问题ID
 		settingType: 'quickSetting', // 设置类型：quickSetting 或 questionSetting
 		isCurrentQuestionAPage: false, // 当前选中的是否为页面
 		pageIndex: -1, // 当前选中的页面索引
 		logicDialogVisible: false, // 逻辑对话框是否可见
-		settedLogicElement: null, // 设置逻辑的元素
+		selectedOptionIndex:-1, // 点击选项设置按钮的索引，默认为-1，语义为未选中
+		isOptionSetting:false  // 单个选项的设置显现，默认不显示
 	}),
 
 	actions: {
-		setActiveEditor(id: string) {
+		// 原子操作
+		setActiveEditor(id: string) { 
 			this.activeEditorId = id
 		},
-
-		clearActiveEditor() {
-			this.activeEditorId = null
+		clearActiveEditor() { 
+			this.activeEditorId = null 
 		},
-
-		setCurrentQuestion(id: string) {
+		setCurrentQuestionId(id: string) { 
 			this.currentQuestionId = id
 		},
-
-		clearCurrentQuestion() {
+		clearCurrentQuestionId() { 
 			this.currentQuestionId = ''
 		},
-
-		setSettingType(type: SettingType) {
+		setSettingType(type: SettingType) { 
 			this.settingType = type
 		},
+		setIsCurrentQuestionAPage(value:boolean){ 
+			this.isCurrentQuestionAPage = value
+		},
+		setPageIndex(index:number){ 
+			this.pageIndex = index
+		},
+		unsetPageIndex(){ 
+			this.pageIndex = -1
+		},
+		setLogicDialogVisible(value:boolean){ 
+			this.logicDialogVisible = value
+		},
+		setSelectedOptionIndex(index:number){ 
+			this.selectedOptionIndex = index 
+		},
+		setIsOptionSetting(value:boolean){
+			this.isOptionSetting = value
+		},
 
+		// 以下是业务操作
 		isCurrentQuestion(elementId: string): boolean {
 			return elementId === this.currentQuestionId
 		},
 
+		isPageSelected(pageIndex:number){
+			return this.currentQuestionId === '' && this.pageIndex === pageIndex
+		},
+
 		selectPage(index: number) {
-			this.isCurrentQuestionAPage = true
-			this.pageIndex = index
-			this.settingType = 'quickSetting'
-			this.currentQuestionId = ''
+			this.setIsCurrentQuestionAPage(true)
+			this.setPageIndex(index) 
+			this.setSettingType('quickSetting')
+			this.clearCurrentQuestionId()
 		},
 
 		selectQuestion(id: string) {
-			this.isCurrentQuestionAPage = false
-			this.pageIndex = -1
-			this.currentQuestionId = id
-			this.settingType = 'questionSetting'
+			this.setIsCurrentQuestionAPage(false)
+			this.unsetPageIndex()
+			this.setCurrentQuestionId(id)
+			this.setSettingType('questionSetting')
 		},
 		
 		clearSelection() {
-			this.isCurrentQuestionAPage = false
-			this.pageIndex = -1
-			this.currentQuestionId = ''
-			this.settingType = 'quickSetting'
+			this.setIsCurrentQuestionAPage(false)
+			this.unsetPageIndex()
+			this.clearCurrentQuestionId()
+			this.setSettingType('quickSetting')
 		},
 
-		openLogicDialog(element: QuestionElement) {
-			this.settedLogicElement = element
-			this.logicDialogVisible = true
+		selectOptionSetting(params:any){
+			this.setCurrentQuestionId(params.id)
+			if (params.isOpen) {
+				this.setSettingType('questionSetting')
+			}
+			this.setIsOptionSetting(params.isOpen)
+			this.setSelectedOptionIndex(params.index)
+		},
+
+		openLogicDialog() {
+			this.setLogicDialogVisible(true)
 		},
 
 		closeLogicDialog() {
-			this.logicDialogVisible = false
-			this.settedLogicElement = null
+			this.setLogicDialogVisible(false)
 		}
 	},
 }) 
