@@ -7,4 +7,5 @@ export * from "./updateElementProp"
 export * from "./updateSurveyProp"
 export * from "./move"
 export * from "./compositeCommand"
+export * from "./replaceLogicState"
  

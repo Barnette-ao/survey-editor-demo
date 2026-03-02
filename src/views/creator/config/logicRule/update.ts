@@ -9,7 +9,7 @@ import type { QuestionSettings } from '@/views/creator/types/questionnaire'
  * @param questionSettings - 问题设置对象
  * @returns 克隆后的问卷设置
  */
-export function handleLogicRulesUpdate(saveLogicObj: any, questionSettings: QuestionSettings) {
+export function handleLogicRulesUpdate(saveLogicObj: any, questionSettings: any) {
     const cloned = structuredClone(questionSettings)
     
     if (!cloned.logicRules) {
@@ -27,7 +27,6 @@ export function handleLogicRulesUpdate(saveLogicObj: any, questionSettings: Ques
         // 1.从最新的逻辑规则saveLogicObj.logicRules中筛选出新插入的逻辑规则,分别插入新逻辑规则
         if (saveLogicObj.newLogicRulesId.length > 0) {
             const newRules = filterFun(saveLogicObj.logicRules, "newLogicRulesId")
-
             newRules.forEach((newRule: any) => {
                 setLogicRule(newRule, cloned)
             })
@@ -35,10 +34,12 @@ export function handleLogicRulesUpdate(saveLogicObj: any, questionSettings: Ques
 
         // 2.从已设置的逻辑规则questionSettings.logicRules中筛选出删除的逻辑规则
         if (saveLogicObj.deletedLogicRulesId.length > 0) {
-            const deletedRules = filterFun(cloned.logicRules, "deletedLogicRulesId")
-        
+            const deletedRules = filterFun(
+                cloned.logicRules, 
+                "deletedLogicRulesId"
+            )
             deletedRules.forEach((deletedRule: any) => {
-                removeLogicRule(deletedRule, { value: cloned } as any)
+                removeLogicRule(deletedRule, cloned)
             })
         }
 
@@ -49,10 +50,9 @@ export function handleLogicRulesUpdate(saveLogicObj: any, questionSettings: Ques
                 cloned.logicRules,
                 "updatedLogicRulesId"
             )
-
             // 从questionSetiing中删除（修改前的旧规则）的设置项
             oldLogicRulesByUpdated.forEach((oldRule: any) => {
-                removeLogicRule(oldRule, { value: cloned } as any)
+                removeLogicRule(oldRule, cloned)
             })
 
             // 3.2 从最新的逻辑规则中筛选出修改后的逻辑规则
@@ -82,7 +82,7 @@ const setLogicRule = (logicRule: any, questionSettings: QuestionSettings) => {
     }
     // 2.根据logicRule设置questionSettings中的设置项
     const { ifConditions, thenCondition } = logicRule
-    const expression = getLogicExpression(ifConditions, { value: questionSettings } as any)
+    const expression = getLogicExpression(ifConditions, questionSettings as any)
     setThenCondition(thenCondition, expression, questionSettings)
 }
 
@@ -95,7 +95,7 @@ const setLogicRule = (logicRule: any, questionSettings: QuestionSettings) => {
 const setThenCondition = (thenCondition: any, expression: string | undefined, questionSettings: QuestionSettings) => {
     const { targetElementId, action } = thenCondition
     const thenElement = targetElementId !== 'complete'
-        ? findElementById(targetElementId, { value: questionSettings } as any)
+        ? findElementById(targetElementId, questionSettings)
         : null
     if (targetElementId !== 'complete' && !thenElement) {
         console.warn(`目标元素 ${targetElementId} 不存在`)

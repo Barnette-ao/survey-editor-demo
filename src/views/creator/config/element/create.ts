@@ -12,6 +12,8 @@ type ExcludePropsMap = {
 	[key: string]: string[];
 }
 
+// export getAllElement
+
 // 如果没有选中任何元素，新元素插入问卷末尾，反之，则插入选中元素的页面末尾
 export const addQuestionElement = (
     state: any, 
@@ -78,7 +80,6 @@ const createNewElement = (type: string, questionSettings: any) => {
 }
 
 const getElementTemplate = (type: string) => {
-    console.log("type", type)
     let elementTemplate
     if(['ratinglabel','ratingsmileys','ratingstars'].includes(type)){
         const rateType = type.replace(/^rating/, '');

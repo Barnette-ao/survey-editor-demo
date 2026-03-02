@@ -174,7 +174,7 @@ const setCurrentElementId = () => {
 const handleCopy = () => {
 	setCurrentElementId()
 	const uiContext = applyAddElement({
-		selectedQuestionId: currentElementId,
+		selectedQuestionId: editorStore.currentQuestionId,
 		elementType: props.element.type,
 	})
 	if (uiContext?.elementId) {
@@ -191,9 +191,9 @@ const handleDelete = () => {
       type: 'warning',
     }).then(() => {
 	  applyDeleteElement({
-		elementId: currentElementId,
+		elementId: editorStore.currentQuestionId,
 	  })
-      if (editorStore.isCurrentQuestion(currentElementId)) {
+      if (editorStore.isCurrentQuestion(editorStore.currentQuestionId)) {
         editorStore.clearCurrentQuestion()
 		editorStore.setSettingType('quickSetting')
       }
@@ -208,6 +208,7 @@ const handleContainerClick = () => {
 		isOpen: false,
 		id:props.element.id  
 	})
+	editorStore.setSettingType('questionSetting')
 }
 
 const handleSetLogic = () => {

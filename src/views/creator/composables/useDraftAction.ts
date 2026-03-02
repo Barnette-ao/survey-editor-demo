@@ -9,7 +9,8 @@ import {
     createUpdateElementCommand,
     createMoveCommand,
     createDeletePageCommand,
-    createUpdateAllElementCommand
+    createUpdateAllElementCommand,
+    createReplaceLogicStateCommand
 } from "@/views/creator/commands";
 import { useDraftContext } from "@/views/creator/composables/useDraftContext";
 import { useRoute } from "vue-router";
@@ -81,6 +82,11 @@ export function useDraftActions() {
     draft.applyOperation(command)
   }
 
+  function applyReplaceLogicState(payload:any){
+    const command = createReplaceLogicStateCommand(payload)
+    draft.applyOperation(command)
+  }
+
   function applyUndo(){
     if (route.name === 'editor-json') {
       draft.undoBaseSnapshot()
@@ -105,8 +111,6 @@ export function useDraftActions() {
     draft.replaceState(snapshot)
   }
 
-  
-
   return {
     applyElementPropChange,
     applyChoicePropChange,
@@ -123,6 +127,7 @@ export function useDraftActions() {
     applyMove,
     applyDeletePage,
     applyUpdateShowNumbers,
-    applySetSubDescriptionFalse
+    applySetSubDescriptionFalse,
+    applyReplaceLogicState
   }
 }

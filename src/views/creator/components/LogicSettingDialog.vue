@@ -134,8 +134,7 @@
 
 <script setup lang = "ts">
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ref, computed, watch } from 'vue';
-
+import { ref, computed, watch,isProxy } from 'vue';
 import { 
 	isDefaultRule, 
 	isEqual, 
@@ -148,10 +147,10 @@ import { useLogicClass } from "@/views/creator/composables/useLogicRule/useLogic
 import { useDisplayLogicRules } from "@/views/creator/composables/useLogicRule/useDisplayLogicRules"
 import { useLogicRuleElements } from "@/views/creator/composables/useLogicRule/useLogicRuleElements"
 import { useDraftContext } from "@/views/creator/composables/useDraftContext";
-
-import { 
-	getConditionStatesByType 
-} from "@/views/creator/utils/logicRuleUI.js"
+import { getConditionStatesByType } from "@/views/creator/utils/logicRuleUI.js"
+import { useDraftActions } from "@/views/creator/composables/useDraftAction";
+import { snapshot } from "@/views/creator/config/shared"
+import { useEditorStore } from "@/stores/editorContextStore";
 
 import type { 
   QuestionElement, 
@@ -163,18 +162,9 @@ const props = defineProps<{
   element: QuestionElement | null
 }>()
 
-const emits = defineEmits<{
-  (e: 'closeLogicDialog'): void
-  (e: 'saveLogicRules', payload: {
-    logicRules: LogicRule[]
-    newLogicRulesId: string[]
-    updatedLogicRulesId: string[]
-    deletedLogicRulesId: string[]
-  }): void
-}>()
-
+const editorStore = useEditorStore()
 const { draftState } = useDraftContext()
-
+const { applyReplaceLogicState } = useDraftActions()
 const { 
 	addUniqueHistoryItems, 
 	filterHistoryBy, 
@@ -184,14 +174,19 @@ const {
 
 const TEXT_TYPES = ['html', 'panel', 'signaturepad', 'multipletext', 'file', 'ranking', 'matrix', 'text', 'comment'];
 const displayedLogicRules = ref<LogicRule[]>([])
-// 使用 composables
+
+// draftState一定要将其作为参数传入，而不是draftState.value
+// 否则当用户关闭修改draftState时，不能同步更新allElements
+// 这也给了一个启示，allElements依赖于draftState，
+// 而draftState是一个外来变量，非自身局部变量，所以需要可以保持同步更新。 
 const {
 	allElements,
 	allIfElement,
 	allTargetElements,
 	isFistElement,
 	getCurrentElementIndex,
-} = useElementData(props, draftState.value, TEXT_TYPES)
+} = useElementData(props, draftState, TEXT_TYPES)
+
 
 const canSetLogic = (type: string): boolean => !TEXT_TYPES.includes(type)
 
@@ -258,7 +253,6 @@ watch([
 
 const openDialog = () : void => {
 	initLogicClass()
-	console.log("element",props.element)
 	const validRules = initializeDisplayedLogicRules(
 		props.element!,
 		draftState.value.logicRules, 
@@ -332,16 +326,12 @@ const removeLogicRule = (index : number) => {
 	}).then(() => {
 		// 在UI对相框中删除
 		const deletedRule = getDeletedDisplayRule(index);
-
 		// ?? []：当前面结果为 null 或 undefined 时，返回空数组
 		// 确保settedlogicRulesId不会出现 undefined，返回值始终是数组
 		const settedlogicRulesId = (draftState.value.logicRules ?? []).map(rule => rule.id);
-		// 如果被删除的逻辑规则是已经保存到数据库中的逻辑规则，则将其id存入deletedLogicRulesId数组中
 		if (settedlogicRulesId.includes(deletedRule.id)) {
 			deletedLogicRulesId.value.push(deletedRule.id)
-		}
-		else {
-			// 否则，其余的逻辑规则都需要删除history中的id
+		}else {
 			removeHistoryItem(deletedRule.id)
 		}
 	
@@ -357,7 +347,7 @@ const removeLogicRule = (index : number) => {
 const addLogicRule = () : void => {
 	const defaultRule = getDefaultRule()
 	// 添加新的逻辑规则后，默认逻辑规则可以显示，无论原来选择了任何题型
-	displayedLogicRules.value.push(defaultRule)
+	displayedLogicRules.value.push(defaultRule!)
 };
 
 
@@ -378,7 +368,8 @@ const disabledIndex = computed<number>(() => {
     if (canSetLogic(currentType.value)) {
 		// 跳转逻辑：所有如果条件分支中条件题目元素最大的索引即禁用索引
 		if (logicClass.value === 'skipLogic') {
-			return getMaxConditionIndex(currentRuleIndex.value);
+			const maxConditionIndex = getMaxConditionIndex(currentRuleIndex.value);
+			return maxConditionIndex
 		}
 		// 显示逻辑：获取当前题目的索引
 		return getCurrentElementIndex.value;
@@ -448,31 +439,27 @@ const saveLogicSettings = () : void => {
   // updatedLogicRulesId: questionSettings.logicRules中修改过的逻辑规则的id
   // deletedLogicRulesId: questionSettings.logicRules中被删除的逻辑规则的id
   // 将这些数据传递给上层组件
-  emits('saveLogicRules', {
-	logicRules: currentTypeRules.value,
+
+  applyReplaceLogicState({
+	logicRules: snapshot(currentTypeRules.value),
 	newLogicRulesId,
 	updatedLogicRulesId,
-	deletedLogicRulesId:deletedLogicRulesId.value
+	deletedLogicRulesId:snapshot(deletedLogicRulesId.value)
   })
-  emits('closeLogicDialog')
+  editorStore.closeLogicDialog()
 }
 
 const cancelSave = () : void => {
 	resetLogicClass()
-	emits('closeLogicDialog')
+	editorStore.closeLogicDialog()
 }
 const closeDialog = () : void => {
 	resetLogicClass()
 	// 重置状态
 	resetHistory()
 	deletedLogicRulesId.value = [];
-
-	emits('closeLogicDialog')
+	editorStore.closeLogicDialog()
 }
-
-watchEffect(() => {
-	console.log("draftState.value",draftState.value);
-})
 
 </script>
 

@@ -144,6 +144,7 @@
             <component
               v-if="editorStore.currentQuestionId"
               :is="settingComponentMap[getCurrentElementType]"
+              :key="editorStore.currentQuestionId"
               :element="currentElement"
               :quesitonTypeText="getCurrentElementTypeText"
               @setting-update="(key, value) => handleSettingUpdate(key, value)"
@@ -157,31 +158,24 @@
     <logic-setting-dialog
       :visible="editorStore.logicDialogVisible"
       :element="currentElement"
-      @saveLogicRules="handleLogicUpdate"
-      @closeLogicDialog="editorStore.closeLogicDialog"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { defineAsyncComponent } from "vue"
-import instruction from "@/views/creator/components/instruction.vue";
-import { questionTypeList } from "@/views/creator/utils/questionTypeList";
 import page from "@/views/creator/components/page.vue";
-import { settingComponentMap } from "@/views/creator/config/registry";
-
-import {
-  handleLogicRulesUpdateWrapper as handleLogicRulesUpdate,
-} from "@/views/creator/config/updateLogic";
-import draggable from "vuedraggable"
-import { nextTick } from "vue";
+import instruction from "@/views/creator/components/instruction.vue";
 import customEditor from "@/views/creator/components/customEditor.vue";
+
+import draggable from "vuedraggable"
+import { defineAsyncComponent,nextTick } from "vue"
+import { questionTypeList } from "@/views/creator/utils/questionTypeList";
+import { settingComponentMap } from "@/views/creator/config/registry";
 import { useIncrementalLoading } from "@/views/creator/composables/useIncreamentalLoading"
 import { useQuestionDisplay } from "@/views/creator/composables/useQuestionNumberDisplay"
 import { useCurrentElement } from "@/views/creator/composables/useCurrentElement"
 import { useComponentMapping } from '@/views/creator/composables/useComponentMapping'
 import { usePageStructure } from '@/views/creator/composables/usePageStructure'
-import { useLogicRules } from '@/views/creator/composables/useLogicRules'
 import { useElementOperations } from '@/views/creator/composables/useElementOperations'
 import { useQuestionCreation } from '@/views/creator/composables/useQuestionCreation'
 import { useHoverState } from '@/views/creator/composables/useHoverState'
@@ -275,8 +269,6 @@ const {
   getQuestionNameOf
 } = usePageStructure(draftState)
 
-const { getLogicRuleNum } = useLogicRules(draftState)
-
 const { 
   currentElement, 
   getCurrentElementType, 
@@ -295,10 +287,6 @@ const {
 )
 
 const { handleQuestionTypeClick } = useQuestionCreation()
-
-const handleLogicUpdate = (saveLogicObj:object) => {
-  handleLogicRulesUpdate(saveLogicObj, draftState);
-};
 
 </script>
 
@@ -527,8 +515,6 @@ const handleLogicUpdate = (saveLogicObj:object) => {
           width: 100%;
           height: 100%;
           border: 1px solid #dcdfe6;
-          --el-segmented-item-selected-bg-color: white;
-          --el-segmented-item-selected-color: rgb(33, 33, 33);
         }
 
         :deep(.el-segmented-item) {

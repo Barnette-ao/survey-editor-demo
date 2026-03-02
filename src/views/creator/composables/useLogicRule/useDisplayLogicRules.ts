@@ -5,42 +5,11 @@ import type {
 
 
 export function useDisplayLogicRules(
-  allElements: { value: QuestionElement[] },
+  allElements: QuestionElement[],
   displayedLogicRules:Ref<LogicRule[]> 
-) {  
+) { 
+   
   // displayedLogicRules是依赖于filteredRules的
-  
-  
-  // 提取初始化逻辑为函数
-  const initializeDisplayedLogicRules = (element:QuestionElement, logicRules: LogicRule[] | undefined, logicClass: 'skipLogic' | 'visibleLogic'): any => {
-    console.log("logicRules",logicRules)
-    
-    if (!element) return
-    let validRules
-    if (!logicRules?.length) validRules = [] 
-
-    validRules = logicRules!
-      // 深拷贝logicRules,避免修改validRules污染logicRules
-      .map(rule => JSON.parse(JSON.stringify(rule)) as LogicRule)
-      // 过滤目标题目不存在（被删除）的逻辑规则
-      .filter(rule => {
-        const targetId = rule.thenCondition.targetElementId
-        if (!targetId || targetId === 'complete') return true
-        return allElements.value.some(element => element.id === targetId)
-      })
-      // 过滤掉不属于当前类型的逻辑规则
-      .filter(rule => {
-        if (logicClass === 'skipLogic') {
-          return rule.thenCondition.action === 'jump' &&
-                 rule.ifConditions.some(ifrule => ifrule.elementId === element.id)
-        } else {
-          return ['show', 'hide'].includes(rule.thenCondition.action) &&
-                 rule.thenCondition.targetElementId === element.id
-        }
-      }) 
-    return validRules
-  }
-
   const getDisplayRuleProp = (ruleIndex: number, prop: keyof LogicRule): any => {
     return displayedLogicRules.value[ruleIndex]?.[prop]
   }
@@ -51,17 +20,6 @@ export function useDisplayLogicRules(
     prop: keyof IfCondition
   ): any => {
     return displayedLogicRules.value[ruleIndex]?.ifConditions?.[conditionIndex]?.[prop]
-  }
-
-  const setDisplayRuleIfElementProp = (
-    ruleIndex: number, 
-    conditionIndex: number, 
-    prop: keyof IfCondition, 
-    value: any
-  ): void => {
-    if (displayedLogicRules.value[ruleIndex]?.ifConditions?.[conditionIndex]) {
-      displayedLogicRules.value[ruleIndex].ifConditions[conditionIndex][prop] = value
-    }
   }
 
   const getDeletedDisplayRule = (index: number): LogicRule => {
@@ -83,7 +41,6 @@ export function useDisplayLogicRules(
   // 改变如果条件从句的条件选择状态
   const changeIfCoditionState = (state: string, ruleIndex: number, index: number): void => {
     // 设置条件选择状态
-    console.log("changeIfCoditionState执行这里")
     setDisplayRuleIfElementProp(ruleIndex, index, 'state', state)
     // 重置选项选择下拉框
     setDisplayRuleIfElementProp(ruleIndex, index, 'choiceIndex', '')
@@ -94,20 +51,28 @@ export function useDisplayLogicRules(
     let maxIndex = -1
     ;(displayedLogicRules.value[ruleIndex]?.ifConditions ?? []).forEach(
       ifCondition => {
-        const index = allElements.value.findIndex(
-          element => ifCondition.elementId === element.id
+        const index = allElements.findIndex(element => 
+          ifCondition.elementId === element.id
         )
         maxIndex = Math.max(maxIndex, index)
     })
-    console.log("maxIndex", maxIndex)
     return maxIndex
   }
 
+  const setDisplayRuleIfElementProp = (
+    ruleIndex: number, 
+    conditionIndex: number, 
+    prop: keyof IfCondition, 
+    value: any
+  ): void => {
+    if (displayedLogicRules.value[ruleIndex]?.ifConditions?.[conditionIndex]) {
+      displayedLogicRules.value[ruleIndex].ifConditions[conditionIndex][prop] = value
+    }
+  }
+
   return {
-    initializeDisplayedLogicRules,
     getDisplayRuleProp,
     getDeletedDisplayRule,
-    setDisplayRuleIfElementProp,
     getDisplayRuleIfElementProp,
     isDisplayRuleEmpty,
     changeIfCoditionElement,

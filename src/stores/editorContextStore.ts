@@ -1,8 +1,5 @@
 import { defineStore } from 'pinia'
-import type { QuestionElement } from '@/views/creator/types/questionnaire'
-
 type SettingType = 'quickSetting' | 'questionSetting'
-
 
 export const useEditorStore = defineStore('editor', {
 	state: (): any => ({
