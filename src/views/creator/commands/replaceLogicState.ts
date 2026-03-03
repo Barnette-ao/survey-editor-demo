@@ -18,12 +18,5 @@ export function createReplaceLogicStateCommand(
     undo() {
       return structuredClone(previousState)
     },
-
-    getMeta() {
-      return {
-        type: "replace-logic-state"
-      }
-    }
-
   }
 }

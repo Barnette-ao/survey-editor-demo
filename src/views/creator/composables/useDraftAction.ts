@@ -10,14 +10,18 @@ import {
     createMoveCommand,
     createDeletePageCommand,
     createUpdateAllElementCommand,
-    createReplaceLogicStateCommand
+    createReplaceLogicStateCommand,
+    createSwitchChoiceElementCommand
 } from "@/views/creator/commands";
 import { useDraftContext } from "@/views/creator/composables/useDraftContext";
 import { useRoute } from "vue-router";
+import { handleUIEffect } from "@/views/creator/config/shared"
+import { useEditorStore } from "@/stores/editorContextStore";
 
 export function useDraftActions() {
   const { draft } = useDraftContext()
-  const route = useRoute()  
+  const route = useRoute()
+  const editorStore = useEditorStore()  
 
   function applySurveyPropChange(payload:any) {
     const cmd = createUpdateSurveyPropCommand(payload)
@@ -63,8 +67,10 @@ export function useDraftActions() {
 
   function applyAddElement(payload:any){ 
     const cmd = createAddQuestionCommand(payload)
-    const UIContext = draft.applyOperation(cmd)
-    return UIContext
+    const uiContext = draft.applyOperation(cmd)
+    if (uiContext) {
+      handleUIEffect(uiContext,editorStore)
+    }
   }
 
   function applyDeleteElement(payload:any){
@@ -87,11 +93,23 @@ export function useDraftActions() {
     draft.applyOperation(command)
   }
 
+  function applySwitchChoiceElement(payload:any){
+    const command = createSwitchChoiceElementCommand(payload)
+    const uiContext = draft.applyOperation(command)
+    if (uiContext) {
+      handleUIEffect(uiContext,editorStore)
+    }
+  }
+
   function applyUndo(){
     if (route.name === 'editor-json') {
       draft.undoBaseSnapshot()
     } else {
-      draft.undoBaseOperation()
+      const uiContext = draft.undoBaseOperation()
+      console.log("uiContext",uiContext)
+      if (uiContext) {
+        handleUIEffect(uiContext,editorStore)
+      }
     }
   }
 
@@ -99,7 +117,10 @@ export function useDraftActions() {
     if (route.name === 'editor-json') {
       draft.redoBaseSnapshot()
     } else {
-      draft.redoBaseOperation()
+      const uiContext = draft.redoBaseOperation()
+      if (uiContext) {
+        handleUIEffect(uiContext,editorStore)
+      }
     }
   }
 
@@ -128,6 +149,7 @@ export function useDraftActions() {
     applyDeletePage,
     applyUpdateShowNumbers,
     applySetSubDescriptionFalse,
-    applyReplaceLogicState
+    applyReplaceLogicState,
+    applySwitchChoiceElement
   }
 }

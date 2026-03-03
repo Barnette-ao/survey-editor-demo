@@ -42,13 +42,13 @@ export function useElementData(
   // 是否是第一个能够设置逻辑规则题目中，第二个题目元素
   const isFistElement = computed(() => {
     if (!props.element) return false
-    let elementIndex = allElements.value.findIndex(el => props.element!.id === el.id)
+    let elementIndex = allElements.value.findIndex((el:any) => props.element!.id === el.id)
     return elementIndex === 1
   })
 
   const getCurrentElementIndex = computed(() => {
     if (!props.element) return -1
-    return allIfElement.value.findIndex(item => props.element!.id === item.id)
+    return allIfElement.value.findIndex((item:any) => props.element!.id === item.id)
   })
   
   return {

@@ -36,8 +36,22 @@ export function createAddQuestionCommand(payload: {
       )
     },
 
-    getMeta(){
-        return {elementId:addedElementId}
+    getExecuteMeta(){
+      return {
+        effect: 'create-active-element',
+        payload: {
+          activeElementId: addedElementId
+        }
+      } 
+    },
+
+    getUndoMeta(){
+      return {
+        effect: 'create-active-element',
+        payload: {
+          activeElementId: payload.selectedQuestionId
+        }
+      } 
     }
   }
 }

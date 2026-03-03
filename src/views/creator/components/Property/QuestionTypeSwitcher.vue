@@ -14,13 +14,14 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useDraftActions } from "@/views/creator/composables/useDraftAction";
+import { useEditorStore } from "@/stores/editorContextStore";
 
 const props = defineProps({
-  quesitonTypeText: String
+  quesitonTypeText: String,
 })
 
-const emit = defineEmits(['update:questionType'])
-
+const editorStore = useEditorStore()
 const switchQuestionTypeList = ['单选', '多选', '下拉']
 
 const typeMapping = {
@@ -29,25 +30,18 @@ const typeMapping = {
   '下拉': 'dropdown'
 }
 
-/**
- * 根据我的梳理，切换题目视图更新的逻辑顺序如下：
- * currentTypeIndex计算属性依赖于props.quesitonTypeText，
- * quesitonTypeText绑定计算属性getCurrentElementTypeText，
- * getCurrentElementTypeText依赖于计算属性currentElement，
- * 计算属性currentElement依赖于currentElementId。
- * 然后切换题型，触发update:questionType事件，
- * 事件的处理方法最后会修改currentElementId，从而完成视图更新。
- * 这是一个典型的响应式数据流
- * 
- * 我还没有找到一个还好的简化方法来简化这个响应数据流。
- */
 
 const currentTypeIndex = computed(() => {
   return switchQuestionTypeList.findIndex(el => el === props.quesitonTypeText)
 })
 
+const { applySwitchChoiceElement } = useDraftActions()
 const handleQuestionTypeChange = (selectedTypeIndex) => {
-  emit('update:questionType', typeMapping[switchQuestionTypeList[selectedTypeIndex]])
+  const type = typeMapping[switchQuestionTypeList[selectedTypeIndex]]
+  applySwitchChoiceElement({
+    sourceElementId: editorStore.currentQuestionId,
+    targetType:type 
+  })
 }
 </script>
 

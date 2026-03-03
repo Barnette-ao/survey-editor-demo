@@ -93,3 +93,16 @@ export const adapteElement = (element: QuestionElement): QuestionElement => {
   return result
 }
 
+
+export const handleUIEffect = (uiContext:any,editorStore:any) => {
+  switch (uiContext.effect) {
+    case 'switch-active-element':
+      editorStore.setCurrentQuestionId(uiContext.payload.activeElementId)
+      editorStore.setSettingType('questionSetting')
+      break
+    
+    case 'create-active-element':
+      editorStore.setCurrentQuestionId(uiContext.payload.activeElementId)
+      break  
+  }
+}

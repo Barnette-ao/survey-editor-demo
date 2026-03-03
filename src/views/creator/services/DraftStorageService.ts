@@ -16,8 +16,13 @@ export interface Command {
   execute(state: DraftState): DraftState
   // 反向操作变更   
   undo(state: DraftState): DraftState
-  getMeta?():any
+  getExecuteMeta?():any
+  getUndoMeta?():any
 }
+
+type HistoryEntry =
+  | { kind: 'operation', cmd: Command }
+  | { kind: 'snapshot', prevState: DraftState }
 
 const adapteStorageState = (storageState:unknown) => {
     const runingState = afterGetInitialSettings(storageState)
@@ -71,6 +76,9 @@ export class DraftStorageService {
   private redoStackBaseSnapshot: unknown[] = []
   private undoStackBaseOperation: Command[] = []
   private redoStackBaseOperation: Command[] = []
+
+  private undoStack: HistoryEntry[] = []
+  private redoStack: HistoryEntry[] = []
 
 
   openWithRunningState() {
@@ -143,7 +151,7 @@ export class DraftStorageService {
     this._draftState.value = nextState 
     this.undoStackBaseOperation.push(cmd)
     this.redoStackBaseOperation = []
-    return cmd.getMeta?.()
+    return cmd.getExecuteMeta?.() 
   }
 
   applyBatch(cmds:Command[]) {
@@ -153,17 +161,19 @@ export class DraftStorageService {
 
   undoBaseOperation(){
     if(!this.undoStackBaseOperation.length) return 
-    const undoCommand:Command = this.undoStackBaseOperation.pop()!
-    this._draftState.value = undoCommand.undo(this._draftState.value)
-    this.redoStackBaseOperation.push(undoCommand)
+    const cmd:Command = this.undoStackBaseOperation.pop()!
+    this._draftState.value = cmd.undo(this._draftState.value)
+    this.redoStackBaseOperation.push(cmd)
+    return cmd.getUndoMeta?.()
   }
 
   // 这里必须存在一个时序耦合，即redo必须在undo之后执行
   redoBaseOperation(){
     if(!this.redoStackBaseOperation.length) return 
-    const redoCommand:Command = this.redoStackBaseOperation.pop()!
-    this._draftState.value = redoCommand.execute(this._draftState.value)  
-    this.undoStackBaseOperation.push(redoCommand)
+    const cmd:Command = this.redoStackBaseOperation.pop()!
+    this._draftState.value = cmd.execute(this._draftState.value)  
+    this.undoStackBaseOperation.push(cmd)
+    return cmd.getExecuteMeta?.()
   }
 
   commitRuntime() {

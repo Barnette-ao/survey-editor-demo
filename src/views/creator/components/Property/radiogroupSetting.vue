@@ -3,9 +3,7 @@
 		<base-question-setting>
 			<template #before-basic>
 				<div class="section-content">
-					<QuestionTypeSwitcher :quesitonTypeText="quesitonTypeText" 
-						@update:questionType="(type) => emit('update:questionType', type)"
-					/>
+					<QuestionTypeSwitcher :quesitonTypeText="quesitonTypeText"/>
 				</div>
 			</template>
 		</base-question-setting>
@@ -69,7 +67,6 @@ const props = defineProps({
 
 const emit = defineEmits([
 	'setting-update',
-	'update:questionType',
 ])
 
 const editorStore = useEditorStore()

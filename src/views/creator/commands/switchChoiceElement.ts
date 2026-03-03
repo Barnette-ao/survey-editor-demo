@@ -6,7 +6,8 @@ export function createSwitchChoiceElementCommand(payload: {
   sourceElementId: string
   targetType: string
 }): Command {
-  let targetElementId: string = ""
+  let targetElementIdByExecute: string = ""
+  let targetElementIdByUndo: string = ""
   let sourceElement: any = null
   
   return {
@@ -24,27 +25,40 @@ export function createSwitchChoiceElementCommand(payload: {
         sourceElement,
         payload.targetType
       )
-      targetElementId = id
+      targetElementIdByExecute = id
       return cloned
     },
 
     undo(state) {
       const rawState = snapshot(state)
+      if (!sourceElement) return rawState
       // 切换回原来的类型
-      if (sourceElement) {
-        const { cloned } = switchChoiceQuestion(
-          rawState,
-          targetElementId,
-          sourceElement,
-          sourceElement.type
-        )
-        return cloned
-      }
-      return rawState
+      const { id , cloned } = switchChoiceQuestion(
+        rawState,
+        targetElementIdByExecute,
+        sourceElement,
+        sourceElement.type
+      )
+      targetElementIdByUndo = id
+      return cloned
     },
 
-    getMeta() {
-      return { elementId: targetElementId }
+    getExecuteMeta(){
+      return {
+        effect: 'switch-active-element',
+        payload: {
+          activeElementId: targetElementIdByExecute
+        }
+      } 
+    },
+
+    getUndoMeta(){
+      return {
+        effect: 'switch-active-element',
+        payload: {
+          activeElementId: targetElementIdByUndo
+        }
+      } 
     }
   }
 }

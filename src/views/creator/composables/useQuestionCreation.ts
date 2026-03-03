@@ -16,15 +16,12 @@ export function useQuestionCreation() {
       })
     } else {
       // 当前选中的题目改为新添加的题目
-      const uiContext = applyAddElement({
+      applyAddElement({
         selectedQuestionId: editorStore.currentQuestionId,
         elementType: elementType,
         isCurrentQuestionAPage:editorStore.isCurrentQuestionAPage,
         selectedPageIndex:editorStore.pageIndex
       })
-      if (uiContext?.elementId) {
-        editorStore.setCurrentQuestionId(uiContext.elementId) 
-      }
     }
   }
 

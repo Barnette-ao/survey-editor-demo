@@ -69,13 +69,6 @@ export function createMoveElementCommand(payload: {
       )
 
       return rawState
-    },
-
-    getMeta() {
-      return {
-        sourceId: payload.sourceId,
-        targetId: payload.targetId
-      }
     }
   }
 }
