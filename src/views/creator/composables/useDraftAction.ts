@@ -102,25 +102,16 @@ export function useDraftActions() {
   }
 
   function applyUndo(){
-    if (route.name === 'editor-json') {
-      draft.undoBaseSnapshot()
-    } else {
-      const uiContext = draft.undoBaseOperation()
-      console.log("uiContext",uiContext)
-      if (uiContext) {
-        handleUIEffect(uiContext,editorStore)
-      }
+    const uiContext = draft.undo()
+    if (uiContext) {
+      handleUIEffect(uiContext,editorStore)
     }
   }
 
   function applyRedo(){
-    if (route.name === 'editor-json') {
-      draft.redoBaseSnapshot()
-    } else {
-      const uiContext = draft.redoBaseOperation()
-      if (uiContext) {
-        handleUIEffect(uiContext,editorStore)
-      }
+    const uiContext = draft.redo()
+    if (uiContext) {
+      handleUIEffect(uiContext,editorStore)
     }
   }
 
