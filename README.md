@@ -1,0 +1,114 @@
+# Survey Editor Demo
+
+一个基于 **Vue3 + Vite + SurveyJS** 实现的低代码问卷编辑器 Demo，支持可视化编辑、JSON 编辑、Undo/Redo 和实时预览。
+
+---
+
+## 在线体验
+
+Demo 地址：
+
+https://你的项目.vercel.app
+
+GitHub：
+
+https://github.com/你的仓库
+
+---
+
+## 项目截图
+
+（放两张截图）
+
+* 可视化编辑器
+* JSON 编辑器
+* 预览页
+
+---
+
+## 核心功能
+
+* 可视化问卷编辑（SurveyJS Creator）
+* JSON Schema 编辑
+* Draft 草稿层设计
+* Undo / Redo 撤销重做
+* 自动保存
+* 本地持久化（localStorage）
+* JSON 编辑器 + 实时校验
+* 问卷实时预览
+
+---
+
+## 技术栈
+
+* Vue 3
+* Vite
+* TypeScript
+* SurveyJS
+* Element Plus
+* Monaco Editor
+
+---
+
+## 核心架构设计
+
+本项目实现了一套简单但清晰的编辑器架构：
+
+UI Layer
+↓
+Context Layer (Composables)
+↓
+Draft Layer（草稿状态管理）
+↓
+Domain Layer（Survey 数据模型）
+
+Undo / Redo 只作用于 Draft 层。
+
+---
+
+## Undo / Redo 设计
+
+* Design 页面：操作级 Undo
+* JSON Editor：状态快照 Undo
+* Draft 层维护
+
+undoStack
+redoStack
+draftState
+
+自动保存只替换 draftState，不进入 undoStack。
+
+---
+
+## 数据存储
+
+当前 Demo 使用：
+
+localStorage
+
+用于模拟持久化。
+
+生产环境可以替换为：
+
+API + 数据库
+
+---
+
+## 本地运行
+
+```
+npm install
+npm run dev
+```
+
+构建：
+
+```
+npm run build
+```
+
+---
+
+## 部署
+
+项目使用 **Vercel** 进行静态部署。
