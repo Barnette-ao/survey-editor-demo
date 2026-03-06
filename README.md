@@ -53,7 +53,7 @@ https://github.com/Barnette-ao/survey-editor-demo
 ## 核心架构设计
 
 本项目实现了一套简单但清晰的编辑器架构：
-
+```js
 UI Layer
 ↓
 Context Layer (Composables)
@@ -63,7 +63,7 @@ Draft Layer（草稿状态管理）
 Domain Layer（Survey 数据模型）
 
 Undo / Redo 只作用于 Draft 层。
-
+```
 ---
 
 ## Undo / Redo 设计
