@@ -47,6 +47,7 @@ https://github.com/你的仓库
 * SurveyJS
 * Element Plus
 * Monaco Editor
+* TipTap
 
 ---
 
