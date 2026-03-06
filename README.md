@@ -12,7 +12,7 @@ https://你的项目.vercel.app
 
 GitHub：
 
-https://github.com/你的仓库
+https://github.com/Barnette-ao/survey-editor-demo
 
 ---
 
