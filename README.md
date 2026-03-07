@@ -1,6 +1,14 @@
-# Survey Editor Demo
+## 项目介绍
 
-一个基于 **Vue3 + Vite + SurveyJS** 实现的低代码问卷编辑器 Demo，支持可视化编辑、JSON 编辑、Undo/Redo 和实时预览。
+Survey Editor Demo 是一个基于 **Vue3 + Vite + SurveyJS** 实现的低代码问卷编辑器原型，
+用于演示如何构建一个支持可视化编辑、JSON 编辑、Undo / Redo 和实时预览的问卷设计工具。
+
+项目重点展示：
+
+- 编辑器架构设计
+- Draft 草稿层状态管理
+- Undo / Redo 实现
+- JSON 与可视化编辑同步
 
 ---
 
