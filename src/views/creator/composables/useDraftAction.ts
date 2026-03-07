@@ -116,7 +116,7 @@ export function useDraftActions() {
   }
 
   function applyCommit(){
-    draft.commitRuntime()
+    draft.save()
   }
 
   function replaceDraftState(snapshot:any){

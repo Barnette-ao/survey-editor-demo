@@ -1,5 +1,6 @@
 import {
-    generateUUID
+    generateUUID,
+    snapshot
 } from "@/views/creator/utils/shared";
 import {
     validateStorageSchema,
@@ -141,7 +142,7 @@ export class SurveyStorageService {
    * @memberof SurveyStorageService
    */
   save(surveyId:string, settings: unknown) {
-    const rawObject = toRaw(settings)
+    const rawObject = snapshot(settings)
     const dataToSave = beforeSaveToDatabase(rawObject)
     validateStorageSchema(dataToSave)
     this.persist(dataToSave, surveyId)

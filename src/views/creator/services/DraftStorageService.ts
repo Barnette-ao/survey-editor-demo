@@ -72,16 +72,11 @@ export class DraftStorageService {
    * @memberof DraftStorageService
    * 撤销操作顺序，它的语义是每个状态按照顺序
    */
-  private undoStackBaseSnapshot: unknown[] = []
-  private redoStackBaseSnapshot: unknown[] = []
-  private undoStackBaseOperation: Command[] = []
-  private redoStackBaseOperation: Command[] = []
-
   private undoStack: HistoryEntry[] = []
   private redoStack: HistoryEntry[] = []
 
 
-  openWithRunningState() {
+  open() {
     // 存储态 -> 运行态
     if(this.isInistialized) return 
     const rawSettings = this.storage.open(this.surveyId.value)
@@ -120,19 +115,6 @@ export class DraftStorageService {
     this._draftState.value = snapshot
   }
 
-  // undoBaseSnapshot() {
-  //   if (!this.undoStackBaseSnapshot.length) return
-  //   this.redoStackBaseSnapshot.push(this._draftState.value)
-  //   this._draftState.value = this.undoStackBaseSnapshot.pop() 
-  // }
-
-  // redoBaseSnapshot() {
-  //   if (!this.redoStackBaseSnapshot.length) return
-  //   this.undoStackBaseSnapshot.push(this._draftState.value)
-  //   this._draftState.value = this.redoStackBaseSnapshot.pop()
-  // }
-
-  
   /**
    * @param {Command} op
    * @memberof DraftStorageService
@@ -150,7 +132,7 @@ export class DraftStorageService {
       kind: 'operation',
       cmd: cmd
     })
-    this.redoStackBaseOperation = []
+    this.redoStack = []
     return cmd.getExecuteMeta?.() 
   }
 
@@ -194,24 +176,7 @@ export class DraftStorageService {
     }
   }
 
-  // undoBaseOperation(){
-  //   if(!this.undoStackBaseOperation.length) return 
-  //   const cmd:Command = this.undoStackBaseOperation.pop()!
-  //   this._draftState.value = cmd.undo(this._draftState.value)
-  //   this.redoStackBaseOperation.push(cmd)
-  //   return cmd.getUndoMeta?.()
-  // }
-
-  // // 这里必须存在一个时序耦合，即redo必须在undo之后执行
-  // redoBaseOperation(){
-  //   if(!this.redoStackBaseOperation.length) return 
-  //   const cmd:Command = this.redoStackBaseOperation.pop()!
-  //   this._draftState.value = cmd.execute(this._draftState.value)  
-  //   this.undoStackBaseOperation.push(cmd)
-  //   return cmd.getExecuteMeta?.()
-  // }
-
-  commitRuntime() {
+  save() {
     this.storage.save(
       this.surveyId.value,
       this._draftState.value
