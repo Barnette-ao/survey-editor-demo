@@ -1,6 +1,14 @@
-# Survey Editor Demo
+## 项目介绍
 
-一个基于 **Vue3 + Vite + SurveyJS** 实现的低代码问卷编辑器 Demo，支持可视化编辑、JSON 编辑、Undo/Redo 和实时预览。
+Survey Editor Demo 是一个基于 **Vue3 + Vite + SurveyJS** 实现的低代码问卷编辑器原型，
+用于演示如何构建一个支持可视化编辑、JSON 编辑、Undo / Redo 和实时预览的问卷设计工具。
+
+项目重点展示：
+
+- 编辑器架构设计
+- Draft 草稿层状态管理
+- Undo / Redo 实现
+- JSON 与可视化编辑同步
 
 ---
 
@@ -52,17 +60,58 @@ https://github.com/Barnette-ao/survey-editor-demo
 
 ---
 
+## 项目结构
+```js
+src
+ ├─ entry
+ |    └─ index.vue
+ └─ creator
+       ├─ commands
+       │   ├─ addQuestionElement.vue
+       │   ├─ ...
+       │   └─ move.vue
+       ├─ components
+       │   ├─ radiogroup.vue
+       │   ├─ ...
+       │   └─ checkbox.vue
+       │
+       ├─ composables
+       |   ├─ useDraftContext.ts
+       │   └─ useDraftAction.ts
+       │
+       ├─ utils
+       |   ├─ element
+       │   ├─ page
+       |   ├─ shared
+       |   ├─ ...
+       │   └─ logicRule
+       ├─ pages
+       │   ├─ design.vue
+       |   ├─ jsonEditor.vue
+       │   └─ preview.vue
+       │
+       ├─ services
+       │   |─ DraftStorageService.ts
+       |   └─ SurveyStorageService.ts
+       │
+       └─ types
+           ├─ design.ts
+           └─ questionnaire.ts
+```
+---
+
+
 ## 核心架构设计
 
 本项目实现了一套简单但清晰的编辑器架构：
 ```js
-UI Layer
+UI Layer (Vue Components)
 ↓
 Context Layer (Composables)
 ↓
-Draft Layer（草稿状态管理）
+Draft Layer (Survey Draft, Undo Stack, Redo Stack)
 ↓
-Domain Layer（Survey 数据模型）
+Domain Layer (Survey JSON)
 
 Undo / Redo 只作用于 Draft 层。
 ```
