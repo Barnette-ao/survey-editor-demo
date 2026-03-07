@@ -173,13 +173,10 @@ const setCurrentElementId = () => {
 
 const handleCopy = () => {
 	setCurrentElementId()
-	const uiContext = applyAddElement({
+	applyAddElement({
 		selectedQuestionId: editorStore.currentQuestionId,
 		elementType: props.element.type,
 	})
-	if (uiContext?.elementId) {
-		editorStore.setCurrentQuestionId(uiContext.elementId)
-	}
 	ElMessage.success('复制成功')
 }
 

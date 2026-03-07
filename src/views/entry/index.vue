@@ -4,7 +4,7 @@
       <button class="create-btn" @click="handleCreate">
         创建新问卷
       </button>
-
+      <div class="textTitle">最近编辑</div>
       <div class="list">
         <div
           v-for="item in surveys"
@@ -14,6 +14,14 @@
         >
           <div class="title">{{ item.title }}</div>
           <div class="id">{{ item.surveyId }}</div>
+          <el-button
+						class="delete-option"
+						@click.stop="handleDelete(item.surveyId)"
+					>
+            <el-icon>
+              <Delete />
+            </el-icon>
+          </el-button>
         </div>
 
         <div v-if="!surveys.length" class="empty">
@@ -33,10 +41,10 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 const appService = new SurveyStorageService()
 
-
 interface SurveyMeta {
   surveyId: string
   title: string
+  lastModified: number 
 }
 
 const surveys = ref<SurveyMeta[]>([])
@@ -44,20 +52,35 @@ const surveys = ref<SurveyMeta[]>([])
 function loadSurveyList() {
   const raw = JSON.parse(localStorage.getItem('questionnaires') || '{}')
 
-  surveys.value = Object.keys(raw).map((id) => ({
-    surveyId: id,
-    title: raw[id]?.title || '未命名问卷'
-  }))
+  surveys.value = Object.keys(raw)
+    .map((id) => ({
+      surveyId: id,
+      title: raw[id]?.title || '未命名问卷',
+      lastModified: raw[id]?.meta?.lastModified || 0
+    }))
+    .sort((a, b) => b.lastModified - a.lastModified)  // 添加这一行，降序排序（最新的在前）
 }
 
 function handleCreate() {
   const newId = appService.create()
-  console.log("newId",newId)
   router.push(`/editor/${newId}`)
 }
 
 function handleOpen(id: string) {
   router.push(`/editor/${id}`)
+}
+
+function handleDelete(surveyId:string){
+  ElMessageBox.confirm('确定要删除该题目吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }).then(() => {
+      appService.delete(surveyId)
+      loadSurveyList()
+
+      ElMessage.success('删除成功')
+    })
 }
 
 onMounted(() => {
@@ -93,8 +116,12 @@ onMounted(() => {
   cursor: pointer;
 }
 
+.textTitle{
+  margin: 10px 0;
+  font-weight: bold
+}
+
 .list {
-  margin-top: 20px;
   height: 200px;
   overflow-y: auto;
 }
@@ -102,6 +129,7 @@ onMounted(() => {
 .list-item {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding: 12px 8px;
   border-radius: 6px;
   cursor: pointer;
@@ -124,5 +152,15 @@ onMounted(() => {
   margin-top: 12px;
   text-align: center;
   color: #666;
+}
+
+.delete-option {
+	border: none;
+	background: transparent;
+  margin-bottom:10px
+
+	&:hover {
+		color: #f56c6c;
+	}
 }
 </style>

@@ -20,9 +20,8 @@ export const createQuestionnaireTemplate = (count: number, surveyId: string) => 
   const baseQuestion = {
 	  id: surveyId,
 		meta: {
-			createdAt: Date.now(),
+			lastModified: Date.now(),
 			type: 'performance-test',
-			questionCount: count
 		},
 		title: `测试问卷${getTestQuestionnaireNumber()}`,
 		description: '用于测试长列表渲染性能',
@@ -121,7 +120,6 @@ export class SurveyStorageService {
     )
     all[surveyId] = base
     localStorage.setItem('questionnaires',JSON.stringify(all))
-    
     return surveyId
   }
 
@@ -131,6 +129,7 @@ export class SurveyStorageService {
     if (!rawSettings) {
       throw new Error("storageService.load() failed")
     }
+    rawSettings.meta.lastModified = Date.now()
     return rawSettings
   }
   
