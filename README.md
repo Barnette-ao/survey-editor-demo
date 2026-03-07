@@ -52,17 +52,58 @@ https://github.com/Barnette-ao/survey-editor-demo
 
 ---
 
+## 项目结构
+
+src
+ ├─ entry
+ |    └─ index.vue
+ └─ creator
+       ├─ commands
+       │   ├─ addQuestionElement.vue
+       │   ├─ ...
+       │   └─ move.vue
+       ├─ components
+       │   ├─ radiogroup.vue
+       │   ├─ ...
+       │   └─ checkbox.vue
+       │
+       ├─ composables
+       |   ├─ useDraftContext.ts
+       │   └─ useDraftAction.ts
+       │
+       ├─ utils
+       |   ├─ element
+       │   ├─ page
+       |   ├─ shared
+       |   ├─ ...
+       │   └─ logicRule
+       ├─ pages
+       │   ├─ design.vue
+       |   ├─ jsonEditor.vue
+       │   └─ preview.vue
+       │
+       ├─ services
+       │   |─ DraftStorageService.ts
+       |   └─ SurveyStorageService.ts
+       │
+       └─ types
+           ├─ design.ts
+           └─ questionnaire.ts
+
+---
+
+
 ## 核心架构设计
 
 本项目实现了一套简单但清晰的编辑器架构：
 ```js
-UI Layer
+UI Layer (Vue Components)
 ↓
 Context Layer (Composables)
 ↓
-Draft Layer（草稿状态管理）
+Draft Layer (Survey Draft, Undo Stack, Redo Stack)
 ↓
-Domain Layer（Survey 数据模型）
+Domain Layer (Survey JSON)
 
 Undo / Redo 只作用于 Draft 层。
 ```
