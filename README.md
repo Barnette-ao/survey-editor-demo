@@ -53,7 +53,7 @@ https://github.com/Barnette-ao/survey-editor-demo
 ---
 
 ## 项目结构
-
+```js
 src
  ├─ entry
  |    └─ index.vue
@@ -89,7 +89,7 @@ src
        └─ types
            ├─ design.ts
            └─ questionnaire.ts
-
+```
 ---
 
 
