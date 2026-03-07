@@ -1,7 +1,7 @@
 import type { Command } from "@/views/creator/services/DraftStorageService"
-import { updateSurveyProp } from "@/views/creator/config/survey"
+import { updateSurveyProp } from "@/views/creator/utils/survey"
 import type { QuestionSettings } from "@/views/creator/types/questionnaire"
-import { snapshot } from '@/views/creator/config/shared'
+import { snapshot } from '@/views/creator/utils/shared'
 
 export function createUpdateSurveyPropCommand<K extends keyof QuestionSettings>(payload: {
   key: K

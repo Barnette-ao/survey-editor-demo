@@ -1,10 +1,10 @@
 import { 
     findLogicRulesByElementId 
-} from '@/views/creator/config/logicRule'
+} from '@/views/creator/utils/logicRule'
 import { LogicRule } from '../../types/questionnaire';
-import { isEqual, } from "@/views/creator/config/logicRule";
-import { findElementById } from '@/views/creator/config/element'
-import { getLogicExpression } from '@/views/creator/config/logicRule'
+import { isEqual, } from "@/views/creator/utils/logicRule";
+import { findElementById } from '@/views/creator/utils/element'
+import { getLogicExpression } from '@/views/creator/utils/logicRule'
 
 export const deleteLogicRulesById = (questionSettings:any, elementId:string) => {
 	// 查找删除该题目关联的逻辑规则

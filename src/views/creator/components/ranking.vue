@@ -86,7 +86,7 @@ import {
   addSimpleBatchOptions, 
   parseBatchInput 
 } from '@/views/creator/composables/useChoiceOperations';
-import { snapshot } from '@/views/creator/config/shared'
+import { snapshot } from '@/views/creator/utils/shared'
 
 const props = defineProps({
 	element: {

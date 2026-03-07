@@ -1,5 +1,5 @@
-import { findElementPosition } from '@/views/creator/config/element'
-import { generateUUID } from '@/views/creator/config/shared'
+import { findElementPosition } from '@/views/creator/utils/element'
+import { generateUUID } from '@/views/creator/utils/shared'
 
 import type { QuestionSettings } from '@/views/creator/types/questionnaire'
 

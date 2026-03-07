@@ -3,10 +3,10 @@ import type { ComputedRef, Ref } from 'vue'
 import { SurveyStorageService } from '@/views/creator/services/SurveyStorageService'
 import {
   afterGetInitialSettings,
-} from "@/views/creator/config/adapter";
+} from "@/views/creator/utils/adapter";
 import {
   isEqual
-} from "@/views/creator/config/logicRule";
+} from "@/views/creator/utils/logicRule";
 import {createCompositeCommand} from "@/views/creator/commands"
 
 type DraftState = unknown
@@ -111,34 +111,31 @@ export class DraftStorageService {
    */
   replaceState(snapshot: unknown) {
     if (!isEqual(snapshot,this._draftState.value)) {
-      this.undoStackBaseSnapshot.push(this._draftState.value)
-      this.redoStackBaseSnapshot = []
+      this.undoStack.push({
+        kind: 'snapshot',
+        prevState: this._draftState.value
+      })
+      this.redoStack = []
     }
     this._draftState.value = snapshot
   }
 
-  undoBaseSnapshot() {
-    if (!this.undoStackBaseSnapshot.length) return
-    this.redoStackBaseSnapshot.push(this._draftState.value)
-    this._draftState.value = this.undoStackBaseSnapshot.pop() 
-  }
+  // undoBaseSnapshot() {
+  //   if (!this.undoStackBaseSnapshot.length) return
+  //   this.redoStackBaseSnapshot.push(this._draftState.value)
+  //   this._draftState.value = this.undoStackBaseSnapshot.pop() 
+  // }
 
-  redoBaseSnapshot() {
-    if (!this.redoStackBaseSnapshot.length) return
-    this.undoStackBaseSnapshot.push(this._draftState.value)
-    this._draftState.value = this.redoStackBaseSnapshot.pop()
-  }
+  // redoBaseSnapshot() {
+  //   if (!this.redoStackBaseSnapshot.length) return
+  //   this.undoStackBaseSnapshot.push(this._draftState.value)
+  //   this._draftState.value = this.redoStackBaseSnapshot.pop()
+  // }
 
   
   /**
    * @param {Command} op
    * @memberof DraftStorageService
-   * 
-   * 用户心智模型：若用户当前的操作是执行可撤销操作，那么Ta之前的操作是什么？
-   * - 着重考虑两种：执行可撤销操作，撤销可执行操作, 恢复已经撤销的操作
-   * - 执行可撤销操作 -> 执行可撤销操作 : applyOperation -> applyOperation
-   * - 撤销可执行操作 -> 执行可撤销操作 : undoBaseOperation -> applyOperation
-   * - 恢复已经撤销的操作 -> 执行可撤销操作 : redoBaseOperation -> applyOperation
    * 
    * 三种操作映射成一个公共函数，
    * 操作对象DraftOperation，核心数据draftState, undoStack, redoStack
@@ -149,7 +146,10 @@ export class DraftStorageService {
   applyOperation(cmd: Command) {
     const nextState = cmd.execute(this._draftState.value)
     this._draftState.value = nextState 
-    this.undoStackBaseOperation.push(cmd)
+    this.undoStack.push({
+      kind: 'operation',
+      cmd: cmd
+    })
     this.redoStackBaseOperation = []
     return cmd.getExecuteMeta?.() 
   }
@@ -159,22 +159,57 @@ export class DraftStorageService {
     this.applyOperation(compositeCmd)
   }
 
-  undoBaseOperation(){
-    if(!this.undoStackBaseOperation.length) return 
-    const cmd:Command = this.undoStackBaseOperation.pop()!
-    this._draftState.value = cmd.undo(this._draftState.value)
-    this.redoStackBaseOperation.push(cmd)
-    return cmd.getUndoMeta?.()
+  undo(){
+    if(!this.undoStack.length) return
+    const historyEntry:HistoryEntry = this.undoStack.pop()!
+    // 基于操作的undo
+    if(historyEntry.kind === "operation"){
+      this._draftState.value = historyEntry.cmd.undo(this._draftState.value)  
+      this.redoStack.push(historyEntry)
+      this._draftState.value = historyEntry.cmd.undo(this._draftState.value)
+      return historyEntry.cmd.getUndoMeta?.()
+    }else{
+      // 基于状态的undo
+      this.redoStack.push({
+        kind: 'snapshot',
+        prevState: this._draftState.value
+      })
+      this._draftState.value = this.undoStack.pop()
+    }
   }
 
-  // 这里必须存在一个时序耦合，即redo必须在undo之后执行
-  redoBaseOperation(){
-    if(!this.redoStackBaseOperation.length) return 
-    const cmd:Command = this.redoStackBaseOperation.pop()!
-    this._draftState.value = cmd.execute(this._draftState.value)  
-    this.undoStackBaseOperation.push(cmd)
-    return cmd.getExecuteMeta?.()
+  redo(){
+    if(!this.redoStack.length) return
+    const historyEntry:HistoryEntry = this.redoStack.pop()!
+    if(historyEntry.kind === "operation"){
+      this._draftState.value = historyEntry.cmd.execute(this._draftState.value)  
+      this.undoStack.push(historyEntry)
+      return historyEntry.cmd.getExecuteMeta?.()
+    }else{
+      this.undoStack.push({
+        kind:"snapshot",
+        prevState:this._draftState.value
+      })
+      this._draftState.value = historyEntry.prevState
+    }
   }
+
+  // undoBaseOperation(){
+  //   if(!this.undoStackBaseOperation.length) return 
+  //   const cmd:Command = this.undoStackBaseOperation.pop()!
+  //   this._draftState.value = cmd.undo(this._draftState.value)
+  //   this.redoStackBaseOperation.push(cmd)
+  //   return cmd.getUndoMeta?.()
+  // }
+
+  // // 这里必须存在一个时序耦合，即redo必须在undo之后执行
+  // redoBaseOperation(){
+  //   if(!this.redoStackBaseOperation.length) return 
+  //   const cmd:Command = this.redoStackBaseOperation.pop()!
+  //   this._draftState.value = cmd.execute(this._draftState.value)  
+  //   this.undoStackBaseOperation.push(cmd)
+  //   return cmd.getExecuteMeta?.()
+  // }
 
   commitRuntime() {
     this.storage.save(

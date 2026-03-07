@@ -15,7 +15,7 @@ import {
 } from "@/views/creator/commands";
 import { useDraftContext } from "@/views/creator/composables/useDraftContext";
 import { useRoute } from "vue-router";
-import { handleUIEffect } from "@/views/creator/config/shared"
+import { handleUIEffect } from "@/views/creator/utils/shared"
 import { useEditorStore } from "@/stores/editorContextStore";
 
 export function useDraftActions() {

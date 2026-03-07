@@ -3,8 +3,8 @@ import type { Command } from "@/views/creator/services/DraftStorageService"
 import {
   addQuestionElement,
   deleteQuestion
-} from "@/views/creator/config/element"
-import { snapshot } from '@/views/creator/config/shared'
+} from "@/views/creator/utils/element"
+import { snapshot } from '@/views/creator/utils/shared'
 
 export function createAddQuestionCommand(payload: {
   selectedQuestionId: string

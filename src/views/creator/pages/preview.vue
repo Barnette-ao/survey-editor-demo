@@ -22,14 +22,14 @@ import { SurveyCreatorComponent } from "survey-creator-vue";
 import Cookies from "js-cookie";
 import { setLicenseKey, Serializer } from "survey-core";
 import { useSurveyId } from "@/views/creator/composables/useSurveyId";
-import { createOptions } from "@/views/creator/config/surveyCreatorOption"
+import { createOptions } from "@/views/creator/utils/surveyCreatorOption"
 import { useDraftContext } from "@/views/creator/composables/useDraftContext";
 import { 
   upfileSurvey,
   applyHtml,
   redistributeElementsToSingleQuestionPages,
   setChoiceVisibleIf 
-} from "@/views/creator/utils/preview"
+} from "@/views/creator/utils/preview.ts"
 
 const zhcn = editorLocalization.getLocale("zh-cn");
 zhcn.ed.testSurvey = " ";

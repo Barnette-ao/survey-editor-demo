@@ -1,6 +1,6 @@
 import type { Command } from "@/views/creator/services/DraftStorageService"
-import { switchChoiceQuestion, findElementById } from "@/views/creator/config/element"
-import { snapshot } from '@/views/creator/config/shared'
+import { switchChoiceQuestion, findElementById } from "@/views/creator/utils/element"
+import { snapshot } from '@/views/creator/utils/shared'
 
 export function createSwitchChoiceElementCommand(payload: {
   sourceElementId: string

@@ -170,7 +170,7 @@ import customEditor from "@/views/creator/components/customEditor.vue";
 import draggable from "vuedraggable"
 import { defineAsyncComponent,nextTick } from "vue"
 import { questionTypeList } from "@/views/creator/utils/questionTypeList";
-import { settingComponentMap } from "@/views/creator/config/registry";
+import { settingComponentMap } from "@/views/creator/utils/registry";
 import { useIncrementalLoading } from "@/views/creator/composables/useIncreamentalLoading"
 import { useQuestionDisplay } from "@/views/creator/composables/useQuestionNumberDisplay"
 import { useCurrentElement } from "@/views/creator/composables/useCurrentElement"
@@ -181,7 +181,7 @@ import { useQuestionCreation } from '@/views/creator/composables/useQuestionCrea
 import { useHoverState } from '@/views/creator/composables/useHoverState'
 import { useDraftContext } from "@/views/creator/composables/useDraftContext";
 import { useDraftActions } from "@/views/creator/composables/useDraftAction";
-import { snapshot } from '@/views/creator/config/shared'
+import { snapshot } from '@/views/creator/utils/shared'
 import { useEditorStore } from "@/stores/editorContextStore";
 
 const LogicSettingDialog = defineAsyncComponent({

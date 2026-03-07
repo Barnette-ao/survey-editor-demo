@@ -5,9 +5,9 @@ import {
   updateElementField,
   findElementById,
   updateItemProp 
-} from "@/views/creator/config/element"
+} from "@/views/creator/utils/element"
 import type { QuestionElement } from "@/views/creator/types/questionnaire"
-import { snapshot } from '@/views/creator/config/shared'
+import { snapshot } from '@/views/creator/utils/shared'
 
 
 export function createUpdateElementPropCommand<K extends keyof QuestionElement>(payload: {

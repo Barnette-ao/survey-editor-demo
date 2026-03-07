@@ -1,6 +1,6 @@
 import type { Command } from "@/views/creator/services/DraftStorageService"
-import { snapshot } from "@/views/creator/config/shared"
-import { handleLogicRulesUpdate } from "@/views/creator/config/logicRule"
+import { snapshot } from "@/views/creator/utils/shared"
+import { handleLogicRulesUpdate } from "@/views/creator/utils/logicRule"
 
 export function createReplaceLogicStateCommand(
     saveLogicObj:any 

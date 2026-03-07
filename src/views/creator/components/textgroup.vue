@@ -79,7 +79,7 @@ import BaseQuestion from '@/components/Question/BaseQuestion.vue'
 import customEditor from "@/views/creator/components/customEditor.vue";
 import DragHandler from "@/views/creator/components/Icons/dragIcon.vue";
 import { useDraftActions } from "@/views/creator/composables/useDraftAction";
-import { snapshot } from '@/views/creator/config/shared'
+import { snapshot } from '@/views/creator/utils/shared'
 
 const props = defineProps({
 	element: {

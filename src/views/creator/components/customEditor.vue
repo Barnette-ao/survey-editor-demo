@@ -26,7 +26,7 @@
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import TiipTapEditor from "@/components/Editor/TiipTapEditor.vue"; // 导入你封装的 wangEditor 组件
 import { useEditorStore } from "@/stores/editorContextStore";
-import { htmlToPlainText } from "@/views/creator/config/adapter";
+import { htmlToPlainText } from "@/views/creator/utils/adapter";
 import { debounce } from "lodash-es";
 
 const props = defineProps({

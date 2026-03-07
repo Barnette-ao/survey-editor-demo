@@ -50,7 +50,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import BaseQuestion from '@/components/Question/BaseQuestion.vue'
-import { snapshot } from '@/views/creator/config/shared'
+import { snapshot } from '@/views/creator/utils/shared'
 import { useDraftActions } from "@/views/creator/composables/useDraftAction";
 
 const { applyUpdateElement } = useDraftActions()

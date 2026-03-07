@@ -1,8 +1,8 @@
 import type { Command } from "@/views/creator/services/DraftStorageService"
 import type { RenderedItem } from '@/views/creator/types/design'
 
-import { snapshot } from '@/views/creator/config/shared'
-import { findElementPosition,findTargetPosition } from '@/views/creator/config/element'
+import { snapshot } from '@/views/creator/utils/shared'
+import { findElementPosition,findTargetPosition } from '@/views/creator/utils/element'
 
 // 拖拽命令的工厂函数
 export function createMoveElementCommand(payload: {

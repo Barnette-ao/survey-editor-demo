@@ -139,17 +139,17 @@ import {
 	isDefaultRule, 
 	isEqual, 
 	isCompleteRule
-} from "@/views/creator/config/logicRule";
-import { initializeDisplayedLogicRules } from "@/views/creator/config/logicRule/create"
+} from "@/views/creator/utils/logicRule";
+import { initializeDisplayedLogicRules } from "@/views/creator/utils/logicRule/create"
 import { useHistory} from "@/views/creator/composables/useLogicRule/useHistory"
 import { useElementData} from "@/views/creator/composables/useLogicRule/useElementData"
 import { useLogicClass } from "@/views/creator/composables/useLogicRule/useLogicClass"
 import { useDisplayLogicRules } from "@/views/creator/composables/useLogicRule/useDisplayLogicRules"
 import { useLogicRuleElements } from "@/views/creator/composables/useLogicRule/useLogicRuleElements"
 import { useDraftContext } from "@/views/creator/composables/useDraftContext";
-import { getConditionStatesByType } from "@/views/creator/utils/logicRuleUI.js"
+import { getConditionStatesByType } from "@/views/creator/utils/logicRuleUI"
 import { useDraftActions } from "@/views/creator/composables/useDraftAction";
-import { snapshot } from "@/views/creator/config/shared"
+import { snapshot } from "@/views/creator/utils/shared"
 import { useEditorStore } from "@/stores/editorContextStore";
 
 import type { 

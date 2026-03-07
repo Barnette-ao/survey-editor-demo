@@ -1,4 +1,4 @@
-import { snapshot } from '@/views/creator/config/shared'
+import { snapshot } from '@/views/creator/utils/shared'
 
 /**
  * 选项操作相关的纯函数

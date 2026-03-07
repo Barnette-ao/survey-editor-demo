@@ -5,8 +5,8 @@ import { useEditorStore } from '@/stores/editorContextStore'
 import type {
   QuestionElement,
 } from '@/views/creator/types/questionnaire' // 路径按你实际项目调整
-import { snapshot } from '@/views/creator/config/shared'
-import { findElementById } from '@/views/creator/config/element'
+import { snapshot } from '@/views/creator/utils/shared'
+import { findElementById } from '@/views/creator/utils/element'
 
 export function useCurrentElement(
   draftState: Ref<any>,

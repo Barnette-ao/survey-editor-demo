@@ -1,6 +1,6 @@
 import type { Command } from "@/views/creator/services/DraftStorageService"
-import { addPage,deletePage,findPageIndexById } from "@/views/creator/config/page"
-import { snapshot } from '@/views/creator/config/shared'
+import { addPage,deletePage,findPageIndexById } from "@/views/creator/utils/page"
+import { snapshot } from '@/views/creator/utils/shared'
 
 export function createAddPageCommand(payload: {
   selectedQuestionId: string

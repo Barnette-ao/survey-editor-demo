@@ -1,8 +1,8 @@
 import { v4 as uuidv4 } from 'uuid'
-import { formattedNumber } from '@/views/creator/config/adapter'
+import { formattedNumber } from '@/views/creator/utils/adapter'
 import { nextTick } from 'vue'
-import { findElementPosition } from '@/views/creator/config/element'
-import { questionTemplates } from '@/views/creator/config/questionTemplate'
+import { findElementPosition } from '@/views/creator/utils/element'
+import { questionTemplates } from '@/views/creator/utils/questionTemplate'
 
 
 type ExcludePropsMap = {

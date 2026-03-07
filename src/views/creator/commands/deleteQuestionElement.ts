@@ -3,8 +3,8 @@ import {
   insertElement,
   deleteQuestion,
   findElementPosition
-} from "@/views/creator/config/element"
-import { snapshot } from '@/views/creator/config/shared'
+} from "@/views/creator/utils/element"
+import { snapshot } from '@/views/creator/utils/shared'
 
 export function createDeleteQuestionCommand(payload: {
   elementId: string

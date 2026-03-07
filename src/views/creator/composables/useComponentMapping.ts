@@ -1,5 +1,5 @@
 import { computed, ComputedRef } from 'vue'
-import { componentMap, ratingTypeMap } from '@/views/creator/config/registry'
+import { componentMap, ratingTypeMap } from '@/views/creator/utils/registry'
 
 import type {
   QuestionElement,

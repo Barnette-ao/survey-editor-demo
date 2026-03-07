@@ -1,7 +1,7 @@
 import type { Command } from "@/views/creator/services/DraftStorageService"
-import { snapshot } from "@/views/creator/config/shared"
-import { resolveTargetPageIndex } from "@/views/creator/config/element"
-import { findPageIndexById } from "@/views/creator/config/page"
+import { snapshot } from "@/views/creator/utils/shared"
+import { resolveTargetPageIndex } from "@/views/creator/utils/element"
+import { findPageIndexById } from "@/views/creator/utils/page"
 
 export function createMovePageCommand(payload: {
   sourcePageId: string
@@ -42,13 +42,5 @@ export function createMovePageCommand(payload: {
 
       return rawState
     },
-
-    getMeta() {
-      return {
-        sourcePageId: payload.sourcePageId,
-        targetPageId: payload.targetPageId
-      }
-    }
-
   }
 }

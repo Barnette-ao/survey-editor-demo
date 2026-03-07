@@ -1,4 +1,4 @@
-import { findPageIndexById } from "@/views/creator/config/page"
+import { findPageIndexById } from "@/views/creator/utils/page"
 
 export const findElementPosition = (questionSettings: any, selectedQuestionId: string) => {
     let elementIndex, pageIndex;

@@ -99,7 +99,7 @@ export function useQuestionDisplay(questionSettings) {
 // src/views/creator/composables/useCurrentElement.js
 import { computed } from 'vue'
 import { questionTypeList } from "@/views/creator/utils/questionTypeList"
-import { ratingTypeMap } from "@/views/creator/config/componentAndSettingMap"
+import { ratingTypeMap } from "@/views/creator/utils/componentAndSettingMap"
 
 export function useCurrentElement(questionSettings, currentQuestionId) {
   // 当前选中的元素
@@ -148,7 +148,7 @@ export function useCurrentElement(questionSettings, currentQuestionId) {
 ```javascript
 // src/views/creator/composables/useComponentMapping.js
 import { computed } from 'vue'
-import { componentMap, ratingTypeMap } from "@/views/creator/config/componentAndSettingMap"
+import { componentMap, ratingTypeMap } from "@/views/creator/utils/componentAndSettingMap"
 
 export function useComponentMapping() {
   // 组件映射计算
@@ -223,7 +223,7 @@ export function usePageStructure(questionSettings) {
 ```javascript
 // src/views/creator/composables/useLogicRules.js
 import { computed } from 'vue'
-import { getLogicRulesAffectingElement } from "@/views/creator/config/updateLogic"
+import { getLogicRulesAffectingElement } from "@/views/creator/utils/updateLogic"
 
 export function useLogicRules(questionSettings) {
   // 获取元素的逻辑规则数量

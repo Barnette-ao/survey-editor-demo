@@ -1,5 +1,5 @@
 import { computed } from 'vue'
-import { CHOICE_TYPES } from "@/views/creator/utils/logicRuleUI.js"
+import { CHOICE_TYPES } from "@/views/creator/utils/logicRuleUI"
 import type { 
     QuestionElement,CanSetLogicElement, IfCondition
 } from '@/views/creator/types/questionnaire.ts'

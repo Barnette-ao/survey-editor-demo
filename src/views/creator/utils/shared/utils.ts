@@ -3,7 +3,7 @@ import { toRaw, isProxy } from 'vue'
 import type { 
   QuestionElement 
 } from '@/views/creator/types/questionnaire.ts'
-import { htmlToPlainText } from "@/views/creator/config/adapter"
+import { htmlToPlainText } from "@/views/creator/utils/adapter"
 
 export const generateUUID = () => {
 	return uuidv4()

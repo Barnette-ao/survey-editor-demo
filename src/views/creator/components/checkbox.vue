@@ -111,7 +111,7 @@ import {
   addBatchOptions, 
   parseBatchInput 
 } from '@/views/creator/composables/useChoiceOperations';
-import { snapshot } from '@/views/creator/config/shared'
+import { snapshot } from '@/views/creator/utils/shared'
 import { useEditorStore } from "@/stores/editorContextStore";
 
 const props = defineProps({

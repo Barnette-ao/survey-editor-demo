@@ -1,7 +1,7 @@
 import type { 
    QuestionElement, CanSetLogicElement 
 } from '@/views/creator/types/questionnaire.ts'
-import { adapteElement } from "@/views/creator/config/shared"
+import { adapteElement } from "@/views/creator/utils/shared"
 
 // 提前结束选项类型
 interface CompleteOption {

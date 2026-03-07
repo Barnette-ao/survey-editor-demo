@@ -101,7 +101,7 @@ import customEditor from "@/views/creator/components/customEditor.vue";
 import { useDraftActions } from "@/views/creator/composables/useDraftAction";
 import { useEditorStore } from "@/stores/editorContextStore";
 import { useDraftContext } from "@/views/creator/composables/useDraftContext";
-import { findLogicRulesByElementId } from '@/views/creator/config/logicRule'
+import { findLogicRulesByElementId } from '@/views/creator/utils/logicRule'
 
 const props = defineProps({
 	element: {

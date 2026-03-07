@@ -1,5 +1,5 @@
 import type { Ref } from "vue"
-import { switchChoiceQuestion } from "@/views/creator/config/element"
+import { switchChoiceQuestion } from "@/views/creator/utils/element"
 import type { 
     QuestionElement, 
     QuestionSettings 

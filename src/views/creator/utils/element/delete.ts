@@ -1,6 +1,6 @@
-import { findElementPosition } from '@/views/creator/config/element'
-import { deleteLogicRulesById } from '@/views/creator/config/logicRule'
-import { formattedNumber } from '@/views/creator/config/adapter'
+import { findElementPosition } from '@/views/creator/utils/element'
+import { deleteLogicRulesById } from '@/views/creator/utils/logicRule'
+import { formattedNumber } from '@/views/creator/utils/adapter'
 
 export const deleteQuestion = (questionSettings: any, elementId: string) => {
 	const cloned = structuredClone(questionSettings)
