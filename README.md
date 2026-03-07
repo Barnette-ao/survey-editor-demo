@@ -18,9 +18,11 @@ https://github.com/Barnette-ao/survey-editor-demo
 
 ## 项目截图
 * 可视化编辑器
-<img width="3166" height="1656" alt="image" src="https://github.com/user-attachments/assets/ba4d8adb-6e4a-4429-a8b7-f16dfed06119" />
+  <img width="3166" height="1656" alt="image" src="https://github.com/user-attachments/assets/ba4d8adb-6e4a-4429-a8b7-f16dfed06119" />
+
 * JSON 编辑器
 <img width="3018" height="1636" alt="image" src="https://github.com/user-attachments/assets/199d3417-1f8c-4086-9bc8-353e19b7dd62" />
+
 * 预览页
 <img width="3178" height="1476" alt="image" src="https://github.com/user-attachments/assets/3aa615e3-5e58-4ff0-a52b-84a4f26aa941" />
 ---
