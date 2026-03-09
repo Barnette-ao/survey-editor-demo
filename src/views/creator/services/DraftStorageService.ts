@@ -79,9 +79,44 @@ export class DraftStorageService {
   open() {
     // 存储态 -> 运行态
     if(this.isInistialized) return 
-    const rawSettings = this.storage.open(this.surveyId.value)
-    this._draftState.value = adapteStorageState(rawSettings)
+    
+    // 首先尝试从 localStorage 加载草稿
+    const draftKey = `draft_${this.surveyId.value}`
+    const savedDraft = localStorage.getItem(draftKey)
+    
+    if (savedDraft) {
+      try {
+        this._draftState.value = JSON.parse(savedDraft)
+      } catch (e) {
+        // 如果草稿解析失败，回退到从存储服务加载
+        const rawSettings = this.storage.open(this.surveyId.value)
+        this._draftState.value = adapteStorageState(rawSettings)
+      }
+    } else {
+      const rawSettings = this.storage.open(this.surveyId.value)
+      this._draftState.value = adapteStorageState(rawSettings)
+    }
+    
     this.isInistialized = true
+  }
+  
+  /**
+   * 保存草稿到 localStorage（临时持久化）
+   * 用于防止浏览器刷新时数据丢失
+   * 不会保存到领域层
+   */
+  saveDraft() {
+    const draftKey = `draft_${this.surveyId.value}`
+    localStorage.setItem(draftKey, JSON.stringify(this._draftState.value))
+  }
+  
+  /**
+   * 清除 localStorage 中的草稿
+   * 在 commit 后调用，避免草稿覆盖已提交的数据
+   */
+  clearDraft() {
+    const draftKey = `draft_${this.surveyId.value}`
+    localStorage.removeItem(draftKey)
   }
   
   /**
@@ -176,11 +211,15 @@ export class DraftStorageService {
     }
   }
 
-  save() {
+
+
+  commit() {
     this.storage.save(
       this.surveyId.value,
       this._draftState.value
     )
+    // 提交后清除草稿，避免下次打开时加载旧草稿
+    this.clearDraft()
   }
 }
 
