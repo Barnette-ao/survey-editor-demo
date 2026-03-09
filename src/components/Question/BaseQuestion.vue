@@ -225,9 +225,6 @@ const logicRuleNum= computed(() => {
 	return rules.length
 })
 
-
-
-
 </script>
 
 <style scoped lang="scss">
