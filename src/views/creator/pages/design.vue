@@ -288,6 +288,10 @@ const {
 
 const { handleQuestionTypeClick } = useQuestionCreation()
 
+watchEffect(()=>{
+  console.log("editorStore.currentQuestionId",editorStore.currentQuestionId);
+})
+
 </script>
 
 <style scoped lang="scss">
