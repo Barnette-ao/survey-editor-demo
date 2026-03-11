@@ -22,7 +22,7 @@ export interface Command {
 
 type HistoryEntry =
   | { kind: 'operation', cmd: Command }
-  | { kind: 'snapshot', prevState: DraftState }
+  | { kind: 'snapshot', preState:DraftState, postState:DraftState }
 
 const adapteStorageState = (storageState:unknown) => {
     const runingState = afterGetInitialSettings(storageState)
@@ -139,15 +139,19 @@ export class DraftStorageService {
    * 所以重置当前为上一次状态的操作为redostack.push(当前态)+当前态 = undostack.pop()
    * 
    */
-  replaceState(snapshot: unknown) {
-    if (!isEqual(snapshot,this._draftState.value)) {
+  replaceState(nextState: DraftState) {
+    const prev = this._draftState.value
+
+    if (!isEqual(prev, nextState)) {
       this.undoStack.push({
-        kind: 'snapshot',
-        prevState: this._draftState.value
+        kind: "snapshot",
+        preState: prev,
+        postState: nextState
       })
+
       this.redoStack = []
+      this._draftState.value = nextState
     }
-    this._draftState.value = snapshot
   }
 
   /**
@@ -183,15 +187,11 @@ export class DraftStorageService {
     if(historyEntry.kind === "operation"){
       this._draftState.value = historyEntry.cmd.undo(this._draftState.value)  
       this.redoStack.push(historyEntry)
-      this._draftState.value = historyEntry.cmd.undo(this._draftState.value)
       return historyEntry.cmd.getUndoMeta?.()
     }else{
+      this._draftState.value = historyEntry.preState
       // 基于状态的undo
-      this.redoStack.push({
-        kind: 'snapshot',
-        prevState: this._draftState.value
-      })
-      this._draftState.value = this.undoStack.pop()
+      this.redoStack.push(historyEntry)
     }
   }
 
@@ -203,15 +203,10 @@ export class DraftStorageService {
       this.undoStack.push(historyEntry)
       return historyEntry.cmd.getExecuteMeta?.()
     }else{
-      this.undoStack.push({
-        kind:"snapshot",
-        prevState:this._draftState.value
-      })
-      this._draftState.value = historyEntry.prevState
+      this.undoStack.push(historyEntry)
+      this._draftState.value = historyEntry.postState
     }
   }
-
-
 
   commit() {
     this.storage.save(

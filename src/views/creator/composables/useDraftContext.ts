@@ -15,7 +15,7 @@ export function useDraftContext() {
 
   const saveDraft = debounce(() => {
     draft.saveDraft()
-  }, 500)
+  }, 300)
 
   watch(
     () => draftState.value,

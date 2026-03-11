@@ -24,6 +24,7 @@ import customerJsonEditor from '@/views/creator/components/customerJsonEditor.vu
 import { useDraftContext } from "@/views/creator/composables/useDraftContext";
 import { useSurveyValidation } from '@/views/creator/composables/useSurveyValidation'
 import { useDraftActions } from "@/views/creator/composables/useDraftAction";
+import { snapshot } from '../utils/shared';
 
 const jsonString = ref<string>("")
 const language = ref('json')
@@ -48,7 +49,8 @@ function onJsonBlur(newValue: string) {
     
     stateChangeFromJSON = true
     const parsednNwValue = JSON.parse(newValue)
-    replaceDraftState(parsednNwValue)
+    const clonedDraftState = snapshot(parsednNwValue)
+    replaceDraftState(clonedDraftState)
   } catch {
     // JSON 错误时不更新 surveyJson
   }
