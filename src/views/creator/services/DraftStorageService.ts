@@ -23,6 +23,7 @@ export interface Command {
 type HistoryEntry =
   | { kind: 'operation', cmd: Command }
   | { kind: 'snapshot', preState:DraftState, postState:DraftState }
+  | { kind: "boundary" }
 
 const adapteStorageState = (storageState:unknown) => {
     const runingState = afterGetInitialSettings(storageState)
@@ -143,6 +144,14 @@ export class DraftStorageService {
     const prev = this._draftState.value
 
     if (!isEqual(prev, nextState)) {
+      const last = this.undoStack[this.undoStack.length - 1]
+
+      // 如果上一条不是 snapshot，则说明发生了模式切换
+      if (last && last.kind !== "snapshot") {
+        this.undoStack.push({ kind: "boundary" })
+      }
+
+
       this.undoStack.push({
         kind: "snapshot",
         preState: prev,
@@ -182,13 +191,18 @@ export class DraftStorageService {
 
   undo(){
     if(!this.undoStack.length) return
+    
     const historyEntry:HistoryEntry = this.undoStack.pop()!
-    // 基于操作的undo
-    if(historyEntry.kind === "operation"){
+    
+    if(historyEntry.kind === "boundary"){
+      this.undo() // 跳过boundary，再次执行undo
+    }
+    else if(historyEntry.kind === "operation"){
       this._draftState.value = historyEntry.cmd.undo(this._draftState.value)  
       this.redoStack.push(historyEntry)
       return historyEntry.cmd.getUndoMeta?.()
-    }else{
+    }
+    else{
       this._draftState.value = historyEntry.preState
       // 基于状态的undo
       this.redoStack.push(historyEntry)
@@ -197,12 +211,18 @@ export class DraftStorageService {
 
   redo(){
     if(!this.redoStack.length) return
-    const historyEntry:HistoryEntry = this.redoStack.pop()!
+    let historyEntry:HistoryEntry
+    //boundray不能弹出不然破坏历史记录
+    historyEntry = this.redoStack[this.redoStack.length - 1]! 
+    if(historyEntry.kind === "boundary") return
+    // 弹出不然破坏历史记录
+    historyEntry = this.redoStack.pop()!
     if(historyEntry.kind === "operation"){
       this._draftState.value = historyEntry.cmd.execute(this._draftState.value)  
       this.undoStack.push(historyEntry)
       return historyEntry.cmd.getExecuteMeta?.()
-    }else{
+    }
+    if(historyEntry.kind === "snapshot"){
       this.undoStack.push(historyEntry)
       this._draftState.value = historyEntry.postState
     }
