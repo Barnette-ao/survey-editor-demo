@@ -191,21 +191,18 @@ export class DraftStorageService {
 
   undo(){
     if(!this.undoStack.length) return
-    
     const historyEntry:HistoryEntry = this.undoStack.pop()!
-    
+    this.redoStack.push(historyEntry)
+
     if(historyEntry.kind === "boundary"){
       this.undo() // 跳过boundary，再次执行undo
     }
     else if(historyEntry.kind === "operation"){
       this._draftState.value = historyEntry.cmd.undo(this._draftState.value)  
-      this.redoStack.push(historyEntry)
       return historyEntry.cmd.getUndoMeta?.()
     }
     else{
       this._draftState.value = historyEntry.preState
-      // 基于状态的undo
-      this.redoStack.push(historyEntry)
     }
   }
 
@@ -217,13 +214,13 @@ export class DraftStorageService {
     if(historyEntry.kind === "boundary") return
     // 弹出不然破坏历史记录
     historyEntry = this.redoStack.pop()!
+    this.undoStack.push(historyEntry)
+    
     if(historyEntry.kind === "operation"){
-      this._draftState.value = historyEntry.cmd.execute(this._draftState.value)  
-      this.undoStack.push(historyEntry)
+      this._draftState.value = historyEntry.cmd.execute(this._draftState.value)    
       return historyEntry.cmd.getExecuteMeta?.()
     }
     if(historyEntry.kind === "snapshot"){
-      this.undoStack.push(historyEntry)
       this._draftState.value = historyEntry.postState
     }
   }
